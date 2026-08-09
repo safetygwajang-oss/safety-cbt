@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>결과 | 포스코퓨처엠 CBT</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container">
+      <h1 class="logo">🏭 포스코퓨처엠 CBT</h1>
+      <a href="index.html" class="btn-sm">🏠 홈</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="result-summary">
+      <h2 id="pass-status">🎉 합격</h2>
+      <div class="score-big"><span id="score">0</span> / 120</div>
+      <div class="score-percent"><span id="percent">0</span>점</div>
+      <p>소요 시간: <span id="elapsed">00:00:00</span></p>
+    </section>
+
+    <section class="chart-section">
+      <h3>과목별 정답률</h3>
+      <canvas id="subject-chart"></canvas>
+    </section>
+
+    <section class="review-section">
+      <div class="review-tabs">
+        <button class="tab active" data-filter="all">전체</button>
+        <button class="tab" data-filter="wrong">오답만</button>
+        <button class="tab" data-filter="correct">정답만</button>
+      </div>
+      <div class="review-list" id="review-list">
+        <!-- JS로 렌더링 -->
+      </div>
+    </section>
+
+    <div class="result-actions">
+      <button id="retry-wrong" class="btn-primary">오답만 다시 풀기</button>
+      <a href="index.html" class="btn-sm">홈으로</a>
+    </div>
+  </main>
+
+  <script src="js/storage.js"></script>
+  <script src="js/result.js"></script>
+</body>
+</html>
