@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>포스코퓨처엠 CBT | 산업안전기사</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="container">
+      <h1 class="logo">🏭 포스코퓨처엠 CBT</h1>
+      <button id="theme-toggle" class="btn-icon" title="다크모드">🌙</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h2>산업안전기사 필기 기출문제</h2>
+      <p>실전처럼 풀고, 약점을 분석하세요.</p>
+    </section>
+
+    <section class="stats-card" id="user-stats">
+      <div class="stat"><span class="label">누적 학습</span><span class="value" id="stat-total">0</span>문항</div>
+      <div class="stat"><span class="label">평균 정답률</span><span class="value" id="stat-rate">0</span>%</div>
+      <div class="stat"><span class="label">연속 학습</span><span class="value" id="stat-streak">0</span>일 🔥</div>
+    </section>
+
+    <section>
+      <h3>회차 선택</h3>
+      <div class="exam-list" id="exam-list">
+        <!-- JS로 동적 생성 -->
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© 2025 포스코퓨처엠 안전학습 CBT</p>
+  </footer>
+
+  <script src="js/storage.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
