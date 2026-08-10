@@ -5,6 +5,135 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>시험 진행 중 | 포스코퓨처엠 CBT</title>
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- KaTeX (수식 렌더링) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+
+  <!-- Passage 렌더러 전용 스타일 (인라인) -->
+  <style>
+    .passage-block { margin: 12px 0; font-size: 0.95rem; line-height: 1.6; }
+    .passage-text { color: #334155; white-space: pre-wrap; }
+
+    /* 표 */
+    .passage-table-wrap { overflow-x: auto; margin: 16px 0; }
+    .passage-table {
+      border-collapse: collapse;
+      min-width: 300px;
+      width: auto;
+      margin: 0 auto;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .passage-table caption {
+      padding: 8px;
+      font-weight: 600;
+      color: #334155;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      caption-side: top;
+    }
+    .passage-table th,
+    .passage-table td {
+      border: 1px solid #e2e8f0;
+      padding: 8px 14px;
+      text-align: center;
+    }
+    .passage-table th {
+      background: #f1f5f9;
+      font-weight: 600;
+      color: #1e293b;
+    }
+    .passage-table tbody tr:nth-child(even) { background: #f8fafc; }
+
+    /* 리스트 (ㄱㄴㄷㄹ 보기) */
+    .passage-list {
+      background: #f8fafc;
+      border-left: 3px solid #3b82f6;
+      padding: 12px 20px;
+      border-radius: 4px;
+    }
+    .passage-list-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #1e293b;
+    }
+    .passage-list ul,
+    .passage-list ol {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .passage-list ul { list-style: none; padding-left: 0; }
+    .passage-list li { margin: 4px 0; }
+
+    /* 수식 */
+    .passage-katex {
+      text-align: center;
+      padding: 8px 0;
+      overflow-x: auto;
+    }
+    .passage-katex-fallback {
+      background: #fef3c7;
+      border: 1px dashed #d97706;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* SVG */
+    .passage-svg {
+      text-align: center;
+      padding: 12px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      margin: 12px auto;
+      max-width: 100%;
+    }
+    .passage-svg svg { max-width: 100%; height: auto; }
+    .passage-svg-caption {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: #64748b;
+      font-style: italic;
+    }
+
+    /* 콜아웃 (조건/정의문) */
+    .passage-callout {
+      padding: 12px 16px;
+      border-radius: 6px;
+      border-left: 4px solid;
+    }
+    .passage-callout-info { background: #eff6ff; border-color: #3b82f6; }
+    .passage-callout-condition { background: #fef3c7; border-color: #d97706; }
+    .passage-callout-definition { background: #f0fdf4; border-color: #16a34a; }
+    .passage-callout-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #1e293b;
+    }
+    .passage-callout-body {
+      color: #334155;
+      white-space: pre-wrap;
+    }
+
+    /* 다크모드 대응 (data-theme="dark") */
+    [data-theme="dark"] .passage-text { color: #cbd5e1; }
+    [data-theme="dark"] .passage-table { background: #1e293b; }
+    [data-theme="dark"] .passage-table caption { background: #0f172a; color: #e2e8f0; border-color: #334155; }
+    [data-theme="dark"] .passage-table th { background: #0f172a; color: #e2e8f0; border-color: #334155; }
+    [data-theme="dark"] .passage-table td { color: #e2e8f0; border-color: #334155; }
+    [data-theme="dark"] .passage-table tbody tr:nth-child(even) { background: #172033; }
+    [data-theme="dark"] .passage-list { background: #172033; }
+    [data-theme="dark"] .passage-list-title { color: #e2e8f0; }
+    [data-theme="dark"] .passage-svg { background: #1e293b; border-color: #334155; }
+    [data-theme="dark"] .passage-callout-info { background: #172033; }
+    [data-theme="dark"] .passage-callout-condition { background: #2a2416; }
+    [data-theme="dark"] .passage-callout-definition { background: #16241d; }
+    [data-theme="dark"] .passage-callout-title { color: #e2e8f0; }
+    [data-theme="dark"] .passage-callout-body { color: #cbd5e1; }
+  </style>
 </head>
 <body>
   <!-- 상단 헤더 -->
@@ -24,7 +153,7 @@
     </div>
   </header>
 
-  <!-- 메인 영역 (OMR 제거, 문제 영역만) -->
+  <!-- 메인 영역 -->
   <main class="exam-main-full">
     <section class="exam-content-full">
       <!-- 상단 컨트롤 바 -->
@@ -59,8 +188,12 @@
     </section>
   </main>
 
-  <!-- 스크립트 -->
+  <!-- KaTeX (수식 렌더링 스크립트) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+
+  <!-- 앱 스크립트 -->
   <script src="js/storage.js"></script>
+  <script src="js/passage-renderer.js"></script>
   <script src="js/exam.js"></script>
 </body>
 </html>
