@@ -3,40 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>포스코퓨처엠 CBT | 산업안전기사</title>
+  <title>포스코퓨처엠 안전관리 CBT</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- 상단 바 -->
   <header class="topbar">
     <div class="container">
-      <h1 class="logo">🏭 포스코퓨처엠 CBT</h1>
-      <button id="theme-toggle" class="btn-icon" title="다크모드">🌙</button>
+      <a href="index.html" class="logo" style="text-decoration:none;">📘 POSCO FUTURE M · CBT</a>
+      <div class="topbar-actions">
+        <span id="user-badge" class="auth-badge" style="display:none;">👤 <span id="user-name">-</span></span>
+        <button id="settings-btn" class="btn-sm" title="설정">⚙️</button>
+      </div>
     </div>
   </header>
 
   <main class="container">
+    <!-- 히어로 -->
     <section class="hero">
-      <h2>산업안전기사 필기 기출문제</h2>
-      <p>실전처럼 풀고, 약점을 분석하세요.</p>
+      <h2>포스코퓨처엠 안전관리 CBT</h2>
+      <p>실전 대비 문제풀이 · 오답 재도전 · 북마크 학습</p>
     </section>
 
-    <section class="stats-card" id="user-stats">
-      <div class="stat"><span class="label">누적 학습</span><span class="value" id="stat-total">0</span>문항</div>
-      <div class="stat"><span class="label">평균 정답률</span><span class="value" id="stat-rate">0</span>%</div>
-      <div class="stat"><span class="label">연속 학습</span><span class="value" id="stat-streak">0</span>일 🔥</div>
+    <!-- 통계 카드 -->
+    <section class="stats-row">
+      <div class="stat-card">
+        <div class="label">📝 총 응시</div>
+        <div class="value" id="stat-sessions">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">🎯 평균 점수</div>
+        <div class="value" id="stat-avg">0<span style="font-size:1rem;">점</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="label">⭐ 북마크</div>
+        <div class="value" id="stat-bookmarks">0</div>
+      </div>
     </section>
 
+    <!-- 북마크 모아보기 -->
+    <section class="bookmark-section" id="bookmark-section" style="display:none;">
+      <h3 style="color:var(--secondary); display:flex; align-items:center; gap:8px;">
+        ⭐ 북마크한 문제
+        <span id="bookmark-count" style="font-size:0.85rem; color:var(--gray-500); font-weight:400;">(0)</span>
+      </h3>
+      <div class="bookmark-list" id="bookmark-list"></div>
+    </section>
+
+    <!-- 최근 응시 결과 -->
+    <section id="recent-section" style="display:none;">
+      <h3 class="section-title">📜 최근 응시 결과</h3>
+      <div class="exam-grid" id="recent-list"></div>
+    </section>
+
+    <!-- 회차 목록 -->
     <section>
-      <h3>회차 선택</h3>
-      <div class="exam-list" id="exam-list">
-        <!-- JS로 동적 생성 -->
+      <h3 class="section-title">📅 회차 선택</h3>
+      <div class="exam-grid" id="exam-list">
+        <p class="loading" style="grid-column: 1/-1;">회차 목록을 불러오는 중...</p>
       </div>
     </section>
   </main>
 
-  <footer class="footer">
-    <p>© 2025 포스코퓨처엠 안전학습 CBT</p>
-  </footer>
+  <!-- 설정 모달 -->
+  <div class="auth-modal-bg" id="settings-modal">
+    <div class="auth-modal">
+      <h3>⚙️ 설정</h3>
+      <div style="margin-bottom:20px; color:var(--gray-600); font-size:0.9rem; line-height:1.7;">
+        모든 데이터(응시 기록, 북마크)를 초기화합니다.<br>
+        이 작업은 되돌릴 수 없습니다.
+      </div>
+      <div class="actions">
+        <button id="clear-data-btn" class="btn-danger">🗑️ 전체 데이터 초기화</button>
+        <button id="close-settings-btn" class="btn">닫기</button>
+      </div>
+    </div>
+  </div>
 
   <script src="js/storage.js"></script>
   <script src="js/main.js"></script>
