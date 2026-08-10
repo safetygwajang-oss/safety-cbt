@@ -9,8 +9,15 @@
   const $ = (id) => document.getElementById(id);
 
   // ⚠️ data/index.json이 없을 때 사용할 fallback 목록
-  const FALLBACK_EXAM_IDS = [
-    '2022-04-24',
+  const FALLBACK_EXAMS = [
+    {
+      id: '2022-04-24',
+      title: '산업안전기사 필기',
+      date: '2022년 4월 24일',
+      questions: 120,
+      duration: 150,
+      subjects: ['안전관리론', '인간공학', '기계', '전기', '화학', '건설']
+    }
   ];
 
   document.addEventListener('DOMContentLoaded', init);
@@ -128,59 +135,48 @@
 
   // ===== 회차 목록 =====
   async function renderExamList() {
-    let examIds = [];
+    let exams = [];
 
-    // 1. data/index.json에서 회차 ID 목록 로드
+    // data/index.json에서 회차 정보 로드
     try {
       const res = await fetch('data/index.json');
       if (res.ok) {
         const data = await res.json();
-        examIds = data.exams || [];
+        // 두 가지 구조 모두 지원:
+        // 1) 배열: [{ id, title, ... }, ...]
+        // 2) 객체: { exams: [{ id, title, ... }, ...] }  또는 { exams: ["id1", "id2"] }
+        if (Array.isArray(data)) {
+          exams = data;
+        } else if (data && Array.isArray(data.exams)) {
+          // data.exams가 문자열 배열인 경우 → 객체 배열로 변환
+          exams = data.exams.map(item => {
+            if (typeof item === 'string') return { id: item, title: item };
+            return item;
+          });
+        }
       }
     } catch (e) {
-      console.log('data/index.json 없음, fallback 사용');
+      console.log('data/index.json 로드 실패, fallback 사용:', e);
     }
 
-    // 2. fallback
-    if (examIds.length === 0) examIds = FALLBACK_EXAM_IDS;
+    // fallback
+    if (exams.length === 0) exams = FALLBACK_EXAMS;
 
     const container = $('exam-list');
 
-    if (examIds.length === 0) {
+    if (exams.length === 0) {
       container.innerHTML = `
         <div style="grid-column:1/-1; padding:30px; text-align:center; color:var(--gray-500);">
           <p style="margin-bottom:12px;">📂 아직 등록된 회차가 없습니다.</p>
           <p style="font-size:0.85rem;">
-            <code>data/index.json</code>의 <code>exams</code> 배열에 회차 ID를 추가하세요.
+            <code>data/index.json</code>에 회차 정보를 추가하세요.
           </p>
         </div>
       `;
       return;
     }
 
-    // 3. 각 시험 파일에서 메타데이터 병렬 로드
-    container.innerHTML = '<p class="loading" style="grid-column:1/-1;">회차 목록을 불러오는 중...</p>';
-
-    const examPromises = examIds.map(async (examId) => {
-      try {
-        const res = await fetch(`data/${examId}.json`);
-        if (!res.ok) return { id: examId, title: examId, error: true };
-        const data = await res.json();
-        return {
-          id: examId,
-          title: data.title || examId,
-          questionCount: (data.questions || []).length,
-          duration: data.duration || null,
-          subjects: data.subjects || [],
-        };
-      } catch (e) {
-        return { id: examId, title: examId, error: true };
-      }
-    });
-
-    const exams = await Promise.all(examPromises);
-
-    // 4. 응시/진행 기록 조회
+    // 응시/진행 기록 조회
     const sessions = window.Storage && window.Storage.getAllSessions
       ? window.Storage.getAllSessions()
       : {};
@@ -200,27 +196,15 @@
       }
     }
 
-    // 5. 렌더링
+    // 렌더링
     container.innerHTML = '';
 
-    // 최신 날짜순 정렬 (파일명이 YYYY-MM-DD 형식이라 사전순 = 시간순)
-    exams.sort((a, b) => b.id.localeCompare(a.id));
+    // 최신 날짜순 정렬 (id가 YYYY-MM-DD 형식이면 사전순 = 시간순)
+    exams.sort((a, b) => (b.id || '').localeCompare(a.id || ''));
 
     exams.forEach(exam => {
       const card = document.createElement('div');
       card.className = 'exam-card';
-
-      if (exam.error) {
-        card.innerHTML = `
-          <h3 style="color:var(--danger);">⚠️ ${escapeHtml(exam.id)}</h3>
-          <div class="meta">파일을 불러올 수 없습니다.</div>
-          <div style="margin-top:8px;">
-            <span class="badge" style="background:#fee2e2; color:#991b1b;">오류</span>
-          </div>
-        `;
-        container.appendChild(card);
-        return;
-      }
 
       const attempted = attemptedExamIds.has(exam.id);
       const inProgress = inProgressExamIds.has(exam.id);
@@ -228,18 +212,23 @@
       let badges = '';
       if (inProgress) badges += '<span class="badge" style="background:#fef3c7; color:#92400e;">▶ 진행중</span>';
       if (attempted) badges += '<span class="badge done">✅ 응시완료</span>';
-      badges += `<span class="badge">${exam.questionCount}문항</span>`;
+      if (exam.questions) badges += `<span class="badge">${exam.questions}문항</span>`;
       if (exam.duration) badges += `<span class="badge">⏱ ${exam.duration}분</span>`;
 
-      // 과목 정보 (간략 표시)
+      // 과목 정보 (문자열 배열 또는 객체 배열 모두 지원)
       let subjectsHtml = '';
       if (exam.subjects && exam.subjects.length > 0) {
-        const names = exam.subjects.map(s => s.name).join(' · ');
+        const names = exam.subjects.map(s => typeof s === 'string' ? s : s.name).join(' · ');
         subjectsHtml = `<div style="font-size:0.8rem; color:var(--gray-500); margin-top:8px; line-height:1.4;">${escapeHtml(names)}</div>`;
       }
 
+      // 제목 (title + date 조합)
+      let titleText = exam.title || exam.id;
+      let dateText = exam.date ? `📅 ${escapeHtml(exam.date)}` : '';
+
       card.innerHTML = `
-        <h3>${escapeHtml(exam.title)}</h3>
+        <h3>${escapeHtml(titleText)}</h3>
+        ${dateText ? `<div class="meta">${dateText}</div>` : ''}
         <div style="margin-top:8px;">${badges}</div>
         ${subjectsHtml}
       `;
