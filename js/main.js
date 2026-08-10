@@ -9,11 +9,8 @@
   const $ = (id) => document.getElementById(id);
 
   // ⚠️ data/index.json이 없을 때 사용할 fallback 목록
-  // 여기에 실제 사용 중인 JSON 파일명을 추가하세요.
-  const FALLBACK_EXAMS = [
-    // 예시: 실제 파일명에 맞게 수정
-    // { id: '2022-04-24', title: '2022년 4월 24일 산업안전기사', questions: 120 },
-    // { id: '2022-09-14', title: '2022년 9월 14일 산업안전기사', questions: 120 },
+  const FALLBACK_EXAM_IDS = [
+    '2022-04-24',
   ];
 
   document.addEventListener('DOMContentLoaded', init);
@@ -54,7 +51,6 @@
     const container = $('bookmark-list');
     container.innerHTML = '';
 
-    // 최대 12개만 표시 (많으면 스크롤/더보기)
     const displayList = list.slice(0, 12);
 
     displayList.forEach(bm => {
@@ -65,10 +61,9 @@
           <span>📅 ${escapeHtml(bm.examId)} · ${bm.no}번</span>
           <span style="color:var(--gray-400);">${bm.subject ? escapeHtml(bm.subject) : ''}</span>
         </div>
-        <div class="bm-text">${escapeHtml(bm.question || '').substring(0, 100)}${(bm.question || '').length > 100 ? '...' : ''}</div>
+        <div class="bm-text">${escapeHtml((bm.question || '').substring(0, 100))}${(bm.question || '').length > 100 ? '...' : ''}</div>
       `;
       item.addEventListener('click', () => {
-        // 해당 시험의 그 문제로 이동
         window.location.href = `exam.html?exam=${encodeURIComponent(bm.examId)}&jumpTo=${bm.no}`;
       });
       container.appendChild(item);
@@ -94,7 +89,7 @@
     const arr = Object.entries(sessions)
       .map(([id, data]) => ({ sessionId: id, ...data }))
       .sort((a, b) => (b.submittedAt || 0) - (a.submittedAt || 0))
-      .slice(0, 5); // 최근 5개
+      .slice(0, 5);
 
     if (arr.length === 0) {
       $('recent-section').style.display = 'none';
@@ -133,45 +128,64 @@
 
   // ===== 회차 목록 =====
   async function renderExamList() {
-    let exams = [];
+    let examIds = [];
 
-    // 1. data/index.json 시도
+    // 1. data/index.json에서 회차 ID 목록 로드
     try {
       const res = await fetch('data/index.json');
       if (res.ok) {
         const data = await res.json();
-        exams = data.exams || [];
+        examIds = data.exams || [];
       }
     } catch (e) {
       console.log('data/index.json 없음, fallback 사용');
     }
 
     // 2. fallback
-    if (exams.length === 0) exams = FALLBACK_EXAMS;
+    if (examIds.length === 0) examIds = FALLBACK_EXAM_IDS;
 
     const container = $('exam-list');
-    container.innerHTML = '';
 
-    if (exams.length === 0) {
+    if (examIds.length === 0) {
       container.innerHTML = `
         <div style="grid-column:1/-1; padding:30px; text-align:center; color:var(--gray-500);">
           <p style="margin-bottom:12px;">📂 아직 등록된 회차가 없습니다.</p>
           <p style="font-size:0.85rem;">
-            <code>data/index.json</code> 파일을 만들거나<br>
-            <code>js/main.js</code>의 <code>FALLBACK_EXAMS</code>에 회차를 추가하세요.
+            <code>data/index.json</code>의 <code>exams</code> 배열에 회차 ID를 추가하세요.
           </p>
         </div>
       `;
       return;
     }
 
-    // 응시 기록 확인용
+    // 3. 각 시험 파일에서 메타데이터 병렬 로드
+    container.innerHTML = '<p class="loading" style="grid-column:1/-1;">회차 목록을 불러오는 중...</p>';
+
+    const examPromises = examIds.map(async (examId) => {
+      try {
+        const res = await fetch(`data/${examId}.json`);
+        if (!res.ok) return { id: examId, title: examId, error: true };
+        const data = await res.json();
+        return {
+          id: examId,
+          title: data.title || examId,
+          questionCount: (data.questions || []).length,
+          duration: data.duration || null,
+          subjects: data.subjects || [],
+        };
+      } catch (e) {
+        return { id: examId, title: examId, error: true };
+      }
+    });
+
+    const exams = await Promise.all(examPromises);
+
+    // 4. 응시/진행 기록 조회
     const sessions = window.Storage && window.Storage.getAllSessions
       ? window.Storage.getAllSessions()
       : {};
     const attemptedExamIds = new Set(Object.values(sessions).map(s => s.examId));
 
-    // 진행 중인 시험(답 저장된 것) 확인
     const inProgressExamIds = new Set();
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -186,9 +200,27 @@
       }
     }
 
+    // 5. 렌더링
+    container.innerHTML = '';
+
+    // 최신 날짜순 정렬 (파일명이 YYYY-MM-DD 형식이라 사전순 = 시간순)
+    exams.sort((a, b) => b.id.localeCompare(a.id));
+
     exams.forEach(exam => {
       const card = document.createElement('div');
       card.className = 'exam-card';
+
+      if (exam.error) {
+        card.innerHTML = `
+          <h3 style="color:var(--danger);">⚠️ ${escapeHtml(exam.id)}</h3>
+          <div class="meta">파일을 불러올 수 없습니다.</div>
+          <div style="margin-top:8px;">
+            <span class="badge" style="background:#fee2e2; color:#991b1b;">오류</span>
+          </div>
+        `;
+        container.appendChild(card);
+        return;
+      }
 
       const attempted = attemptedExamIds.has(exam.id);
       const inProgress = inProgressExamIds.has(exam.id);
@@ -196,12 +228,20 @@
       let badges = '';
       if (inProgress) badges += '<span class="badge" style="background:#fef3c7; color:#92400e;">▶ 진행중</span>';
       if (attempted) badges += '<span class="badge done">✅ 응시완료</span>';
-      if (exam.questions) badges += `<span class="badge">${exam.questions}문항</span>`;
+      badges += `<span class="badge">${exam.questionCount}문항</span>`;
+      if (exam.duration) badges += `<span class="badge">⏱ ${exam.duration}분</span>`;
+
+      // 과목 정보 (간략 표시)
+      let subjectsHtml = '';
+      if (exam.subjects && exam.subjects.length > 0) {
+        const names = exam.subjects.map(s => s.name).join(' · ');
+        subjectsHtml = `<div style="font-size:0.8rem; color:var(--gray-500); margin-top:8px; line-height:1.4;">${escapeHtml(names)}</div>`;
+      }
 
       card.innerHTML = `
-        <h3>${escapeHtml(exam.title || exam.id)}</h3>
-        <div class="meta">${exam.date ? '📅 ' + escapeHtml(exam.date) : ''}</div>
+        <h3>${escapeHtml(exam.title)}</h3>
         <div style="margin-top:8px;">${badges}</div>
+        ${subjectsHtml}
       `;
       card.addEventListener('click', () => {
         window.location.href = `exam.html?exam=${encodeURIComponent(exam.id)}`;
@@ -212,7 +252,6 @@
 
   // ===== 이벤트 =====
   function bindEvents() {
-    // 설정 모달
     $('settings-btn').addEventListener('click', () => {
       $('settings-modal').classList.add('show');
     });
@@ -234,7 +273,6 @@
       if (window.Storage && window.Storage.clearAll) {
         window.Storage.clearAll();
       }
-      // 모든 진행상황도 삭제
       const keysToRemove = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
