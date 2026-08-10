@@ -1,6 +1,6 @@
 /* ============================================
    포스코퓨처엠 CBT - 시험 진행 로직
-   exam.js (v2 - passage-renderer 통합)
+   exam.js (v3 - 저장/홈 버튼 + 자동저장 + passage-renderer)
    ============================================ */
 
 (function () {
@@ -20,6 +20,7 @@
     totalPages: 1,
     startTime: null,
     timerInterval: null,
+    autoSaveInterval: null,
     timeLimit: 3 * 60 * 60,
     submitted: false,
   };
@@ -36,6 +37,8 @@
     els.timer = $('timer');
     els.modeToggle = $('mode-toggle');
     els.resetBtn = $('reset-btn');
+    els.saveBtn = $('save-btn');
+    els.homeBtn = $('home-btn');
     els.submitBtn = $('submit-btn');
     els.progressFill = $('progress-fill');
     els.perPage = $('per-page');
@@ -89,10 +92,10 @@
 
     renderPage();
     startTimer();
+    startAutoSave();
 
     // KaTeX가 늦게 로드될 수 있으니, 로드 완료 시 한 번 다시 렌더
     ensureKatexReady().then(() => {
-      // 이미 그려진 수식들을 다시 그려서 보장
       renderPage();
     });
 
@@ -106,12 +109,21 @@
       let tries = 0;
       const timer = setInterval(() => {
         tries++;
-        if (window.katex || tries > 20) { // 최대 2초 대기
+        if (window.katex || tries > 20) {
           clearInterval(timer);
           resolve();
         }
       }, 100);
     });
+  }
+
+  // ===== 자동 저장 (30초마다) =====
+  function startAutoSave() {
+    state.autoSaveInterval = setInterval(() => {
+      if (!state.submitted && Object.keys(state.answers).length > 0) {
+        saveProgress();
+      }
+    }, 30000);
   }
 
   // ===== 데이터 로드 =====
@@ -181,11 +193,14 @@
       perPage: state.perPage,
       currentPage: state.currentPage,
       startTime: state.startTime,
+      lastSavedAt: Date.now(),
     };
     try {
       localStorage.setItem(key, JSON.stringify(data));
+      return true;
     } catch (e) {
       console.warn('저장 실패:', e);
+      return false;
     }
   }
 
@@ -265,8 +280,38 @@
       state.submitted = false;
       saveProgress();
       renderPage();
-      alert('초기화되었습니다.');
+      showToast('↺ 초기화되었습니다.');
     });
+
+    // 💾 저장하기 (현재 페이지에 머무름)
+    if (els.saveBtn) {
+      els.saveBtn.addEventListener('click', () => {
+        const ok = saveProgress();
+        const answered = Object.keys(state.answers).length;
+        if (ok) {
+          showToast(`💾 저장 완료! (${answered}문항 진행 중)`);
+        } else {
+          showToast('⚠️ 저장에 실패했습니다.', 3000);
+        }
+      });
+    }
+
+    // 🏠 홈으로 이동 (자동 저장 후)
+    if (els.homeBtn) {
+      els.homeBtn.addEventListener('click', () => {
+        const answered = Object.keys(state.answers).length;
+        const msg = answered > 0
+          ? `💾 현재까지 푼 ${answered}문항이 저장됩니다.\n\n나중에 다시 이 시험을 선택하면 이어서 풀 수 있습니다.\n\n홈으로 이동할까요?`
+          : '홈으로 이동하시겠습니까?';
+        if (!confirm(msg)) return;
+
+        saveProgress();
+        clearInterval(state.autoSaveInterval);
+        // 이탈 방지 해제 (저장 완료했으므로)
+        window.removeEventListener('beforeunload', beforeUnloadHandler);
+        window.location.href = 'index.html';
+      });
+    }
 
     els.submitBtn.addEventListener('click', handleSubmit);
   }
@@ -384,8 +429,6 @@
   }
 
   // ===== 렌더링: passage =====
-  // 1순위: 신규 PassageRenderer 사용 (배열/객체/문자열 모두 지원)
-  // 2순위: 구형 호환 (type: list/table/text 단일 객체)
   function renderPassage(passage) {
     // 신규 렌더러 사용 가능하면 그것으로
     if (window.PassageRenderer && typeof window.PassageRenderer.render === 'function') {
@@ -408,7 +451,6 @@
       return box;
     }
 
-    // 배열이면 첫 요소만 fallback으로 표시 (거의 안 씀)
     if (Array.isArray(passage)) {
       box.classList.add('type-mixed');
       box.textContent = JSON.stringify(passage);
@@ -544,6 +586,7 @@
 
     state.submitted = true;
     clearInterval(state.timerInterval);
+    clearInterval(state.autoSaveInterval);
 
     let correct = 0;
     const subjectStats = {};
@@ -608,9 +651,54 @@
   function beforeUnloadHandler(e) {
     if (state.submitted) return;
     if (Object.keys(state.answers).length === 0) return;
+    // 이탈 전에 한 번 더 저장 시도
+    saveProgress();
     e.preventDefault();
     e.returnValue = '';
     return '';
+  }
+
+  // ===== 토스트 알림 =====
+  let toastTimer = null;
+  function showToast(message, duration = 2000) {
+    let toast = document.getElementById('cbt-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'cbt-toast';
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: rgba(30, 41, 59, 0.95);
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+        pointer-events: none;
+        max-width: 90%;
+        text-align: center;
+      `;
+      document.body.appendChild(toast);
+    }
+
+    toast.textContent = message;
+
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateX(-50%) translateY(0)';
+    });
+
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-50%) translateY(20px)';
+    }, duration);
   }
 
   // ===== 유틸: HTML 이스케이프 =====
