@@ -13,7 +13,7 @@
       <h1 id="exam-title" class="exam-title">시험 로딩 중...</h1>
       <div class="exam-header-right">
         <span class="timer" id="timer">00:00:00</span>
-        <button id="mode-toggle" class="btn btn-outline">🎯 실전모드</button>
+        <button id="mode-toggle" class="btn btn-outline" title="학습모드에서는 답 선택 즉시 해설 표시">🎯 실전모드</button>
         <button id="reset-btn" class="btn btn-outline">↺ 초기화</button>
         <button id="submit-btn" class="btn btn-primary">제출하기</button>
       </div>
@@ -24,36 +24,39 @@
     </div>
   </header>
 
-  <!-- 메인 영역 -->
-  <main class="exam-main">
-    <!-- 좌측: 문제 영역 -->
-    <section class="exam-content">
+  <!-- 메인 영역 (OMR 제거, 문제 영역만) -->
+  <main class="exam-main-full">
+    <section class="exam-content-full">
+      <!-- 상단 컨트롤 바 -->
       <div class="exam-controls">
-        <label for="per-page">페이지당 문제 수:</label>
-        <select id="per-page">
-          <option value="1">1문항</option>
-          <option value="2" selected>2문항</option>
-          <option value="5">5문항</option>
-          <option value="10">10문항</option>
-        </select>
+        <div class="controls-left">
+          <label for="per-page">페이지당:</label>
+          <select id="per-page">
+            <option value="1">1문항</option>
+            <option value="2" selected>2문항</option>
+            <option value="5">5문항</option>
+            <option value="10">10문항</option>
+          </select>
+        </div>
+
+        <div class="controls-right">
+          <button id="jump-input-btn" class="btn btn-outline" title="문제 번호로 이동">🔢 이동</button>
+          <span id="answered-count" class="answered-count">0 / 0 답변</span>
+        </div>
       </div>
 
+      <!-- 문제 렌더링 영역 -->
       <div id="question-area" class="question-area">
         <p class="loading">문제를 불러오는 중...</p>
       </div>
 
+      <!-- 하단 페이지 이동 -->
       <div class="pagination">
         <button id="prev-page" class="btn">◀ 이전</button>
         <span id="page-info" class="page-info">1 / 1</span>
         <button id="next-page" class="btn">다음 ▶</button>
       </div>
     </section>
-
-    <!-- 우측: OMR 답안지 -->
-    <aside class="omr-panel">
-      <h3>📝 답안지 (OMR)</h3>
-      <div id="omr-list" class="omr-list"></div>
-    </aside>
   </main>
 
   <!-- 스크립트 -->
