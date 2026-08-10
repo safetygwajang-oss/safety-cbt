@@ -5,7 +5,157 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>결과 | 포스코퓨처엠 CBT</title>
   <link rel="stylesheet" href="css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- KaTeX CSS (수식 렌더링) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Passage + Review 인라인 스타일 (style.css 안 건드려도 됨) -->
+  <style>
+    /* ===== Passage 블록 ===== */
+    .passage-block { margin: 12px 0; font-size: 0.95rem; line-height: 1.6; }
+    .passage-text { color: #334155; white-space: pre-wrap; }
+
+    .passage-table-wrap { overflow-x: auto; margin: 16px 0; }
+    .passage-table {
+      border-collapse: collapse; min-width: 300px; width: auto;
+      margin: 0 auto; background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border-radius: 6px; overflow: hidden;
+    }
+    .passage-table caption {
+      padding: 8px; font-weight: 600; color: #334155;
+      background: #f8fafc; border-bottom: 1px solid #e2e8f0; caption-side: top;
+    }
+    .passage-table th, .passage-table td {
+      border: 1px solid #e2e8f0; padding: 8px 14px; text-align: center;
+    }
+    .passage-table th { background: #f1f5f9; font-weight: 600; color: #1e293b; }
+    .passage-table tbody tr:nth-child(even) { background: #f8fafc; }
+
+    .passage-list {
+      background: #f8fafc; border-left: 3px solid #3b82f6;
+      padding: 12px 20px; border-radius: 4px;
+    }
+    .passage-list-title { font-weight: 600; margin-bottom: 8px; color: #1e293b; }
+    .passage-list ul, .passage-list ol { margin: 0; padding-left: 20px; }
+    .passage-list ul { list-style: none; padding-left: 0; }
+    .passage-list li { margin: 4px 0; }
+
+    .passage-katex { text-align: center; padding: 8px 0; overflow-x: auto; }
+    .passage-katex-fallback {
+      background: #fef3c7; border: 1px dashed #d97706;
+      padding: 10px; border-radius: 4px; font-family: 'Courier New', monospace;
+    }
+
+    .passage-svg {
+      text-align: center; padding: 12px; background: #fff;
+      border: 1px solid #e2e8f0; border-radius: 6px;
+      margin: 12px auto; max-width: 100%;
+    }
+    .passage-svg svg { max-width: 100%; height: auto; }
+    .passage-svg-caption { margin-top: 8px; font-size: 0.85rem; color: #64748b; font-style: italic; }
+
+    .passage-callout { padding: 12px 16px; border-radius: 6px; border-left: 4px solid; }
+    .passage-callout-info { background: #eff6ff; border-color: #3b82f6; }
+    .passage-callout-condition { background: #fef3c7; border-color: #d97706; }
+    .passage-callout-definition { background: #f0fdf4; border-color: #16a34a; }
+    .passage-callout-title { font-weight: 700; margin-bottom: 6px; color: #1e293b; }
+    .passage-callout-body { color: #334155; white-space: pre-wrap; }
+
+    /* ===== 결과 리뷰 카드 ===== */
+    .review-item {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #94a3b8;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .review-item.correct { border-left-color: #16a34a; }
+    .review-item.wrong { border-left-color: #dc2626; }
+
+    .review-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 8px;
+    }
+    .review-status { font-size: 1.3rem; }
+    .review-question { margin: 8px 0; font-weight: 500; color: #1e293b; line-height: 1.6; }
+    .review-passage { margin: 8px 0; }
+
+    .review-choices { margin: 12px 0; }
+    .review-choice {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px; margin: 6px 0;
+      border-radius: 6px; background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+    .review-choice .choice-no {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 26px; height: 26px;
+      border-radius: 50%; background: #e2e8f0; color: #334155;
+      font-size: 0.85rem; font-weight: 600;
+      flex-shrink: 0;
+    }
+    .review-choice .choice-text { flex: 1; color: #334155; }
+    .review-choice.is-answer { background: #f0fdf4; border-color: #16a34a; }
+    .review-choice.is-answer .choice-no { background: #16a34a; color: #fff; }
+    .review-choice.is-picked-wrong { background: #fef2f2; border-color: #dc2626; }
+    .review-choice.is-picked-wrong .choice-no { background: #dc2626; color: #fff; }
+
+    .badge-answer, .badge-picked {
+      padding: 2px 8px; border-radius: 4px;
+      font-size: 0.75rem; font-weight: 700;
+    }
+    .badge-answer { background: #16a34a; color: #fff; }
+    .badge-picked { background: #dc2626; color: #fff; }
+
+    .review-answer-line { margin: 12px 0 6px; color: #475569; }
+    .review-explanation {
+      margin-top: 10px; padding: 10px 12px;
+      background: #eff6ff; border-radius: 6px;
+      color: #334155; font-size: 0.9rem; line-height: 1.6;
+    }
+
+    /* ===== 차트 영역 (높이 안정화) ===== */
+    .chart-section {
+      max-width: 600px;
+      margin: 24px auto;
+    }
+    .chart-section canvas {
+      max-height: 400px;
+    }
+
+    /* ===== 탭 (기존 스타일 없을 때 대비) ===== */
+    .review-tabs {
+      display: flex; gap: 8px; margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .review-tabs .tab {
+      padding: 8px 16px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #475569;
+      transition: all 0.15s;
+    }
+    .review-tabs .tab:hover { background: #e2e8f0; }
+    .review-tabs .tab.active {
+      background: #3b82f6;
+      color: #fff;
+      border-color: #3b82f6;
+    }
+
+    .result-actions {
+      display: flex; gap: 12px; justify-content: center;
+      margin: 32px 0; flex-wrap: wrap;
+    }
+  </style>
 </head>
 <body>
   <header class="topbar">
@@ -16,6 +166,7 @@
   </header>
 
   <main class="container">
+    <!-- 요약 -->
     <section class="result-summary">
       <h2 id="pass-status">🎉 합격</h2>
       <div class="score-big"><span id="score">0</span> / 120</div>
@@ -23,29 +174,38 @@
       <p>소요 시간: <span id="elapsed">00:00:00</span></p>
     </section>
 
+    <!-- 과목별 차트 -->
     <section class="chart-section">
       <h3>과목별 정답률</h3>
       <canvas id="subject-chart"></canvas>
     </section>
 
+    <!-- 리뷰 -->
     <section class="review-section">
       <div class="review-tabs">
         <button class="tab active" data-filter="all">전체</button>
-        <button class="tab" data-filter="wrong">오답만</button>
-        <button class="tab" data-filter="correct">정답만</button>
+        <button class="tab" data-filter="wrong">❌ 오답만</button>
+        <button class="tab" data-filter="correct">✅ 정답만</button>
+        <button class="tab" data-filter="bookmark">⭐ 북마크</button>
       </div>
       <div class="review-list" id="review-list">
         <!-- JS로 렌더링 -->
       </div>
     </section>
 
+    <!-- 하단 액션 -->
     <div class="result-actions">
-      <button id="retry-wrong" class="btn-primary">오답만 다시 풀기</button>
-      <a href="index.html" class="btn-sm">홈으로</a>
+      <button id="retry-wrong" class="btn-primary">❌ 오답만 다시 풀기</button>
+      <a href="index.html" class="btn-sm">🏠 홈으로</a>
     </div>
   </main>
 
+  <!-- KaTeX JS (수식 렌더링) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+
+  <!-- 앱 스크립트 (순서 매우 중요!) -->
   <script src="js/storage.js"></script>
+  <script src="js/passage-renderer.js"></script>
   <script src="js/result.js"></script>
 </body>
 </html>
