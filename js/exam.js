@@ -1,6 +1,6 @@
 /* ============================================
    포스코퓨처엠 CBT - 시험 진행 로직
-   exam.js
+   exam.js (v2 - passage-renderer 통합)
    ============================================ */
 
 (function () {
@@ -8,19 +8,19 @@
 
   // ===== 전역 상태 =====
   const state = {
-    examId: null,          // URL의 exam 파라미터 (예: 2022-04-24)
-    examTitle: '',         // 표시용 제목
-    mode: 'exam',          // 'exam' (실전) | 'study' (학습) | 'wrong' (오답재도전)
-    sessionId: null,       // 오답 재도전 시 원본 세션 ID
-    questions: [],         // 현재 시험의 문제 배열
-    answers: {},           // { 문제번호: 선택한번호(1~4) }
-    bookmarks: {},         // { 문제번호: true }
-    perPage: 2,            // 페이지당 문제 수
+    examId: null,
+    examTitle: '',
+    mode: 'exam',
+    sessionId: null,
+    questions: [],
+    answers: {},
+    bookmarks: {},
+    perPage: 2,
     currentPage: 1,
     totalPages: 1,
-    startTime: null,       // 시험 시작 시각 (ms)
+    startTime: null,
     timerInterval: null,
-    timeLimit: 3 * 60 * 60, // 3시간 (초)
+    timeLimit: 3 * 60 * 60,
     submitted: false,
   };
 
@@ -32,7 +32,6 @@
   document.addEventListener('DOMContentLoaded', init);
 
   async function init() {
-    // DOM 캐싱
     els.title = $('exam-title');
     els.timer = $('timer');
     els.modeToggle = $('mode-toggle');
@@ -47,18 +46,16 @@
     els.nextPage = $('next-page');
     els.pageInfo = $('page-info');
 
-    // URL 파라미터 파싱
     const params = new URLSearchParams(window.location.search);
     state.examId = params.get('exam');
     state.mode = params.get('mode') || 'exam';
-    state.sessionId = params.get('session'); // 오답모드일 때 원본 세션
+    state.sessionId = params.get('session');
 
     if (!state.examId) {
       els.questionArea.innerHTML = '<p class="loading">❌ 시험 정보가 없습니다. <a href="index.html">홈으로</a></p>';
       return;
     }
 
-    // 데이터 로드
     try {
       await loadExamData();
     } catch (err) {
@@ -67,7 +64,6 @@
       return;
     }
 
-    // 오답 모드면 문제 필터링
     if (state.mode === 'wrong' && state.sessionId) {
       filterWrongQuestions();
     }
@@ -77,31 +73,45 @@
       return;
     }
 
-    // 저장된 진행상황 복구
     restoreProgress();
-
-    // 이벤트 바인딩
     bindEvents();
+    updateTitle();
 
-// 렌더링
-updateTitle();
+    // jumpTo 파라미터 처리
+    const jumpTo = params.get('jumpTo');
+    if (jumpTo) {
+      const targetNo = parseInt(jumpTo, 10);
+      const idx = state.questions.findIndex(q => q.no === targetNo);
+      if (idx >= 0) {
+        state.currentPage = Math.floor(idx / state.perPage) + 1;
+      }
+    }
 
-// jumpTo 파라미터 처리 (북마크에서 이동해온 경우)
-const jumpTo = params.get('jumpTo');
-if (jumpTo) {
-  const targetNo = parseInt(jumpTo, 10);
-  const idx = state.questions.findIndex(q => q.no === targetNo);
-  if (idx >= 0) {
-    state.currentPage = Math.floor(idx / state.perPage) + 1;
-  }
-}
+    renderPage();
+    startTimer();
 
-renderPage();
-startTimer();
+    // KaTeX가 늦게 로드될 수 있으니, 로드 완료 시 한 번 다시 렌더
+    ensureKatexReady().then(() => {
+      // 이미 그려진 수식들을 다시 그려서 보장
+      renderPage();
+    });
 
-
-    // 이탈 방지
     window.addEventListener('beforeunload', beforeUnloadHandler);
+  }
+
+  // ===== KaTeX 로드 대기 (defer 스크립트 대비) =====
+  function ensureKatexReady() {
+    return new Promise(resolve => {
+      if (window.katex) return resolve();
+      let tries = 0;
+      const timer = setInterval(() => {
+        tries++;
+        if (window.katex || tries > 20) { // 최대 2초 대기
+          clearInterval(timer);
+          resolve();
+        }
+      }, 100);
+    });
   }
 
   // ===== 데이터 로드 =====
@@ -113,7 +123,6 @@ startTimer();
     state.examTitle = data.title || state.examId;
     state.questions = Array.isArray(data.questions) ? data.questions : [];
 
-    // 문제에 no가 없으면 자동 부여
     state.questions.forEach((q, i) => {
       if (typeof q.no !== 'number') q.no = i + 1;
     });
@@ -121,7 +130,6 @@ startTimer();
 
   // ===== 오답 필터링 =====
   function filterWrongQuestions() {
-    // storage.js의 getSession 사용
     const session = (window.Storage && window.Storage.getSession)
       ? window.Storage.getSession(state.sessionId)
       : null;
@@ -188,7 +196,6 @@ startTimer();
 
   // ===== 이벤트 바인딩 =====
   function bindEvents() {
-    // 페이지당 문제 수
     els.perPage.addEventListener('change', () => {
       state.perPage = parseInt(els.perPage.value, 10);
       state.currentPage = 1;
@@ -197,7 +204,6 @@ startTimer();
       saveProgress();
     });
 
-    // 이전/다음 페이지
     els.prevPage.addEventListener('click', () => {
       if (state.currentPage > 1) {
         state.currentPage--;
@@ -216,7 +222,6 @@ startTimer();
       }
     });
 
-    // 문제 번호 점프
     els.jumpBtn.addEventListener('click', () => {
       const total = state.questions.length;
       const input = prompt(`이동할 문제 번호 (1 ~ ${total}):`);
@@ -226,7 +231,6 @@ startTimer();
         alert('올바른 문제 번호를 입력하세요.');
         return;
       }
-      // 해당 문제가 있는 페이지로 이동
       const idx = state.questions.findIndex(q => q.no === target);
       const useIdx = idx >= 0 ? idx : (target - 1);
       state.currentPage = Math.floor(useIdx / state.perPage) + 1;
@@ -235,7 +239,6 @@ startTimer();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // 모드 토글 (실전 ↔ 학습)
     els.modeToggle.addEventListener('click', () => {
       if (state.mode === 'wrong') {
         alert('오답 재도전은 실전 모드로만 진행됩니다.');
@@ -253,7 +256,6 @@ startTimer();
       renderPage();
     });
 
-    // 초기화
     els.resetBtn.addEventListener('click', () => {
       if (!confirm('⚠️ 현재 시험의 답안과 진행상황을 모두 지웁니다. 계속할까요?')) return;
       state.answers = {};
@@ -266,7 +268,6 @@ startTimer();
       alert('초기화되었습니다.');
     });
 
-    // 제출
     els.submitBtn.addEventListener('click', handleSubmit);
   }
 
@@ -295,7 +296,6 @@ startTimer();
       els.questionArea.appendChild(renderQuestionCard(q));
     });
 
-    // 페이지 정보
     els.pageInfo.textContent = `${state.currentPage} / ${state.totalPages}`;
     els.prevPage.disabled = state.currentPage === 1;
     els.nextPage.disabled = state.currentPage === state.totalPages;
@@ -310,7 +310,7 @@ startTimer();
     if (state.bookmarks[q.no]) card.classList.add('bookmarked');
     card.dataset.no = q.no;
 
-    // 헤더 (번호 + 과목 + 북마크)
+    // 헤더
     const header = document.createElement('div');
     header.className = 'question-header';
     header.innerHTML = `
@@ -332,9 +332,10 @@ startTimer();
     qText.textContent = q.question || '';
     card.appendChild(qText);
 
-    // passage (지문/보기박스/표)
+    // passage 렌더 (신규 렌더러 우선)
     if (q.passage) {
-      card.appendChild(renderPassage(q.passage));
+      const passageEl = renderPassage(q.passage);
+      if (passageEl) card.appendChild(passageEl);
     }
 
     // 선택지
@@ -347,11 +348,9 @@ startTimer();
       choice.dataset.no = q.no;
       choice.dataset.choice = choiceNo;
 
-      // 선택 상태 반영
       const picked = state.answers[q.no];
       if (picked === choiceNo) choice.classList.add('selected');
 
-      // 학습 모드에서 이미 선택했으면 정답/오답 표시
       if (state.mode === 'study' && picked) {
         if (choiceNo === q.answer) choice.classList.add('correct');
         else if (choiceNo === picked) choice.classList.add('wrong');
@@ -366,7 +365,7 @@ startTimer();
     });
     card.appendChild(choicesDiv);
 
-    // 해설 (학습 모드 + 답 선택 시)
+    // 해설
     if (q.explanation) {
       const exp = document.createElement('div');
       exp.className = 'explanation';
@@ -375,7 +374,6 @@ startTimer();
       card.appendChild(exp);
     }
 
-    // 북마크 버튼 이벤트
     const bmBtn = header.querySelector('.bookmark-btn');
     bmBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -385,15 +383,35 @@ startTimer();
     return card;
   }
 
-  // ===== 렌더링: passage (표/보기/지문) =====
+  // ===== 렌더링: passage =====
+  // 1순위: 신규 PassageRenderer 사용 (배열/객체/문자열 모두 지원)
+  // 2순위: 구형 호환 (type: list/table/text 단일 객체)
   function renderPassage(passage) {
+    // 신규 렌더러 사용 가능하면 그것으로
+    if (window.PassageRenderer && typeof window.PassageRenderer.render === 'function') {
+      const html = window.PassageRenderer.render(passage);
+      if (html) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'passage passage-v2';
+        wrapper.innerHTML = html;
+        return wrapper;
+      }
+    }
+
+    // ===== fallback (구버전) =====
     const box = document.createElement('div');
     box.className = 'passage';
 
-    // 문자열이면 기본 텍스트로
     if (typeof passage === 'string') {
       box.classList.add('type-text');
       box.textContent = passage;
+      return box;
+    }
+
+    // 배열이면 첫 요소만 fallback으로 표시 (거의 안 씀)
+    if (Array.isArray(passage)) {
+      box.classList.add('type-mixed');
+      box.textContent = JSON.stringify(passage);
       return box;
     }
 
@@ -401,7 +419,6 @@ startTimer();
     box.classList.add('type-' + type);
 
     if (type === 'list') {
-      // ㄱ, ㄴ, ㄷ 형태 리스트
       const ul = document.createElement('ul');
       (passage.items || []).forEach(item => {
         const li = document.createElement('li');
@@ -410,7 +427,6 @@ startTimer();
       });
       box.appendChild(ul);
     } else if (type === 'table') {
-      // 표 (headers + rows)
       const table = document.createElement('table');
       if (Array.isArray(passage.headers) && passage.headers.length) {
         const thead = document.createElement('thead');
@@ -436,8 +452,7 @@ startTimer();
       table.appendChild(tbody);
       box.appendChild(table);
     } else {
-      // 일반 텍스트
-      box.textContent = passage.text || '';
+      box.textContent = passage.text || passage.content || '';
     }
 
     return box;
@@ -462,7 +477,6 @@ startTimer();
     }
     saveProgress();
 
-    // 전역 북마크 저장 (홈 화면에서 모아보기용)
     if (window.Storage && window.Storage.setGlobalBookmark) {
       const q = state.questions.find(qq => qq.no === no);
       if (q) {
@@ -493,15 +507,12 @@ startTimer();
     const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
     const remaining = Math.max(0, state.timeLimit - elapsed);
 
-    // 시간 색상 경고
     els.timer.classList.remove('warning', 'danger');
     if (remaining <= 60) els.timer.classList.add('danger');
     else if (remaining <= 300) els.timer.classList.add('warning');
 
-    // 표시 (남은 시간)
     els.timer.textContent = formatTime(remaining);
 
-    // 시간 종료
     if (remaining === 0) {
       clearInterval(state.timerInterval);
       alert('⏰ 시험 시간이 종료되었습니다. 자동 제출됩니다.');
@@ -534,9 +545,8 @@ startTimer();
     state.submitted = true;
     clearInterval(state.timerInterval);
 
-    // 채점
     let correct = 0;
-    const subjectStats = {}; // { 과목: { correct, total } }
+    const subjectStats = {};
     const reviewData = [];
 
     state.questions.forEach(q => {
@@ -582,21 +592,15 @@ startTimer();
       submittedAt: Date.now(),
     };
 
-    // 결과 저장
     if (window.Storage && window.Storage.saveSession) {
       window.Storage.saveSession(sessionId, resultData);
     } else {
-      // fallback
       localStorage.setItem(`result-${sessionId}`, JSON.stringify(resultData));
     }
 
-    // 진행상황 삭제 (제출 완료)
     localStorage.removeItem(getStorageKey());
-
-    // 이탈 방지 해제
     window.removeEventListener('beforeunload', beforeUnloadHandler);
 
-    // 결과 페이지로 이동
     window.location.href = `result.html?session=${sessionId}`;
   }
 
