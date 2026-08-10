@@ -83,10 +83,22 @@
     // 이벤트 바인딩
     bindEvents();
 
-    // 렌더링
-    updateTitle();
-    renderPage();
-    startTimer();
+// 렌더링
+updateTitle();
+
+// jumpTo 파라미터 처리 (북마크에서 이동해온 경우)
+const jumpTo = params.get('jumpTo');
+if (jumpTo) {
+  const targetNo = parseInt(jumpTo, 10);
+  const idx = state.questions.findIndex(q => q.no === targetNo);
+  if (idx >= 0) {
+    state.currentPage = Math.floor(idx / state.perPage) + 1;
+  }
+}
+
+renderPage();
+startTimer();
+
 
     // 이탈 방지
     window.addEventListener('beforeunload', beforeUnloadHandler);
