@@ -8,7 +8,13 @@
 
   const $ = (id) => document.getElementById(id);
 
-  // ⚠️ data/index.json이 없을 때 사용할 fallback 목록
+  /* 🔑 중복기출 입장코드 — 이 값만 바꾸세요 */
+  const ACCESS_CODE = 'posco2026';
+  const CODE_KEY = 'dup-access-ok';
+  /* 유지 방식: sessionStorage = 브라우저 탭 닫으면 재입력
+     계속 유지하려면 아래를 localStorage 로 변경 */
+  const codeStore = sessionStorage;
+
   const FALLBACK_EXAMS = [
     {
       id: '2022-04-24',
@@ -28,6 +34,18 @@
     renderRecent();
     await renderExamList();
     bindEvents();
+    bindTabs();
+    bindCodeModal();
+  }
+
+  /* ===== 중복기출 판별 ===== */
+  function isDup(exam) {
+    const key = `${exam.id || ''} ${exam.title || ''}`;
+    return /중복기출|2021-2026|2021~2026/.test(key);
+  }
+
+  function isUnlocked() {
+    return codeStore.getItem(CODE_KEY) === '1';
   }
 
   // ===== 통계 카드 =====
@@ -58,9 +76,7 @@
     const container = $('bookmark-list');
     container.innerHTML = '';
 
-    const displayList = list.slice(0, 12);
-
-    displayList.forEach(bm => {
+    list.slice(0, 12).forEach(bm => {
       const item = document.createElement('div');
       item.className = 'bookmark-item';
       item.innerHTML = `
@@ -133,135 +149,166 @@
     });
   }
 
-  // ===== 회차 목록 =====
+  // ===== 목록 로드 & 두 그룹으로 분리 =====
   async function renderExamList() {
     let exams = [];
 
-    // data/index.json에서 회차 정보 로드
     try {
       const res = await fetch('data/index.json');
       if (res.ok) {
         const data = await res.json();
-        // 두 가지 구조 모두 지원:
-        // 1) 배열: [{ id, title, ... }, ...]
-        // 2) 객체: { exams: [{ id, title, ... }, ...] }  또는 { exams: ["id1", "id2"] }
         if (Array.isArray(data)) {
           exams = data;
         } else if (data && Array.isArray(data.exams)) {
-          // data.exams가 문자열 배열인 경우 → 객체 배열로 변환
-          exams = data.exams.map(item => {
-            if (typeof item === 'string') return { id: item, title: item };
-            return item;
-          });
+          exams = data.exams.map(item => (typeof item === 'string' ? { id: item, title: item } : item));
         }
       }
     } catch (e) {
       console.log('data/index.json 로드 실패, fallback 사용:', e);
     }
 
-    // fallback
     if (exams.length === 0) exams = FALLBACK_EXAMS;
 
-    const container = $('exam-list');
-
-    if (exams.length === 0) {
-      container.innerHTML = `
-        <div style="grid-column:1/-1; padding:30px; text-align:center; color:var(--gray-500);">
-          <p style="margin-bottom:12px;">📂 아직 등록된 회차가 없습니다.</p>
-          <p style="font-size:0.85rem;">
-            <code>data/index.json</code>에 회차 정보를 추가하세요.
-          </p>
-        </div>
-      `;
-      return;
-    }
-
-    // 응시/진행 기록 조회
+    // 기록 조회
     const sessions = window.Storage && window.Storage.getAllSessions
       ? window.Storage.getAllSessions()
       : {};
-    const attemptedExamIds = new Set(Object.values(sessions).map(s => s.examId));
+    const attempted = new Set(Object.values(sessions).map(s => s.examId));
 
-    const inProgressExamIds = new Set();
+    const inProgress = new Set();
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith('exam-progress-') && !key.includes('-wrong-')) {
         const examId = key.replace('exam-progress-', '');
         try {
           const data = JSON.parse(localStorage.getItem(key) || '{}');
-          if (data.answers && Object.keys(data.answers).length > 0) {
-            inProgressExamIds.add(examId);
-          }
+          if (data.answers && Object.keys(data.answers).length > 0) inProgress.add(examId);
         } catch (e) {}
       }
     }
 
-    // 렌더링
+    // 그룹 분리
+    const dupExams = exams.filter(isDup);
+    const roundExams = exams.filter(e => !isDup(e));
+
+    // 회차: 최신순
+    roundExams.sort((a, b) => (b.id || '').localeCompare(a.id || ''));
+
+    paint($('exam-list'), roundExams, attempted, inProgress, '등록된 회차가 없습니다.');
+    paint($('dup-list'), dupExams, attempted, inProgress, '등록된 중복기출이 없습니다.');
+
+    // 이미 인증된 상태면 잠금 해제
+    if (isUnlocked()) unlockDup();
+  }
+
+  function paint(container, list, attempted, inProgress, emptyMsg) {
     container.innerHTML = '';
 
-    // 최신 날짜순 정렬 (id가 YYYY-MM-DD 형식이면 사전순 = 시간순)
-    exams.sort((a, b) => (b.id || '').localeCompare(a.id || ''));
+    if (list.length === 0) {
+      container.innerHTML = `<div style="grid-column:1/-1; padding:30px; text-align:center; color:var(--gray-500);">📂 ${emptyMsg}</div>`;
+      return;
+    }
 
-    exams.forEach(exam => {
+    list.forEach(exam => {
       const card = document.createElement('div');
       card.className = 'exam-card';
 
-      const attempted = attemptedExamIds.has(exam.id);
-      const inProgress = inProgressExamIds.has(exam.id);
-
       let badges = '';
-      if (inProgress) badges += '<span class="badge" style="background:#fef3c7; color:#92400e;">▶ 진행중</span>';
-      if (attempted) badges += '<span class="badge done">✅ 응시완료</span>';
+      if (inProgress.has(exam.id)) badges += '<span class="badge" style="background:#fef3c7; color:#92400e;">▶ 진행중</span>';
+      if (attempted.has(exam.id)) badges += '<span class="badge done">✅ 응시완료</span>';
       if (exam.questions) badges += `<span class="badge">${exam.questions}문항</span>`;
       if (exam.duration) badges += `<span class="badge">⏱ ${exam.duration}분</span>`;
 
-      // 과목 정보 (문자열 배열 또는 객체 배열 모두 지원)
       let subjectsHtml = '';
       if (exam.subjects && exam.subjects.length > 0) {
-        const names = exam.subjects.map(s => typeof s === 'string' ? s : s.name).join(' · ');
+        const names = exam.subjects.map(s => (typeof s === 'string' ? s : s.name)).join(' · ');
         subjectsHtml = `<div style="font-size:0.8rem; color:var(--gray-500); margin-top:8px; line-height:1.4;">${escapeHtml(names)}</div>`;
       }
 
-      // 제목 (title + date 조합)
-      let titleText = exam.title || exam.id;
-      let dateText = exam.date ? `📅 ${escapeHtml(exam.date)}` : '';
+      const dateText = exam.date ? `📅 ${escapeHtml(exam.date)}` : '';
 
       card.innerHTML = `
-        <h3>${escapeHtml(titleText)}</h3>
+        <h3>${escapeHtml(exam.title || exam.id)}</h3>
         ${dateText ? `<div class="meta">${dateText}</div>` : ''}
         <div style="margin-top:8px;">${badges}</div>
         ${subjectsHtml}
       `;
       card.addEventListener('click', () => {
+        if (isDup(exam) && !isUnlocked()) {
+          openCodeModal();
+          return;
+        }
         window.location.href = `exam.html?exam=${encodeURIComponent(exam.id)}`;
       });
       container.appendChild(card);
     });
   }
 
-  // ===== 이벤트 =====
-  function bindEvents() {
-    $('settings-btn').addEventListener('click', () => {
-      $('settings-modal').classList.add('show');
-    });
+  // ===== 탭 ===== 
+  function bindTabs() {
+    document.querySelectorAll('.main-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.main-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
 
-    $('close-settings-btn').addEventListener('click', () => {
-      $('settings-modal').classList.remove('show');
-    });
+        const tab = btn.dataset.tab;
+        $('panel-rounds').style.display = (tab === 'rounds') ? 'block' : 'none';
+        $('panel-dup').style.display = (tab === 'dup') ? 'block' : 'none';
 
-    $('settings-modal').addEventListener('click', (e) => {
-      if (e.target === $('settings-modal')) {
-        $('settings-modal').classList.remove('show');
+        if (tab === 'dup' && !isUnlocked()) openCodeModal();
+      });
+    });
+  }
+
+  // ===== 입장코드 =====
+  function openCodeModal() {
+    $('code-error').style.display = 'none';
+    $('code-input').value = '';
+    $('code-modal').classList.add('show');
+    setTimeout(() => $('code-input').focus(), 50);
+  }
+
+  function unlockDup() {
+    codeStore.setItem(CODE_KEY, '1');
+    $('dup-locked').style.display = 'none';
+    $('dup-list').style.display = 'grid';
+    const tab = document.querySelector('.main-tab[data-tab="dup"]');
+    if (tab) tab.textContent = '🔓 중복기출';
+  }
+
+  function bindCodeModal() {
+    const submit = () => {
+      if ($('code-input').value.trim() === ACCESS_CODE) {
+        $('code-modal').classList.remove('show');
+        unlockDup();
+      } else {
+        $('code-error').style.display = 'block';
+        $('code-input').select();
       }
+    };
+
+    $('code-submit-btn').addEventListener('click', submit);
+    $('code-input').addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+    $('open-code-btn').addEventListener('click', openCodeModal);
+    $('code-cancel-btn').addEventListener('click', () => $('code-modal').classList.remove('show'));
+    $('code-modal').addEventListener('click', e => {
+      if (e.target === $('code-modal')) $('code-modal').classList.remove('show');
+    });
+  }
+
+  // ===== 기존 이벤트 =====
+  function bindEvents() {
+    $('settings-btn').addEventListener('click', () => $('settings-modal').classList.add('show'));
+    $('close-settings-btn').addEventListener('click', () => $('settings-modal').classList.remove('show'));
+    $('settings-modal').addEventListener('click', (e) => {
+      if (e.target === $('settings-modal')) $('settings-modal').classList.remove('show');
     });
 
     $('clear-data-btn').addEventListener('click', () => {
       if (!confirm('⚠️ 모든 응시 기록과 북마크를 삭제합니다.\n\n정말 초기화하시겠습니까?')) return;
       if (!confirm('한 번 더 확인합니다.\n\n정말 모든 데이터를 삭제할까요?')) return;
 
-      if (window.Storage && window.Storage.clearAll) {
-        window.Storage.clearAll();
-      }
+      if (window.Storage && window.Storage.clearAll) window.Storage.clearAll();
       const keysToRemove = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -274,7 +321,6 @@
     });
   }
 
-  // ===== 유틸 =====
   function escapeHtml(str) {
     if (str == null) return '';
     return String(str)
