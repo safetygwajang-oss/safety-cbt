@@ -18,9 +18,8 @@
       "question": "산업안전보건법령상 안전보건관리규정 작성에 관한 사항으로 ( )에 알맞은 기준은?",
       "passage": [
         {
-          "type": "image",
-          "src": "/assets/exams/csafety/2022-04-24/q001-passage.png",
-          "alt": "1번 문제 지문 자료"
+          "type": "text",
+          "content": "사업주는 안전보건관리규정을 작성해야 할 사유가 발생한 날부터 ( )일 이내에 안전보건관리규정을 작성해야 하며, 이를 변경할 사유가 발생한 경우에도 같다."
         }
       ],
       "choices": ["7", "14", "30", "60"],
@@ -46,14 +45,13 @@
       "question": "산업재해보상보험법령상 보험급여의 종류를 모두 고른 것은?",
       "passage": [
         {
-          "type": "image",
-          "src": "/assets/exams/csafety/2022-04-24/q003-passage.png",
-          "alt": "3번 문제 ㄱ~ㅁ 보기 자료"
+          "type": "text",
+          "content": "ㄱ. 휴업급여\nㄴ. 요양급여\nㄷ. 장해급여\nㄹ. 영업손실비용\nㅁ. 상병보상연금"
         }
       ],
       "choices": ["ㄱ, ㄴ, ㄹ", "ㄱ, ㄴ, ㄷ, ㅁ", "ㄱ, ㄷ, ㄹ, ㅁ", "ㄴ, ㄷ, ㄹ, ㅁ"],
       "answer": 2,
-      "explanation": "산업재해보상 보험급여(진폐에 대한 보험급여는 제외)의 종류에는 요양급여, 휴업급여, 장해급여, 간병급여, 유족급여, 상병보상연금, 장례비, 직업재활급여가 있다."
+      "explanation": "산업재해보상 보험급여(진폐에 대한 보험급여는 제외)의 종류에는 요양급여, 휴업급여, 장해급여, 간병급여, 유족급여, 상병보상연금, 장례비, 직업재활급여가 있다. 영업손실비용은 보험급여가 아니다."
     },
     {
       "no": 4,
@@ -103,9 +101,13 @@
       "question": "시설물의 안전 및 유지관리에 관한 특별법령상 안전등급별 정기안전점검 및 정밀안전진단 실시시기에 관한 사항으로 ( )에 알맞은 기준은?",
       "passage": [
         {
-          "type": "image",
-          "src": "/assets/exams/csafety/2022-04-24/q008-passage.png",
-          "alt": "8번 문제 A등급 시설물 점검 및 진단 주기 표"
+          "type": "table",
+          "caption": "A등급 시설물의 정기안전점검 및 정밀안전진단 실시시기",
+          "headers": ["구분", "실시 주기"],
+          "rows": [
+            ["정기안전점검", "( ㄱ )에 1회 이상"],
+            ["정밀안전진단", "( ㄴ )에 1회 이상"]
+          ]
         }
       ],
       "choices": ["ㄱ : 반기, ㄴ : 4년", "ㄱ : 반기, ㄴ : 6년", "ㄱ : 1년, ㄴ : 4년", "ㄱ : 1년, ㄴ : 6년"],
@@ -118,9 +120,8 @@
       "question": "다음의 재해사례에서 기인물과 가해물은?",
       "passage": [
         {
-          "type": "image",
-          "src": "/assets/exams/csafety/2022-04-24/q009-passage.png",
-          "alt": "9번 문제 재해사례 자료"
+          "type": "text",
+          "content": "작업자가 작업장을 걸어가던 중 바닥에 쌓여 있던 자재에 걸려 넘어지면서 머리를 바닥에 부딪쳐 사망하였다."
         }
       ],
       "choices": [
@@ -151,14 +152,13 @@
       "question": "건설업 산업안전보건관리비 계상 및 사용기준상 건설업 안전보건관리비로 사용할 수 있는 것을 모두 고른 것은?",
       "passage": [
         {
-          "type": "image",
-          "src": "/assets/exams/csafety/2022-04-24/q011-passage.png",
-          "alt": "11번 문제 ㄱ~ㅁ 보기 자료"
+          "type": "text",
+          "content": "ㄱ. 전담 안전ㆍ보건관리자의 인건비 및 업무수행 출장비\nㄴ. 안전시설비 및 개인보호구 구입비\nㄷ. 원활한 공사수행을 위한 가설시설, 장치, 도구, 자재 등의 비용\nㄹ. 안전보건진단비 및 안전보건교육비\nㅁ. 건설재해예방 전문지도기관의 기술지도비"
         }
       ],
       "choices": ["ㄴ, ㄷ, ㄹ", "ㄱ, ㄴ, ㄹ, ㅁ", "ㄱ, ㄷ, ㄹ, ㅁ", "ㄱ, ㄴ, ㄷ, ㅁ"],
       "answer": 2,
-      "explanation": "사용 가능 항목은 안전·보건관리자 임금 등, 안전시설비 등, 보호구 등, 안전보건진단비 등, 안전보건교육비 등, 근로자 건강장해예방비 등, 건설재해예방전문지도기관 기술지도비, 본사 전담조직 근로자 임금 등, 위험성평가 등에 따른 소요비용이다."
+      "explanation": "사용 가능 항목은 안전·보건관리자 임금 등, 안전시설비 등, 보호구 등, 안전보건진단비 등, 안전보건교육비 등, 근로자 건강장해예방비 등, 건설재해예방전문지도기관 기술지도비, 본사 전담조직 근로자 임금 등, 위험성평가 등에 따른 소요비용이다. 원활한 공사수행을 위한 가설시설·장치·도구·자재 비용은 사용 불가 내역이다."
     },
     {
       "no": 12,
@@ -166,9 +166,8 @@
       "question": "다음에서 설명하는 위험예지훈련 단계는?",
       "passage": [
         {
-          "type": "image",
-          "src": "/assets/exams/csafety/2022-04-24/q012-passage.png",
-          "alt": "12번 문제 설명 자료"
+          "type": "text",
+          "content": "작업 중 잠재된 위험요인을 파악한 후 그 가운데 위험의 포인트가 되는 가장 위험한 요인을 참가자 전원의 합의로 결정하고 지적확인하는 단계"
         }
       ],
       "choices": ["현상파악", "본질추구", "대책수립", "목표설정"],
@@ -225,9 +224,13 @@
       "question": "보호구 안전인증 고시상 안전대 충격흡수장치의 동하중 시험성능기준에 관한 사항으로 ( )에 알맞은 기준은?",
       "passage": [
         {
-          "type": "image",
-          "src": "/assets/exams/csafety/2022-04-24/q017-passage.png",
-          "alt": "17번 문제 동하중 시험성능기준 자료"
+          "type": "table",
+          "caption": "충격흡수장치의 동하중 시험성능기준",
+          "headers": ["구분", "기준"],
+          "rows": [
+            ["최대전달충격력", "( ㄱ )kN 이하"],
+            ["감속거리", "( ㄴ )mm 이하"]
+          ]
         }
       ],
       "choices": ["ㄱ : 6.0, ㄴ : 1000", "ㄱ : 6.0, ㄴ : 2000", "ㄱ : 8.0, ㄴ : 1000", "ㄱ : 8.0, ㄴ : 2000"],
@@ -240,9 +243,8 @@
       "question": "산업안전보건기준에 관한 규칙상 공기압축기 가동 전 점검사항을 모두 고른 것은? (단, 그 밖에 사항은 제외한다.)",
       "passage": [
         {
-          "type": "image",
-          "src": "/assets/exams/csafety/2022-04-24/q018-passage.png",
-          "alt": "18번 문제 ㄱ~ㄹ 보기 자료"
+          "type": "text",
+          "content": "ㄱ. 윤활유의 상태\nㄴ. 회전부의 덮개 또는 울\nㄷ. 압력방출장치의 기능\nㄹ. 언로드밸브(unloading valve)의 기능"
         }
       ],
       "choices": ["ㄷ, ㄹ", "ㄱ, ㄴ, ㄷ", "ㄱ, ㄴ, ㄹ", "ㄱ, ㄴ, ㄷ, ㄹ"],
@@ -347,7 +349,7 @@
       "subject": "산업심리 및 교육",
       "question": "생체리듬에 관한 설명 중 틀린 것은?",
       "choices": [
-        "감성적 리듬이 (-)로 최대가 되는 경우에만 위험일이라고 한다.",
+        "감각의 리듬이 (-)로 최대가 되는 경우에만 위험일이라고 한다.",
         "육체적 리듬은 \"P\"로 나타내며, 23일을 주기로 반복된다.",
         "감성적 리듬은 \"S\"로 나타내며, 28일을 주기로 반복된다.",
         "지성적 리듬은 \"I\"로 나타내며, 33일을 주기로 반복된다."
@@ -366,7 +368,7 @@
     {
       "no": 32,
       "subject": "산업심리 및 교육",
-      "question": "조직 구성원의 태도는 조직성과 밀접한 관계가 있는데 태도(attitude)의 3가지 구성요소에 포함되지 않는 것은?",
+      "question": "조직 구성원의 태도는 조직성과와 밀접한 관계가 있는데 태도(attitude)의 3가지 구성요소에 포함되지 않는 것은?",
       "choices": ["인지적 요소", "정서적 요소", "성격적 요소", "행동경향 요소"],
       "answer": 3,
       "explanation": "태도의 3가지 구성요소는 인지적 요소, 정서적 요소, 행동경향 요소이다."
@@ -377,9 +379,8 @@
       "question": "다음에서 설명하는 학습방법은?",
       "passage": [
         {
-          "type": "image",
-          "src": "/assets/exams/csafety/2022-04-24/q033-passage.png",
-          "alt": "33번 문제 설명 자료"
+          "type": "text",
+          "content": "학습자가 문제 장면에서 출발하여 스스로 문제를 해결하고, 그 결과를 평가 또는 반성하는 것으로 끝나는 학습방법"
         }
       ],
       "choices": [
@@ -468,9 +469,14 @@
       "question": "A작업의 평균에너지소비량이 다음과 같을 때, 60분간의 총 작업시간 내에 포함되어야 하는 휴식시간(분)은?",
       "passage": [
         {
-          "type": "image",
-          "src": "/assets/exams/csafety/2022-04-24/q041-passage.png",
-          "alt": "41번 문제 평균에너지소비량 자료"
+          "type": "table",
+          "caption": "A작업의 평균에너지소비량",
+          "headers": ["구분", "에너지소비량"],
+          "rows": [
+            ["휴식 중 에너지소비량", "1.5kcal/min"],
+            ["A작업 시 평균에너지소비량", "6kcal/min"],
+            ["기초대사를 포함한 작업에 대한 평균에너지소비량 상한", "5kcal/min"]
+          ]
         },
         {
           "type": "katex",
@@ -501,14 +507,13 @@
       "question": "근골격계질환 작업분석 및 평가 방법인 OWAS의 평가요소를 모두 고른 것은?",
       "passage": [
         {
-          "type": "image",
-          "src": "/assets/exams/csafety/2022-04-24/q043-passage.png",
-          "alt": "43번 문제 ㄱ~ㄹ 보기 자료"
+          "type": "text",
+          "content": "ㄱ. 상지\nㄴ. 무게(하중)\nㄷ. 하지\nㄹ. 허리"
         }
       ],
       "choices": ["ㄱ, ㄴ", "ㄱ, ㄷ, ㄹ", "ㄴ, ㄷ, ㄹ", "ㄱ, ㄴ, ㄷ, ㄹ"],
       "answer": 4,
-      "explanation": "OWAS(Ovako Working-posture Analysis System)의 평가요소는 허리, 팔, 다리, 하중/힘이다."
+      "explanation": "OWAS(Ovako Working-posture Analysis System)의 평가요소는 허리, 팔(상지), 다리(하지), 하중/힘이다."
     },
     {
       "no": 44,
@@ -535,7 +540,6 @@
       "no": 46,
       "subject": "인간공학 및 시스템안전공학",
       "question": "불(Bool) 대수의 정리를 나타낸 관계식 중 틀린 것은?",
-      "passage": [],
       "choices": [
         { "type": "katex", "content": "A \\cdot 0 = 0" },
         { "type": "katex", "content": "A + 1 = 1" },
@@ -543,27 +547,36 @@
         { "type": "katex", "content": "A(A+B) = A" }
       ],
       "answer": 3,
-      "explanation": "불 대수에서 A와 그 여집합의 곱은 0이므로 A·Ā = 0이 옳은 관계식이다.",
-      "explanationMedia": [
-        {
-          "type": "katex",
-          "content": "A \\cdot \\overline{A} = 0",
-          "display": true
-        }
-      ]
+      "explanation": "불 대수에서 A와 그 여집합의 곱은 0이므로 A·Ā = 0이 옳은 관계식이다."
     },
     {
       "no": 47,
       "subject": "인간공학 및 시스템안전공학",
       "question": "FTA(Fault Tree Analysis)에서 사용되는 사상 기호 중 통상의 작업이나 기계의 상태에서 재해의 발생 원인이 되는 요소가 있는 것은?",
       "choices": [
-        { "type": "image", "src": "/assets/exams/csafety/2022-04-24/q047-c1.png", "alt": "47번 선택지 1 기호" },
-        { "type": "image", "src": "/assets/exams/csafety/2022-04-24/q047-c2.png", "alt": "47번 선택지 2 기호" },
-        { "type": "image", "src": "/assets/exams/csafety/2022-04-24/q047-c3.png", "alt": "47번 선택지 3 기호" },
-        { "type": "image", "src": "/assets/exams/csafety/2022-04-24/q047-c4.png", "alt": "47번 선택지 4 기호" }
+        {
+          "type": "svg",
+          "alt": "47번 선택지 1 기호",
+          "content": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 80' width='120' height='80'><rect x='20' y='20' width='80' height='40' fill='white' stroke='#333' stroke-width='2'/></svg>"
+        },
+        {
+          "type": "svg",
+          "alt": "47번 선택지 2 기호",
+          "content": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 80' width='120' height='80'><circle cx='60' cy='40' r='26' fill='white' stroke='#333' stroke-width='2'/></svg>"
+        },
+        {
+          "type": "svg",
+          "alt": "47번 선택지 3 기호",
+          "content": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 80' width='120' height='80'><polygon points='60,14 100,40 60,66 20,40' fill='white' stroke='#333' stroke-width='2'/></svg>"
+        },
+        {
+          "type": "svg",
+          "alt": "47번 선택지 4 기호",
+          "content": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 80' width='120' height='80'><polygon points='60,14 100,36 100,66 20,66 20,36' fill='white' stroke='#333' stroke-width='2'/></svg>"
+        }
       ],
       "answer": 4,
-      "explanation": "결함사상은 한 개 이상의 입력에 의해 발생된 고장사상, 기본사상은 더 이상 전개할 수 없는 사건의 원인, 생략사상은 관련정보 미비로 더 개발될 수 없는 초기사상, 통상사상은 통상의 작업이나 기계의 상태에서 재해의 발생 원인이 되는 사상이다."
+      "explanation": "결함사상(직사각형)은 한 개 이상의 입력에 의해 발생된 고장사상, 기본사상(원)은 더 이상 전개할 수 없는 사건의 원인, 생략사상(다이아몬드)은 관련정보 미비로 더 개발될 수 없는 초기사상, 통상사상(집 모양)은 통상의 작업이나 기계의 상태에서 재해의 발생 원인이 되는 사상이다."
     },
     {
       "no": 48,
@@ -623,9 +636,8 @@
       "question": "1 sone에 관한 설명으로 ( )에 알맞은 수치는?",
       "passage": [
         {
-          "type": "image",
-          "src": "/assets/exams/csafety/2022-04-24/q052-passage.png",
-          "alt": "52번 문제 지문 자료"
+          "type": "text",
+          "content": "1sone이란 ( ㄱ )Hz 순음의 음압수준 ( ㄴ )dB의 크기를 말한다."
         }
       ],
       "choices": ["ㄱ : 1000, ㄴ : 1", "ㄱ : 4000, ㄴ : 1", "ㄱ : 1000, ㄴ : 40", "ㄱ : 4000, ㄴ : 40"],
@@ -677,9 +689,8 @@
       "question": "다음에서 설명하는 용어는?",
       "passage": [
         {
-          "type": "image",
-          "src": "/assets/exams/csafety/2022-04-24/q056-passage.png",
-          "alt": "56번 문제 설명 자료"
+          "type": "text",
+          "content": "유해ㆍ위험요인을 파악하고 해당 유해ㆍ위험요인에 의한 부상 또는 질병의 발생 가능성(빈도)과 중대성(강도)을 추정ㆍ결정하고 감소대책을 수립하여 실행하는 일련의 과정"
         }
       ],
       "choices": ["위험성 결정", "위험성 평가", "위험성 추정", "유해ㆍ위험요인 파악"],
@@ -723,14 +734,14 @@
       "question": "그림과 같은 FT도에 대한 최소 컷셋(minimal cut sets)으로 옳은 것은? (단, Fussell의 알고리즘을 따른다.)",
       "passage": [
         {
-          "type": "image",
-          "src": "/assets/exams/csafety/2022-04-24/q060-passage.png",
-          "alt": "60번 문제 FT도"
+          "type": "svg",
+          "caption": "FT도",
+          "content": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 330' width='460' height='330'><rect x='195' y='10' width='70' height='34' fill='white' stroke='#333' stroke-width='2'/><text x='230' y='33' text-anchor='middle' font-family='sans-serif' font-size='15' font-weight='bold'>T</text><line x1='230' y1='44' x2='230' y2='62' stroke='#333' stroke-width='2'/><path d='M 196 96 L 196 78 A 34 34 0 0 1 264 78 L 264 96 Z' fill='white' stroke='#333' stroke-width='2'/><line x1='196' y1='96' x2='120' y2='130' stroke='#333' stroke-width='2'/><line x1='264' y1='96' x2='340' y2='130' stroke='#333' stroke-width='2'/><rect x='85' y='130' width='70' height='32' fill='white' stroke='#333' stroke-width='2'/><text x='120' y='152' text-anchor='middle' font-family='sans-serif' font-size='14'>A</text><rect x='305' y='130' width='70' height='32' fill='white' stroke='#333' stroke-width='2'/><text x='340' y='152' text-anchor='middle' font-family='sans-serif' font-size='14'>B</text><line x1='120' y1='162' x2='120' y2='180' stroke='#333' stroke-width='2'/><path d='M 88 214 Q 120 176 152 214 Q 120 198 88 214 Z' fill='white' stroke='#333' stroke-width='2'/><line x1='340' y1='162' x2='340' y2='180' stroke='#333' stroke-width='2'/><path d='M 306 214 L 306 198 A 34 34 0 0 1 374 198 L 374 214 Z' fill='white' stroke='#333' stroke-width='2'/><line x1='104' y1='214' x2='60' y2='250' stroke='#333' stroke-width='2'/><line x1='136' y1='214' x2='180' y2='250' stroke='#333' stroke-width='2'/><line x1='324' y1='214' x2='280' y2='250' stroke='#333' stroke-width='2'/><line x1='356' y1='214' x2='400' y2='250' stroke='#333' stroke-width='2'/><circle cx='60' cy='275' r='24' fill='white' stroke='#333' stroke-width='2'/><text x='60' y='281' text-anchor='middle' font-family='sans-serif' font-size='14'>1</text><circle cx='180' cy='275' r='24' fill='white' stroke='#333' stroke-width='2'/><text x='180' y='281' text-anchor='middle' font-family='sans-serif' font-size='14'>2</text><circle cx='280' cy='275' r='24' fill='white' stroke='#333' stroke-width='2'/><text x='280' y='281' text-anchor='middle' font-family='sans-serif' font-size='14'>1</text><circle cx='400' cy='275' r='24' fill='white' stroke='#333' stroke-width='2'/><text x='400' y='281' text-anchor='middle' font-family='sans-serif' font-size='14'>3</text></svg>"
         }
       ],
       "choices": ["{1, 2}", "{1, 3}", "{2, 3}", "{1, 2, 3}"],
       "answer": 2,
-      "explanation": "A는 OR 게이트로 둘 중 하나만 입력되면 되고, B는 AND 게이트로 둘 모두 입력되어야 한다. B를 위해 X1, X3가 모두 입력되면 A도 X1에 의해 발생하므로 최소 컷셋은 {1, 3}이다."
+      "explanation": "A는 OR 게이트로 둘 중 하나만 입력되면 되고, B는 AND 게이트로 둘 모두 입력되어야 한다. B를 위해 1, 3이 모두 입력되면 A도 1에 의해 발생하므로 최소 컷셋은 {1, 3}이다."
     },
     {
       "no": 61,
