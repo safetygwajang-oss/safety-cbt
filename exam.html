@@ -6,6 +6,17 @@
   <title>시험 진행 중 | 포스코퓨처엠 CBT</title>
   <link rel="stylesheet" href="css/style.css">
 
+  <!-- ★ 중복기출 URL 직접 접근 차단 -->
+  <script>
+  (function () {
+    var id = decodeURIComponent(new URLSearchParams(location.search).get('exam') || '');
+    if (/중복기출|2021-2026|2021~2026/.test(id) && sessionStorage.getItem('dup-access-ok') !== '1') {
+      alert('중복기출은 입장코드 인증 후 이용할 수 있습니다.');
+      location.replace('index.html');
+    }
+  })();
+  </script>
+
   <!-- KaTeX (수식 렌더링) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
 
@@ -140,15 +151,14 @@
   <header class="exam-header">
     <div class="exam-header-inner">
       <h1 id="exam-title" class="exam-title">시험 로딩 중...</h1>
-    <div class="exam-header-right">
-  <span class="timer" id="timer">00:00:00</span>
-  <button id="mode-toggle" class="btn btn-outline" title="학습모드에서는 답 선택 즉시 해설 표시">🎯 실전모드</button>
-  <button id="reset-btn" class="btn btn-outline" title="답안·진행상황 모두 지우기">↺ 초기화</button>
-  <button id="save-btn" class="btn btn-outline" title="현재 진행상황을 저장합니다">💾 저장</button>
-  <button id="home-btn" class="btn btn-outline" title="저장 후 홈으로 이동">🏠 홈</button>
-  <button id="submit-btn" class="btn btn-primary">제출하기</button>
-</div>
-
+      <div class="exam-header-right">
+        <span class="timer" id="timer">00:00:00</span>
+        <button id="mode-toggle" class="btn btn-outline" title="학습모드에서는 답 선택 즉시 해설 표시">🎯 실전모드</button>
+        <button id="reset-btn" class="btn btn-outline" title="답안·진행상황 모두 지우기">↺ 초기화</button>
+        <button id="save-btn" class="btn btn-outline" title="현재 진행상황을 저장합니다">💾 저장</button>
+        <button id="home-btn" class="btn btn-outline" title="저장 후 홈으로 이동">🏠 홈</button>
+        <button id="submit-btn" class="btn btn-primary">제출하기</button>
+      </div>
     </div>
     <!-- 진행률 바 -->
     <div class="progress-bar">
@@ -195,6 +205,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
 
   <!-- 앱 스크립트 -->
+  <script src="js/protect.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/passage-renderer.js"></script>
   <script src="js/exam.js"></script>
