@@ -1,6 +1,6 @@
 /* ============================================
    포스코퓨처엠 CBT - 홈 대시보드
-   main.js
+   main.js (v2 - 탭 분리 + 중복기출 입장코드)
    ============================================ */
 
 (function () {
@@ -8,13 +8,18 @@
 
   const $ = (id) => document.getElementById(id);
 
-  /* 🔑 중복기출 입장코드 — 이 값만 바꾸세요 */
+  /* ============================================
+     🔑 중복기출 입장코드 — 아래 값만 바꾸세요
+     ============================================ */
   const ACCESS_CODE = 'posco2026';
-  const CODE_KEY = 'dup-access-ok';
-  /* 유지 방식: sessionStorage = 브라우저 탭 닫으면 재입력
-     계속 유지하려면 아래를 localStorage 로 변경 */
-  const codeStore = sessionStorage;
 
+  /* 인증 유지 방식
+     sessionStorage → 브라우저 탭을 닫으면 다시 입력
+     localStorage   → 계속 기억 (바꾸고 싶으면 아래 단어만 교체) */
+  const codeStore = sessionStorage;
+  const CODE_KEY = 'dup-access-ok';
+
+  // data/index.json 로드 실패 시 임시 목록
   const FALLBACK_EXAMS = [
     {
       id: '2022-04-24',
@@ -38,7 +43,7 @@
     bindCodeModal();
   }
 
-  /* ===== 중복기출 판별 ===== */
+  /* ===== 중복기출 여부 판별 ===== */
   function isDup(exam) {
     const key = `${exam.id || ''} ${exam.title || ''}`;
     return /중복기출|2021-2026|2021~2026/.test(key);
@@ -149,7 +154,7 @@
     });
   }
 
-  // ===== 목록 로드 & 두 그룹으로 분리 =====
+  // ===== 목록 로드 후 두 그룹으로 분리 =====
   async function renderExamList() {
     let exams = [];
 
@@ -169,12 +174,13 @@
 
     if (exams.length === 0) exams = FALLBACK_EXAMS;
 
-    // 기록 조회
+    // 응시 기록
     const sessions = window.Storage && window.Storage.getAllSessions
       ? window.Storage.getAllSessions()
       : {};
     const attempted = new Set(Object.values(sessions).map(s => s.examId));
 
+    // 진행중 기록
     const inProgress = new Set();
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -191,13 +197,12 @@
     const dupExams = exams.filter(isDup);
     const roundExams = exams.filter(e => !isDup(e));
 
-    // 회차: 최신순
+    // 회차는 최신순 정렬
     roundExams.sort((a, b) => (b.id || '').localeCompare(a.id || ''));
 
     paint($('exam-list'), roundExams, attempted, inProgress, '등록된 회차가 없습니다.');
     paint($('dup-list'), dupExams, attempted, inProgress, '등록된 중복기출이 없습니다.');
 
-    // 이미 인증된 상태면 잠금 해제
     if (isUnlocked()) unlockDup();
   }
 
@@ -233,6 +238,7 @@
         <div style="margin-top:8px;">${badges}</div>
         ${subjectsHtml}
       `;
+
       card.addEventListener('click', () => {
         if (isDup(exam) && !isUnlocked()) {
           openCodeModal();
@@ -240,11 +246,12 @@
         }
         window.location.href = `exam.html?exam=${encodeURIComponent(exam.id)}`;
       });
+
       container.appendChild(card);
     });
   }
 
-  // ===== 탭 ===== 
+  // ===== 탭 전환 =====
   function bindTabs() {
     document.querySelectorAll('.main-tab').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -288,15 +295,17 @@
     };
 
     $('code-submit-btn').addEventListener('click', submit);
-    $('code-input').addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+    $('code-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submit();
+    });
     $('open-code-btn').addEventListener('click', openCodeModal);
     $('code-cancel-btn').addEventListener('click', () => $('code-modal').classList.remove('show'));
-    $('code-modal').addEventListener('click', e => {
+    $('code-modal').addEventListener('click', (e) => {
       if (e.target === $('code-modal')) $('code-modal').classList.remove('show');
     });
   }
 
-  // ===== 기존 이벤트 =====
+  // ===== 설정 =====
   function bindEvents() {
     $('settings-btn').addEventListener('click', () => $('settings-modal').classList.add('show'));
     $('close-settings-btn').addEventListener('click', () => $('settings-modal').classList.remove('show'));
@@ -309,6 +318,7 @@
       if (!confirm('한 번 더 확인합니다.\n\n정말 모든 데이터를 삭제할까요?')) return;
 
       if (window.Storage && window.Storage.clearAll) window.Storage.clearAll();
+
       const keysToRemove = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -321,6 +331,7 @@
     });
   }
 
+  // ===== 유틸 =====
   function escapeHtml(str) {
     if (str == null) return '';
     return String(str)
