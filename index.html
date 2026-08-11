@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>포스코퓨처엠 안전관리 CBT</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/custom.css">
 </head>
 <body>
   <!-- 상단 바 -->
@@ -19,11 +20,13 @@
   </header>
 
   <main class="container">
+    <!-- 히어로 -->
     <section class="hero">
       <h2>포스코퓨처엠 안전관리 CBT</h2>
       <p>실전 대비 문제풀이 · 오답 재도전 · 북마크 학습</p>
     </section>
 
+    <!-- 통계 카드 -->
     <section class="stats-row">
       <div class="stat-card">
         <div class="label">📝 총 응시</div>
@@ -39,6 +42,7 @@
       </div>
     </section>
 
+    <!-- 북마크 모아보기 -->
     <section class="bookmark-section" id="bookmark-section" style="display:none;">
       <h3 style="color:var(--secondary); display:flex; align-items:center; gap:8px;">
         ⭐ 북마크한 문제
@@ -47,6 +51,7 @@
       <div class="bookmark-list" id="bookmark-list"></div>
     </section>
 
+    <!-- 최근 응시 결과 -->
     <section id="recent-section" style="display:none;">
       <h3 class="section-title">📜 최근 응시 결과</h3>
       <div class="exam-grid" id="recent-list"></div>
@@ -55,8 +60,8 @@
     <!-- ===== 탭: 회차 선택 / 중복기출 ===== -->
     <section>
       <div class="main-tabs">
-        <button class="main-tab active" data-tab="rounds">📅 회차 선택</button>
-        <button class="main-tab" data-tab="dup">🔒 중복기출</button>
+        <button class="main-tab active" data-tab="rounds" type="button">📅 회차 선택</button>
+        <button class="main-tab" data-tab="dup" type="button">🔒 중복기출</button>
       </div>
 
       <!-- 회차 선택 패널 -->
@@ -70,8 +75,8 @@
       <div class="tab-panel" id="panel-dup" style="display:none;">
         <div class="lock-box" id="dup-locked">
           <div class="lock-icon">🔒</div>
-          <p class="lock-text">중복기출은 <b>입장코드</b> 입력 후 이용할 수 있습니다.</p>
-          <button id="open-code-btn" class="btn-primary">입장코드 입력</button>
+          <p class="lock-text">중복기출은 <b>입장코드</b>를 입력해야 이용할 수 있습니다.</p>
+          <button id="open-code-btn" class="btn-primary" type="button">입장코드 입력</button>
         </div>
         <div class="exam-grid" id="dup-list" style="display:none;"></div>
       </div>
@@ -85,8 +90,8 @@
       <input type="password" id="code-input" placeholder="입장코드를 입력하세요" autocomplete="off">
       <div class="code-error" id="code-error" style="display:none;">입장코드가 올바르지 않습니다.</div>
       <div class="actions">
-        <button id="code-submit-btn" class="btn-primary">입장</button>
-        <button id="code-cancel-btn" class="btn">취소</button>
+        <button id="code-submit-btn" class="btn-primary" type="button">입장</button>
+        <button id="code-cancel-btn" class="btn" type="button">취소</button>
       </div>
     </div>
   </div>
@@ -100,8 +105,8 @@
         이 작업은 되돌릴 수 없습니다.
       </div>
       <div class="actions">
-        <button id="clear-data-btn" class="btn-danger">🗑️ 전체 데이터 초기화</button>
-        <button id="close-settings-btn" class="btn">닫기</button>
+        <button id="clear-data-btn" class="btn-danger" type="button">🗑️ 전체 데이터 초기화</button>
+        <button id="close-settings-btn" class="btn" type="button">닫기</button>
       </div>
     </div>
   </div>
