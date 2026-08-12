@@ -1,5 +1,5 @@
 /* ============================================
-   포스코퓨처엠 CBT - Passage 렌더러
+   안전과장 CBT - Passage 렌더러
    passage-renderer.js
    
    지원 타입:
