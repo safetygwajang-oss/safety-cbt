@@ -1,6 +1,6 @@
 /* ============================================
    포스코퓨처엠 CBT - 홈 대시보드
-   main.js (v3 - 자격증별 탭 자동 분류 + 중복기출 입장코드)
+   main.js (v4 - 자격증별 탭 분류 + 문항수/시험시간 자동 보정)
    ============================================ */
 
 (function () {
@@ -11,7 +11,7 @@
   /* ============================================
      🔑 중복기출 입장코드 — 아래 값만 바꾸세요
      ============================================ */
-  const ACCESS_CODE = 'posco2026';
+  const ACCESS_CODE = '1221';
 
   /* 인증 유지 방식
      sessionStorage → 탭 닫으면 다시 입력
@@ -55,6 +55,45 @@
     if (/산업안전기사/.test(text)) return 'safety';
     if (/^\d{4}-\d{2}-\d{2}$/.test(String(exam.id || '').trim())) return 'safety';
     return 'etc';
+  }
+
+  /* ============================================
+     ★ 자격증별 문항수 / 시험시간 보정
+     (data/index.json이 잘못돼 있어도 화면은 정확히 표시)
+     ============================================ */
+  function fixMeta(exam) {
+    const text = `${exam.id || ''} ${exam.title || ''}`;
+    const out = Object.assign({}, exam);
+
+    // 중복기출 모음집 : 문항수는 원본 유지, 시간만 문항수 기준(문항×1.5분)
+    if (/중복기출/.test(text)) {
+      if (out.questions) out.duration = Math.max(30, Math.ceil(out.questions * 1.5));
+      return out;
+    }
+
+    // 위험물기능장 : 60문항 / 60분 / 과목 구분 없음
+    if (/위험물기능장/.test(text)) {
+      out.questions = 60;
+      out.duration = 60;
+      out.subjects = null;   // "위험물안전관리 · 공업경영" 표기 숨김
+      return out;
+    }
+
+    // 산업위생관리기사 : 100문항(5과목) / 150분
+    if (/산업위생관리기사/.test(text)) {
+      out.questions = 100;
+      out.duration = 150;
+      return out;
+    }
+
+    // 산업안전기사 · 건설안전기사 : 120문항(6과목) / 150분
+    if (/건설안전기사|산업안전기사/.test(text)) {
+      out.questions = 120;
+      out.duration = 150;
+      return out;
+    }
+
+    return out;
   }
 
   /* 정렬용 날짜 키 (최신순) */
@@ -333,7 +372,9 @@
       return;
     }
 
-    list.forEach(exam => {
+    list.forEach(raw => {
+      const exam = fixMeta(raw);   // ★ 문항수 / 시험시간 보정
+
       const card = document.createElement('div');
       card.className = 'exam-card';
 
@@ -345,8 +386,11 @@
 
       let subjectsHtml = '';
       if (exam.subjects && exam.subjects.length > 0) {
-        const names = exam.subjects.map(s => (typeof s === 'string' ? s : s.name)).join(' · ');
-        subjectsHtml = `<div class="exam-subjects">${escapeHtml(names)}</div>`;
+        const names = exam.subjects
+          .map(s => (typeof s === 'string' ? s : s.name))
+          .filter(n => n && !/임의구분/.test(n))
+          .join(' · ');
+        if (names) subjectsHtml = `<div class="exam-subjects">${escapeHtml(names)}</div>`;
       }
 
       const dateText = exam.date ? `📅 ${escapeHtml(exam.date)}` : '';
