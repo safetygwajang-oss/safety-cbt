@@ -1,6 +1,6 @@
 /* ============================================
-   안전과장 CBT - 홈 대시보드
-   main.js (v2 - 탭 분리 + 중복기출 입장코드)
+   포스코퓨처엠 CBT - 홈 대시보드
+   main.js (v3 - 자격증별 탭 자동 분류 + 중복기출 입장코드)
    ============================================ */
 
 (function () {
@@ -11,24 +11,24 @@
   /* ============================================
      🔑 중복기출 입장코드 — 아래 값만 바꾸세요
      ============================================ */
-  const ACCESS_CODE = '1221';
+  const ACCESS_CODE = 'posco2026';
 
   /* 인증 유지 방식
-     sessionStorage → 브라우저 탭을 닫으면 다시 입력
-     localStorage   → 계속 기억 (바꾸고 싶으면 아래 단어만 교체) */
+     sessionStorage → 탭 닫으면 다시 입력
+     localStorage   → 계속 기억 */
   const codeStore = sessionStorage;
   const CODE_KEY = 'dup-access-ok';
 
-  // data/index.json 로드 실패 시 임시 목록
-  const FALLBACK_EXAMS = [
-    {
-      id: '2022-04-24',
-      title: '산업안전기사 필기',
-      date: '2022년 4월 24일',
-      questions: 120,
-      duration: 150,
-      subjects: ['안전관리론', '인간공학', '기계', '전기', '화학', '건설']
-    }
+  /* ============================================
+     탭 정의 (순서 = 화면 표시 순서)
+     ============================================ */
+  const CATEGORIES = [
+    { key: 'safety',       label: '🏭 산업안전기사' },
+    { key: 'construction', label: '🏗 건설안전기사' },
+    { key: 'hygiene',      label: '🩺 산업위생관리기사' },
+    { key: 'hazmat',       label: '🧪 위험물기능장' },
+    { key: 'dup',          label: '중복기출 모음집', locked: true, alwaysShow: true },
+    { key: 'etc',          label: '📂 기타' }
   ];
 
   document.addEventListener('DOMContentLoaded', init);
@@ -39,14 +39,33 @@
     renderRecent();
     await renderExamList();
     bindEvents();
-    bindTabs();
     bindCodeModal();
   }
 
-  /* ===== 중복기출 여부 판별 ===== */
-  function isDup(exam) {
-    const key = `${exam.id || ''} ${exam.title || ''}`;
-    return /중복기출|2021-2026|2021~2026/.test(key);
+  /* ============================================
+     분류 함수
+     ============================================ */
+  function classify(exam) {
+    const text = `${exam.id || ''} ${exam.title || ''}`;
+
+    if (/중복기출/.test(text)) return 'dup';
+    if (/건설안전기사/.test(text)) return 'construction';
+    if (/산업위생관리기사|산업위생/.test(text)) return 'hygiene';
+    if (/위험물기능장|위험물/.test(text)) return 'hazmat';
+    if (/산업안전기사/.test(text)) return 'safety';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(String(exam.id || '').trim())) return 'safety';
+    return 'etc';
+  }
+
+  /* 정렬용 날짜 키 (최신순) */
+  function getDateKey(exam) {
+    const src = `${exam.id || ''} ${exam.date || ''}`;
+    const m = src.match(/(\d{4})[-.\s]?(\d{1,2})[-.\s]?(\d{1,2})/);
+    if (m) {
+      return m[1] + String(m[2]).padStart(2, '0') + String(m[3]).padStart(2, '0');
+    }
+    const y = src.match(/(\d{4})/);
+    return y ? y[1] + '0000' : '00000000';
   }
 
   function isUnlocked() {
@@ -154,7 +173,32 @@
     });
   }
 
-  // ===== 목록 로드 후 두 그룹으로 분리 =====
+  /* ============================================
+     탭 껍데기 확보 (index.html 수정 불필요)
+     ============================================ */
+  function buildShell() {
+    let tabsEl = document.querySelector('.main-tabs');
+
+    if (!tabsEl) {
+      const section = document.createElement('section');
+      tabsEl = document.createElement('div');
+      tabsEl.className = 'main-tabs';
+      section.appendChild(tabsEl);
+      document.querySelector('main.container').appendChild(section);
+    }
+
+    const host = tabsEl.parentElement;
+
+    // 기존 패널(구버전 HTML) 제거
+    host.querySelectorAll('.tab-panel').forEach(p => p.remove());
+    tabsEl.innerHTML = '';
+
+    return { tabsEl, host };
+  }
+
+  /* ============================================
+     회차 목록 로드 + 탭 생성
+     ============================================ */
   async function renderExamList() {
     let exams = [];
 
@@ -169,10 +213,8 @@
         }
       }
     } catch (e) {
-      console.log('data/index.json 로드 실패, fallback 사용:', e);
+      console.log('data/index.json 로드 실패:', e);
     }
-
-    if (exams.length === 0) exams = FALLBACK_EXAMS;
 
     // 응시 기록
     const sessions = window.Storage && window.Storage.getAllSessions
@@ -193,24 +235,101 @@
       }
     }
 
-    // 그룹 분리
-    const dupExams = exams.filter(isDup);
-    const roundExams = exams.filter(e => !isDup(e));
+    // 그룹핑
+    const groups = {};
+    CATEGORIES.forEach(c => { groups[c.key] = []; });
+    exams.forEach(ex => { groups[classify(ex)].push(ex); });
 
-    // 회차는 최신순 정렬
-    roundExams.sort((a, b) => (b.id || '').localeCompare(a.id || ''));
+    // 정렬
+    Object.keys(groups).forEach(key => {
+      if (key === 'dup') {
+        groups[key].sort((a, b) => String(a.title || a.id).localeCompare(String(b.title || b.id)));
+      } else {
+        groups[key].sort((a, b) => getDateKey(b).localeCompare(getDateKey(a)));
+      }
+    });
 
-    paint($('exam-list'), roundExams, attempted, inProgress, '등록된 회차가 없습니다.');
-    paint($('dup-list'), dupExams, attempted, inProgress, '등록된 중복기출이 없습니다.');
+    // 탭/패널 생성
+    const { tabsEl, host } = buildShell();
+    let firstKey = null;
 
+    CATEGORIES.forEach(cat => {
+      const items = groups[cat.key];
+      if (items.length === 0 && !cat.alwaysShow) return;
+
+      // 탭 버튼
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'main-tab';
+      btn.dataset.tab = cat.key;
+      btn.innerHTML = `${cat.locked && !isUnlocked() ? '🔒 ' : (cat.locked ? '🔓 ' : '')}${cat.label}<span class="tab-cnt">${items.length}</span>`;
+      tabsEl.appendChild(btn);
+
+      // 패널
+      const panel = document.createElement('div');
+      panel.className = 'tab-panel';
+      panel.id = `panel-${cat.key}`;
+      panel.style.display = 'none';
+
+      if (cat.locked) {
+        const lock = document.createElement('div');
+        lock.className = 'lock-box';
+        lock.id = 'dup-locked';
+        lock.innerHTML = `
+          <div class="lock-icon">🔒</div>
+          <p class="lock-text">중복기출 모음집은 <b>입장코드</b>를 입력해야 이용할 수 있습니다.</p>
+          <button class="btn-primary" id="open-code-btn" type="button">입장코드 입력</button>
+        `;
+        panel.appendChild(lock);
+      }
+
+      const grid = document.createElement('div');
+      grid.className = 'exam-grid';
+      grid.id = `list-${cat.key}`;
+      if (cat.locked) grid.style.display = 'none';
+      panel.appendChild(grid);
+
+      host.appendChild(panel);
+
+      paint(grid, items, attempted, inProgress);
+
+      if (!firstKey) firstKey = cat.key;
+    });
+
+    // 첫 탭 활성화
+    if (firstKey) activateTab(firstKey);
+
+    // 탭 클릭
+    tabsEl.querySelectorAll('.main-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activateTab(btn.dataset.tab);
+        if (btn.dataset.tab === 'dup' && !isUnlocked()) openCodeModal();
+      });
+    });
+
+    // 잠금 해제 버튼
+    const openBtn = $('open-code-btn');
+    if (openBtn) openBtn.addEventListener('click', openCodeModal);
+
+    // 이미 인증된 상태면 해제
     if (isUnlocked()) unlockDup();
   }
 
-  function paint(container, list, attempted, inProgress, emptyMsg) {
+  function activateTab(key) {
+    document.querySelectorAll('.main-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.tab === key);
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.style.display = (p.id === `panel-${key}`) ? 'block' : 'none';
+    });
+  }
+
+  /* ===== 카드 그리기 ===== */
+  function paint(container, list, attempted, inProgress) {
     container.innerHTML = '';
 
     if (list.length === 0) {
-      container.innerHTML = `<div style="grid-column:1/-1; padding:30px; text-align:center; color:var(--gray-500);">📂 ${emptyMsg}</div>`;
+      container.innerHTML = `<div style="grid-column:1/-1; padding:30px; text-align:center; color:var(--gray-500);">📂 등록된 회차가 없습니다.</div>`;
       return;
     }
 
@@ -227,10 +346,11 @@
       let subjectsHtml = '';
       if (exam.subjects && exam.subjects.length > 0) {
         const names = exam.subjects.map(s => (typeof s === 'string' ? s : s.name)).join(' · ');
-        subjectsHtml = `<div style="font-size:0.8rem; color:var(--gray-500); margin-top:8px; line-height:1.4;">${escapeHtml(names)}</div>`;
+        subjectsHtml = `<div class="exam-subjects">${escapeHtml(names)}</div>`;
       }
 
       const dateText = exam.date ? `📅 ${escapeHtml(exam.date)}` : '';
+      const isDup = classify(exam) === 'dup';
 
       card.innerHTML = `
         <h3>${escapeHtml(exam.title || exam.id)}</h3>
@@ -240,7 +360,7 @@
       `;
 
       card.addEventListener('click', () => {
-        if (isDup(exam) && !isUnlocked()) {
+        if (isDup && !isUnlocked()) {
           openCodeModal();
           return;
         }
@@ -251,23 +371,7 @@
     });
   }
 
-  // ===== 탭 전환 =====
-  function bindTabs() {
-    document.querySelectorAll('.main-tab').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.main-tab').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        const tab = btn.dataset.tab;
-        $('panel-rounds').style.display = (tab === 'rounds') ? 'block' : 'none';
-        $('panel-dup').style.display = (tab === 'dup') ? 'block' : 'none';
-
-        if (tab === 'dup' && !isUnlocked()) openCodeModal();
-      });
-    });
-  }
-
-  // ===== 입장코드 =====
+  /* ===== 입장코드 ===== */
   function openCodeModal() {
     $('code-error').style.display = 'none';
     $('code-input').value = '';
@@ -277,10 +381,13 @@
 
   function unlockDup() {
     codeStore.setItem(CODE_KEY, '1');
-    $('dup-locked').style.display = 'none';
-    $('dup-list').style.display = 'grid';
+    const lock = $('dup-locked');
+    const grid = $('list-dup');
+    if (lock) lock.style.display = 'none';
+    if (grid) grid.style.display = 'grid';
+
     const tab = document.querySelector('.main-tab[data-tab="dup"]');
-    if (tab) tab.textContent = '🔓 중복기출';
+    if (tab) tab.innerHTML = tab.innerHTML.replace('🔒 ', '🔓 ');
   }
 
   function bindCodeModal() {
@@ -288,6 +395,7 @@
       if ($('code-input').value.trim() === ACCESS_CODE) {
         $('code-modal').classList.remove('show');
         unlockDup();
+        activateTab('dup');
       } else {
         $('code-error').style.display = 'block';
         $('code-input').select();
@@ -298,14 +406,13 @@
     $('code-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') submit();
     });
-    $('open-code-btn').addEventListener('click', openCodeModal);
     $('code-cancel-btn').addEventListener('click', () => $('code-modal').classList.remove('show'));
     $('code-modal').addEventListener('click', (e) => {
       if (e.target === $('code-modal')) $('code-modal').classList.remove('show');
     });
   }
 
-  // ===== 설정 =====
+  /* ===== 설정 ===== */
   function bindEvents() {
     $('settings-btn').addEventListener('click', () => $('settings-modal').classList.add('show'));
     $('close-settings-btn').addEventListener('click', () => $('settings-modal').classList.remove('show'));
@@ -331,7 +438,7 @@
     });
   }
 
-  // ===== 유틸 =====
+  /* ===== 유틸 ===== */
   function escapeHtml(str) {
     if (str == null) return '';
     return String(str)
