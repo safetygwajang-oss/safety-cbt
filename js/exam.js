@@ -1,6 +1,6 @@
 /* ============================================
    포스코퓨처엠 CBT - 시험 진행 로직
-   exam.js (v3 - 저장/홈 버튼 + 자동저장 + passage-renderer)
+   exam.js (v4 - 자격증별 시험시간 자동 적용)
    ============================================ */
 
 (function () {
@@ -21,15 +21,14 @@
     startTime: null,
     timerInterval: null,
     autoSaveInterval: null,
-    timeLimit: 3 * 60 * 60,
+    durationMin: null,
+    timeLimit: 150 * 60,
     submitted: false,
   };
 
-  // ===== DOM 요소 =====
   const $ = (id) => document.getElementById(id);
   const els = {};
 
-  // ===== 초기화 =====
   document.addEventListener('DOMContentLoaded', init);
 
   async function init() {
@@ -76,11 +75,11 @@
       return;
     }
 
+    applyTimeLimit();     // ★ 자격증별 시험시간 결정
     restoreProgress();
     bindEvents();
     updateTitle();
 
-    // jumpTo 파라미터 처리
     const jumpTo = params.get('jumpTo');
     if (jumpTo) {
       const targetNo = parseInt(jumpTo, 10);
@@ -94,7 +93,6 @@
     startTimer();
     startAutoSave();
 
-    // KaTeX가 늦게 로드될 수 있으니, 로드 완료 시 한 번 다시 렌더
     ensureKatexReady().then(() => {
       renderPage();
     });
@@ -102,7 +100,37 @@
     window.addEventListener('beforeunload', beforeUnloadHandler);
   }
 
-  // ===== KaTeX 로드 대기 (defer 스크립트 대비) =====
+  /* ============================================
+     ★ 자격증별 시험시간 자동 결정
+     ============================================ */
+  function applyTimeLimit() {
+    const text = `${state.examId || ''} ${state.examTitle || ''}`;
+    const count = state.questions.length;
+    let min;
+
+    if (state.durationMin && state.durationMin > 0) {
+      // JSON 파일에 duration(분)이 있으면 그것을 우선 사용
+      min = state.durationMin;
+    } else if (state.mode === 'wrong') {
+      min = Math.max(10, Math.ceil(count * 1.5));
+    } else if (/중복기출/.test(text)) {
+      min = Math.max(30, Math.ceil(count * 1.5));
+    } else if (/위험물기능장/.test(text)) {
+      min = 60;
+    } else if (/산업위생관리기사/.test(text)) {
+      min = 150;
+    } else {
+      min = 150;   // 산업안전기사 · 건설안전기사
+    }
+
+    // 오답 재도전은 항상 문항수 기준으로 축소
+    if (state.mode === 'wrong') {
+      min = Math.max(10, Math.ceil(count * 1.5));
+    }
+
+    state.timeLimit = min * 60;
+  }
+
   function ensureKatexReady() {
     return new Promise(resolve => {
       if (window.katex) return resolve();
@@ -117,7 +145,6 @@
     });
   }
 
-  // ===== 자동 저장 (30초마다) =====
   function startAutoSave() {
     state.autoSaveInterval = setInterval(() => {
       if (!state.submitted && Object.keys(state.answers).length > 0) {
@@ -134,6 +161,7 @@
 
     state.examTitle = data.title || state.examId;
     state.questions = Array.isArray(data.questions) ? data.questions : [];
+    state.durationMin = Number(data.duration || data.timeLimitMin || 0) || null;
 
     state.questions.forEach((q, i) => {
       if (typeof q.no !== 'number') q.no = i + 1;
@@ -178,6 +206,13 @@
       state.perPage = saved.perPage || 2;
       state.currentPage = saved.currentPage || 1;
       state.startTime = saved.startTime || Date.now();
+
+      // ★ 저장된 시각이 너무 오래돼 즉시 자동제출되는 것 방지
+      const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+      if (elapsed >= state.timeLimit) {
+        state.startTime = Date.now();
+      }
+
       if (els.perPage) els.perPage.value = state.perPage;
     } catch (e) {
       state.startTime = Date.now();
@@ -283,7 +318,6 @@
       showToast('↺ 초기화되었습니다.');
     });
 
-    // 💾 저장하기 (현재 페이지에 머무름)
     if (els.saveBtn) {
       els.saveBtn.addEventListener('click', () => {
         const ok = saveProgress();
@@ -296,7 +330,6 @@
       });
     }
 
-    // 🏠 홈으로 이동 (자동 저장 후)
     if (els.homeBtn) {
       els.homeBtn.addEventListener('click', () => {
         const answered = Object.keys(state.answers).length;
@@ -307,7 +340,6 @@
 
         saveProgress();
         clearInterval(state.autoSaveInterval);
-        // 이탈 방지 해제 (저장 완료했으므로)
         window.removeEventListener('beforeunload', beforeUnloadHandler);
         window.location.href = 'index.html';
       });
@@ -316,15 +348,16 @@
     els.submitBtn.addEventListener('click', handleSubmit);
   }
 
-  // ===== 렌더링: 제목 & 헤더 =====
+  // ===== 제목 =====
   function updateTitle() {
-    els.title.textContent = state.examTitle || state.examId;
+    const min = Math.round(state.timeLimit / 60);
+    els.title.textContent = `${state.examTitle || state.examId} (${state.questions.length}문항 / ${min}분)`;
     if (state.mode === 'wrong') {
       els.modeToggle.style.display = 'none';
     }
   }
 
-  // ===== 렌더링: 페이지 =====
+  // ===== 페이지 =====
   function updateTotalPages() {
     state.totalPages = Math.max(1, Math.ceil(state.questions.length / state.perPage));
     if (state.currentPage > state.totalPages) state.currentPage = state.totalPages;
@@ -348,14 +381,13 @@
     updateProgress();
   }
 
-  // ===== 렌더링: 문제 카드 =====
+  // ===== 문제 카드 =====
   function renderQuestionCard(q) {
     const card = document.createElement('div');
     card.className = 'question-card';
     if (state.bookmarks[q.no]) card.classList.add('bookmarked');
     card.dataset.no = q.no;
 
-    // 헤더
     const header = document.createElement('div');
     header.className = 'question-header';
     header.innerHTML = `
@@ -371,19 +403,16 @@
     `;
     card.appendChild(header);
 
-    // 문제 텍스트
     const qText = document.createElement('div');
     qText.className = 'question-text';
     qText.textContent = q.question || '';
     card.appendChild(qText);
 
-    // passage 렌더 (신규 렌더러 우선)
     if (q.passage) {
       const passageEl = renderPassage(q.passage);
       if (passageEl) card.appendChild(passageEl);
     }
 
-    // 선택지
     const choicesDiv = document.createElement('div');
     choicesDiv.className = 'choices';
     (q.choices || []).forEach((choiceText, idx) => {
@@ -410,7 +439,6 @@
     });
     card.appendChild(choicesDiv);
 
-    // 해설
     if (q.explanation) {
       const exp = document.createElement('div');
       exp.className = 'explanation';
@@ -428,9 +456,8 @@
     return card;
   }
 
-  // ===== 렌더링: passage =====
+  // ===== passage =====
   function renderPassage(passage) {
-    // 신규 렌더러 사용 가능하면 그것으로
     if (window.PassageRenderer && typeof window.PassageRenderer.render === 'function') {
       const html = window.PassageRenderer.render(passage);
       if (html) {
@@ -441,7 +468,6 @@
       }
     }
 
-    // ===== fallback (구버전) =====
     const box = document.createElement('div');
     box.className = 'passage';
 
@@ -500,17 +526,14 @@
     return box;
   }
 
-  // ===== 선택지 클릭 =====
   function handleChoiceClick(q, choiceNo) {
     if (state.submitted) return;
-
     state.answers[q.no] = choiceNo;
     saveProgress();
     renderPage();
     updateProgress();
   }
 
-  // ===== 북마크 토글 =====
   function toggleBookmark(no) {
     if (state.bookmarks[no]) {
       delete state.bookmarks[no];
@@ -525,11 +548,9 @@
         window.Storage.setGlobalBookmark(state.examId, no, !!state.bookmarks[no], q);
       }
     }
-
     renderPage();
   }
 
-  // ===== 진행률 업데이트 =====
   function updateProgress() {
     const total = state.questions.length;
     const answered = Object.keys(state.answers).length;
@@ -597,7 +618,7 @@
       const isCorrect = picked === q.answer;
       if (isCorrect) correct++;
 
-      const subj = q.subject || '기타';
+      const subj = q.subject || '전체';
       if (!subjectStats[subj]) subjectStats[subj] = { correct: 0, total: 0 };
       subjectStats[subj].total++;
       if (isCorrect) subjectStats[subj].correct++;
@@ -628,6 +649,7 @@
       correct: correct,
       score: total > 0 ? Math.round((correct / total) * 100) : 0,
       elapsedSec: elapsedSec,
+      timeLimitSec: state.timeLimit,
       subjectStats: subjectStats,
       review: reviewData,
       answers: state.answers,
@@ -647,18 +669,16 @@
     window.location.href = `result.html?session=${sessionId}`;
   }
 
-  // ===== 이탈 방지 =====
   function beforeUnloadHandler(e) {
     if (state.submitted) return;
     if (Object.keys(state.answers).length === 0) return;
-    // 이탈 전에 한 번 더 저장 시도
     saveProgress();
     e.preventDefault();
     e.returnValue = '';
     return '';
   }
 
-  // ===== 토스트 알림 =====
+  // ===== 토스트 =====
   let toastTimer = null;
   function showToast(message, duration = 2000) {
     let toast = document.getElementById('cbt-toast');
@@ -666,23 +686,15 @@
       toast = document.createElement('div');
       toast.id = 'cbt-toast';
       toast.style.cssText = `
-        position: fixed;
-        bottom: 30px;
-        left: 50%;
+        position: fixed; bottom: 30px; left: 50%;
         transform: translateX(-50%) translateY(20px);
-        background: rgba(30, 41, 59, 0.95);
-        color: #fff;
-        padding: 12px 24px;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        font-weight: 500;
+        background: rgba(30, 41, 59, 0.95); color: #fff;
+        padding: 12px 24px; border-radius: 8px;
+        font-size: 0.95rem; font-weight: 500;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 9999;
-        opacity: 0;
+        z-index: 9999; opacity: 0;
         transition: opacity 0.25s ease, transform 0.25s ease;
-        pointer-events: none;
-        max-width: 90%;
-        text-align: center;
+        pointer-events: none; max-width: 90%; text-align: center;
       `;
       document.body.appendChild(toast);
     }
@@ -701,7 +713,6 @@
     }, duration);
   }
 
-  // ===== 유틸: HTML 이스케이프 =====
   function escapeHtml(str) {
     if (str == null) return '';
     return String(str)
