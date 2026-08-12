@@ -1,37 +1,63 @@
 /* ============================================
-   추가 스타일 - 탭 / 중복기출 잠금
+   추가 스타일 - 자격증별 탭 / 중복기출 잠금
    ============================================ */
 
-/* ===== 상단 탭 (회차 선택 / 중복기출) ===== */
+/* ===== 상단 탭 ===== */
 .main-tabs {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   border-bottom: 2px solid var(--primary);
   margin: 30px 0 20px;
-  flex-wrap: wrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
 
+.main-tabs::-webkit-scrollbar { height: 4px; }
+.main-tabs::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 2px; }
+
 .main-tab {
-  padding: 12px 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 18px;
   background: transparent;
   border: none;
   font-family: inherit;
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--gray-400);
   cursor: pointer;
   border-bottom: 3px solid transparent;
   margin-bottom: -2px;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.15s ease;
 }
 
-.main-tab:hover {
-  color: var(--primary);
-}
+.main-tab:hover { color: var(--primary); }
 
 .main-tab.active {
   color: var(--secondary);
   border-bottom-color: var(--primary);
+}
+
+/* 탭 안 문항수 배지 */
+.tab-cnt {
+  display: inline-block;
+  min-width: 20px;
+  padding: 1px 7px;
+  background: var(--gray-200);
+  color: var(--gray-600);
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.main-tab.active .tab-cnt {
+  background: var(--primary);
+  color: #fff;
 }
 
 /* ===== 중복기출 잠금 박스 ===== */
@@ -55,7 +81,7 @@
   font-size: 0.95rem;
 }
 
-/* ===== 입장코드 오류 메시지 ===== */
+/* ===== 입장코드 오류 ===== */
 .code-error {
   color: var(--danger);
   font-size: 0.85rem;
@@ -63,9 +89,30 @@
   font-weight: 600;
 }
 
+/* ===== 카드 과목 표기 ===== */
+.exam-subjects {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  margin-top: 8px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ===== 카드 제목 줄바꿈 개선 ===== */
+.exam-card h3 {
+  word-break: keep-all;
+  line-height: 1.4;
+}
+
+/* ===== 모바일 ===== */
 @media (max-width: 768px) {
+  .main-tabs { margin: 20px 0 16px; }
   .main-tab {
-    padding: 10px 14px;
-    font-size: 1rem;
+    padding: 10px 12px;
+    font-size: 0.9rem;
   }
+  .lock-box { padding: 36px 16px; }
 }
