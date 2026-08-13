@@ -4,71 +4,59 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>안전과장 CBT</title>
+
+  <!-- ===== Google AdSense 자동광고 ===== -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9283463208175336"
+     crossorigin="anonymous"></script>
+
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/custom.css">
 
-  <!-- ===== 추가 스타일: 로고 옆 광고 + 하단 출처 ===== -->
+  <!-- ※ custom.css에 이미 광고/푸터 스타일을 넣으셨다면 아래 <style> 블록은 삭제해도 됩니다 -->
   <style>
-    /* 페이지 전체를 세로 flex로 만들어 푸터를 항상 화면 맨 아래로 */
     html, body { min-height: 100%; }
-    body {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+    body { display: flex; flex-direction: column; min-height: 100vh; }
     body > main { flex: 1 0 auto; }
 
-    /* 상단바: 로고 - 광고 - 우측버튼 정렬 */
-    .topbar .container {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
+    .topbar .container { display: flex; align-items: center; gap: 14px; }
     .topbar .logo { flex: 0 0 auto; white-space: nowrap; }
     .topbar .topbar-actions { flex: 0 0 auto; margin-left: auto; }
 
-    /* 로고 옆 광고 영역 */
     .topbar-ad {
-      flex: 1 1 auto;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      overflow: hidden;
-      max-height: 60px;
-      line-height: 0;
+      flex: 1 1 auto; display: flex; align-items: center;
+      justify-content: flex-start; overflow: hidden; max-height: 60px; line-height: 0;
     }
+    .topbar-ad a { display: block; line-height: 0; }
     .topbar-ad img {
-      display: block;
-      height: 46px;      /* 상단바 높이에 맞춰 축소 */
-      width: auto;
-      max-width: 100%;
-      border-radius: 6px;
-    }
-    /* 좁은 화면에서는 상단 광고 숨김 (레이아웃 깨짐 방지) */
-    @media (max-width: 900px) {
-      .topbar-ad { display: none; }
+      display: block; height: 46px; width: auto; max-width: 100%; border-radius: 6px;
     }
 
-    /* 본문 하단 배너 광고 (캐러셀) */
-    .ad-bottom {
-      margin: 30px auto 10px;
-      display: flex;
-      justify-content: center;
-      overflow: hidden;
+    /* 광고 영역 공통 */
+    .ad-zone {
+      margin: 26px auto 10px;
+      display: flex; justify-content: center;
+      overflow: hidden; max-width: 100%; min-height: 90px;
+    }
+    .ad-zone iframe, .ad-zone ins { max-width: 100%; }
+    .ad-label {
+      display: block; text-align: center; font-size: 0.65rem;
+      color: #b6bcc4; letter-spacing: 0.05em; margin-bottom: 4px;
     }
 
-    /* 하단 출처 표기 */
     .site-footer {
-      flex-shrink: 0;
-      margin-top: auto;
-      padding: 18px 12px 22px;
-      text-align: center;
-      font-size: 0.72rem;
-      line-height: 1.6;
-      color: #9aa1ab;
-      border-top: 1px solid #e5e7eb;
-      background: #fff;
-      word-break: keep-all;
+      flex-shrink: 0; margin-top: auto; padding: 18px 12px 22px;
+      text-align: center; font-size: 0.72rem; line-height: 1.6;
+      color: #9aa1ab; border-top: 1px solid var(--gray-200, #e5e7eb);
+      background: #fff; word-break: keep-all;
+    }
+    .site-footer .footer-links { margin-bottom: 6px; }
+    .site-footer .footer-links a { color: #9aa1ab; text-decoration: none; margin: 0 6px; }
+    .site-footer .footer-links a:hover { text-decoration: underline; }
+
+    @media (max-width: 900px) { .topbar-ad { display: none; } }
+    @media (max-width: 768px) {
+      .ad-zone { margin: 18px auto 6px; }
+      .site-footer { font-size: 0.68rem; padding: 16px 14px 20px; }
     }
   </style>
 </head>
@@ -78,7 +66,7 @@
     <div class="container">
       <a href="index.html" class="logo" style="text-decoration:none;">⛑️ 안전과장 · CBT</a>
 
-      <!-- ===== [광고 2] 로고 옆 배너 광고 ===== -->
+      <!-- 로고 옆 쿠팡 배너 -->
       <div class="topbar-ad">
         <a href="https://link.coupang.com/a/gaVHjnvo96" target="_blank" rel="nofollow sponsored noopener" referrerpolicy="unsafe-url">
           <img src="https://ads-partners.coupang.com/banners/1014721?trackingCode=AF3164006&subId=&traceId=V0-301-969b06e95b87326d-I1014721&w=728&h=90" alt="광고">
@@ -114,6 +102,17 @@
         <div class="value" id="stat-bookmarks">0</div>
       </div>
     </section>
+
+    <!-- ===== 애드센스 광고 ① (상단 디스플레이) ===== -->
+    <div class="ad-zone">
+      <ins class="adsbygoogle"
+           style="display:block; width:100%;"
+           data-ad-client="ca-pub-9283463208175336"
+           data-ad-slot="0000000000"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
 
     <!-- 북마크 모아보기 -->
     <section class="bookmark-section" id="bookmark-section" style="display:none;">
@@ -155,8 +154,19 @@
       </div>
     </section>
 
-    <!-- ===== [광고 1] 본문 하단 캐러셀 광고 ===== -->
-    <div class="ad-bottom">
+    <!-- ===== 애드센스 광고 ② (하단 디스플레이) ===== -->
+    <div class="ad-zone">
+      <ins class="adsbygoogle"
+           style="display:block; width:100%;"
+           data-ad-client="ca-pub-9283463208175336"
+           data-ad-slot="1111111111"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <!-- ===== 쿠팡 캐러셀 (맨 아래) ===== -->
+    <div class="ad-zone">
       <script src="https://ads-partners.coupang.com/g.js"></script>
       <script>
         new PartnersCoupang.G({"id":1014723,"trackingCode":"AF3164006","subId":null,"template":"carousel","width":"680","height":"140"});
@@ -192,8 +202,11 @@
     </div>
   </div>
 
-  <!-- ===== 하단 출처 표기 ===== -->
+  <!-- 하단 출처 표기 -->
   <footer class="site-footer">
+    <div class="footer-links">
+      <a href="privacy.html">개인정보처리방침</a>·<a href="mailto:본인이메일@example.com">문의</a>
+    </div>
     출처 : 한국산업인력공단, 각종 CBT 사이트(최강 자격증 기출문제 전자문제집 CBT, CBT 문제은행, 모두CBT 등)
   </footer>
 
