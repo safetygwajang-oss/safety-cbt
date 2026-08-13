@@ -1,33 +1,64 @@
 /* ============================================================
    안전과장 CBT - 자기소개서 AI 엔진
-   resume-ai.js (v1)
+   resume-ai.js (v2 · 공용키 / 개인키 / 프록시 3중 지원)
    Gemini API + Google Search 그라운딩
+   ------------------------------------------------------------
+   키 우선순위 : ① PROXY_URL 설정 시 프록시  ② 개인 키  ③ 공용 키
    ============================================================ */
 (function () {
   'use strict';
 
   /* ============================================
      설정
-     MODE : 'key'   → 사용자가 직접 API 키 입력 (정적 호스팅 권장)
-            'proxy' → 서버(Cloudflare Workers 등) 경유
      ============================================ */
   const CONFIG = {
-    MODE: 'key',
     MODEL: 'gemini-2.5-flash',
-    PROXY_URL: '',            // MODE:'proxy' 일 때만 사용
-    LS_KEY: 'cbt_gemini_key'
+
+    /* Cloudflare Worker 등 프록시를 쓸 경우에만 주소 입력.
+       비워두면 브라우저에서 직접 호출(공용키/개인키)합니다. */
+    PROXY_URL: '',
+
+    LS_KEY: 'cbt_gemini_key'      // 개인 키 저장소 (api-config.js 와 동일)
   };
 
   const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/';
 
   /* ============================================
-     API 키 관리
+     개인 API 키 관리
      ============================================ */
   function getKey() {
     try { return localStorage.getItem(CONFIG.LS_KEY) || ''; } catch (e) { return ''; }
   }
   function setKey(v) {
-    try { v ? localStorage.setItem(CONFIG.LS_KEY, v) : localStorage.removeItem(CONFIG.LS_KEY); } catch (e) {}
+    try {
+      v ? localStorage.setItem(CONFIG.LS_KEY, v)
+        : localStorage.removeItem(CONFIG.LS_KEY);
+    } catch (e) {}
+  }
+
+  /* ============================================
+     사용 가능 여부 조회 (사용량 증가 없음)
+     ============================================ */
+  function keyInfo() {
+    if (CONFIG.PROXY_URL) {
+      return { usable: true, mode: 'proxy', own: false, left: Infinity };
+    }
+    if (window.CBT_API) {
+      var r = window.CBT_API.peek();
+      r.mode = r.own ? 'own' : 'shared';
+      return r;
+    }
+    var k = getKey();
+    return k
+      ? { usable: true, mode: 'own', own: true, key: k, left: Infinity }
+      : { usable: false, mode: 'none', own: false, left: 0,
+          error: 'API 키가 설정되지 않았습니다.' };
+  }
+
+  function remaining() {
+    if (CONFIG.PROXY_URL) return '무제한';
+    if (window.CBT_API) return window.CBT_API.remaining();
+    return getKey() ? '무제한' : 0;
   }
 
   /* ============================================
@@ -48,27 +79,71 @@
     /* 회사 정보 실시간 검색 (그라운딩) */
     if (opt.search) body.tools = [{ google_search: {} }];
 
-    let url, headers = { 'Content-Type': 'application/json' };
+    let url;
+    let headers = { 'Content-Type': 'application/json' };
+    let taken = null;                       // 공용키 사용량 환불용
 
-    if (CONFIG.MODE === 'proxy') {
-      if (!CONFIG.PROXY_URL) throw new Error('PROXY_URL이 설정되지 않았습니다.');
-      url = CONFIG.PROXY_URL;
+    if (CONFIG.PROXY_URL) {
+      /* ---------- 프록시 모드 : 키를 보내지 않음 ---------- */
+      url = CONFIG.PROXY_URL +
+            (CONFIG.PROXY_URL.indexOf('?') >= 0 ? '&' : '?') +
+            'model=' + encodeURIComponent(CONFIG.MODEL);
     } else {
-      const key = getKey();
-      if (!key) throw new Error('NO_KEY');
-      url = API_BASE + CONFIG.MODEL + ':generateContent?key=' + encodeURIComponent(key);
+      /* ---------- 직접 호출 : 개인키 > 공용키 ---------- */
+      let picked;
+      if (window.CBT_API) {
+        picked = window.CBT_API.take();
+        taken = picked;
+      } else {
+        const k = getKey();
+        picked = k ? { usable: true, key: k, own: true }
+                   : { usable: false, error: 'NO_KEY' };
+      }
+
+      if (!picked.usable || !picked.key) {
+        throw new Error(picked.error || 'NO_KEY');
+      }
+
+      url = API_BASE + CONFIG.MODEL + ':generateContent';
+      /* 키를 URL 대신 헤더로 전송 (주소창·로그 노출 방지) */
+      headers['x-goog-api-key'] = picked.key;
     }
 
-    const res = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(body) });
+    let res;
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body)
+      });
+    } catch (e) {
+      if (taken && window.CBT_API) window.CBT_API.refund(taken);
+      throw new Error('네트워크 연결을 확인해 주세요.');
+    }
 
     if (!res.ok) {
+      if (taken && window.CBT_API) window.CBT_API.refund(taken);
+
       let msg = 'HTTP ' + res.status;
       try {
         const j = await res.json();
         if (j.error && j.error.message) msg = j.error.message;
       } catch (e) {}
-      if (res.status === 400 && /API key/i.test(msg)) throw new Error('BAD_KEY');
-      if (res.status === 429) throw new Error('요청이 너무 많습니다. 1분 후 다시 시도해 주세요.');
+
+      if (res.status === 400 && /API key|api_key/i.test(msg)) throw new Error('BAD_KEY');
+      if (res.status === 403) {
+        throw new Error(
+          '이 도메인에서는 키 사용이 허용되지 않았습니다.\n' +
+          '(공용 키는 지정된 사이트에서만 동작합니다. 개인 키를 등록해 이용해 주세요.)'
+        );
+      }
+      if (res.status === 429) {
+        throw new Error(
+          '요청이 많아 잠시 제한되었습니다. 1~2분 후 다시 시도하거나,\n' +
+          '개인 API 키를 등록하면 바로 이용할 수 있습니다.'
+        );
+      }
+      if (res.status >= 500) throw new Error('AI 서버가 일시적으로 불안정합니다. 다시 시도해 주세요.');
       throw new Error(msg);
     }
 
@@ -268,6 +343,8 @@
     CONFIG: CONFIG,
     getKey: getKey,
     setKey: setKey,
+    keyInfo: keyInfo,
+    remaining: remaining,
     call: callGemini,
     md: md,
     prompts: {
