@@ -620,20 +620,123 @@
     }
 
 
+        /* 길이 자르기 */
+    function clip(text, max) {
+      if (text.length <= max) return text;
+      return text.substring(0, max) +
+        '\n\n(입력이 길어 이후 내용은 생략했습니다)';
+    }
+
+    /* 실제 1회 요청 */
+    async function once(promptText, model, maxTok) {
+      var payload = {
+        model: model,
+        temperature: 0.7,
+        max_completion_tokens: maxTok,
+        messages: [
+          { role: 'system', content: SYS },
+          { role: 'user', content: promptText }
+        ]
+      };
+
+      var key = getKey(), url, headers;
+      if (key) {
+        url = 'https://api.groq.com/openai/v1/chat/completions';
+        headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key };
+      } else {
+        url = (window.CBT_API && CBT_API.PROXY_URL) || '/api/ai';
+        headers = { 'Content-Type': 'application/json' };
+      }
+
+      var res = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(payload)
+      });
+
+      var data = null;
+      try { data = await res.json(); } catch (e) {}
+
+      return { status: res.status, ok: res.ok, data: data, usedKey: !!key, model: model };
+    }
+
     async function call(prompt, opt) {
       opt = opt || {};
       var info = keyInfo();
       if (!info.usable) throw new Error(info.error || 'NO_KEY');
 
-      var payload = {
-        model: opt.search ? M_SEARCH : M_PLAIN,
-        temperature: (opt.temp == null ? 0.7 : opt.temp),
-        max_tokens: 8000,
-        messages: [
-          { role: 'system', content: SYS },
-          { role: 'user', content: prompt }
-        ]
-      };
+      /* 1차 → 실패 시 점점 작게 재시도 */
+      var plan = [
+        { model: (opt.search ? M_SEARCH : M_PLAIN), maxTok: 4000, size: 12000 },
+        { model: M_PLAIN, maxTok: 3000, size: 6000 },
+        { model: M_PLAIN, maxTok: 2000, size: 3500 }
+      ];
+
+      var tk = ticker(opt);
+      var lastMsg = '';
+
+      try {
+        for (var i = 0; i < plan.length; i++) {
+          var step = plan[i];
+
+          if (i > 0 && typeof opt.onProgress === 'function') {
+            opt.onProgress(30, '입력을 줄여 다시 시도하는 중 (' + (i + 1) + '/' + plan.length + ')');
+          }
+
+          var r = await once(clip(prompt, step.size), step.model, step.maxTok);
+
+          /* 성공 */
+          if (r.ok && r.data && r.data.choices && r.data.choices[0]) {
+            var ch = r.data.choices[0];
+            var txt = (ch.message && ch.message.content) || '';
+            if (txt.replace(/\s/g, '') !== '') {
+              if (!r.usedKey) bump();
+              if (typeof opt.onProgress === 'function') opt.onProgress(97, '정리하는 중');
+              return {
+                text: txt.replace(/^\s+|\s+$/g, ''),
+                sources: pickSources(ch.message),
+                model: r.data.model || step.model
+              };
+            }
+            lastMsg = '빈 응답을 받았습니다.';
+            continue;
+          }
+
+          /* 실패 원인 정리 */
+          var em = '';
+          if (r.data && r.data.error) {
+            em = r.data.error.message || r.data.error;
+          }
+          em = String(em || ('HTTP ' + r.status));
+          lastMsg = em;
+
+          /* 키 문제는 즉시 중단 */
+          if (r.status === 401 || r.status === 403) throw new Error('BAD_KEY');
+
+          /* 크기 문제면 다음 단계로 축소 재시도 */
+          if (r.status === 413 || r.status === 400) continue;
+
+          /* 한도 초과 */
+          if (r.status === 429) {
+            throw new Error('요청이 많아 잠시 제한되었습니다. 1~2분 후 다시 시도해 주세요.');
+          }
+
+          /* 그 외 서버 오류도 한 번 더 시도 */
+          if (r.status >= 500) continue;
+
+          throw new Error(em);
+        }
+
+        throw new Error(
+          '입력이 너무 커서 처리하지 못했습니다.\n' +
+          '채용공고는 담당업무·필수요건·우대사항만 남기고, 작성 항목을 3개 이하로 줄여 보세요.\n' +
+          '(서버 응답 : ' + lastMsg + ')'
+        );
+      } finally {
+        tk.stop();
+      }
+    }
+
 
       var key = getKey(), url, headers;
       if (key) {
