@@ -1,10 +1,10 @@
 /* ============================================
    안전과장 CBT - 홈 대시보드
-   main.js (v6)
-   - ★ 자기소개서 · 토익스피킹 탭을 맨 앞에 배치
+   main.js (v7)
+   - ★ 커리어 탭(자기소개서·토익스피킹)을 자격증 탭 "윗줄"에 별도 배치
    - 자격증별 탭 분류 + 문항수/시험시간 자동 보정
    - 마지막 선택 탭 기억
-   ★ index.html 에서 toeic.js / resume-tab.js 는 제거하세요
+   ★ index.html 에서 toeic.js / resume-tab.js 태그는 제거하세요
    ============================================ */
 
 (function () {
@@ -17,24 +17,16 @@
      ============================================ */
   const ACCESS_CODE = '1221';
 
-  /* 인증 유지 방식
-     sessionStorage → 탭 닫으면 다시 입력
-     localStorage   → 계속 기억 */
-  const codeStore = sessionStorage;
+  const codeStore = sessionStorage;   // localStorage 로 바꾸면 계속 기억
   const CODE_KEY = 'dup-access-ok';
-
-  /* 마지막으로 본 탭 기억 */
   const TAB_KEY = 'cbt-last-tab';
 
-  /* 상단 카드형 바로가기도 함께 쓰고 싶으면 true */
-  const SHOW_QUICK_NAV = false;
-
   /* ============================================
-     ★ 맨 앞에 붙는 커리어 탭
+     ★ 윗줄 커리어 메뉴
      type: 'link'  → 누르면 바로 이동
-           'cards' → 패널에 카드 목록 표시
+           'cards' → 아래에 카드 목록 표시
      ============================================ */
-  const FRONT_TABS = [
+  const CAREER_TABS = [
     {
       key: 'resume',
       label: '📝 자기소개서',
@@ -59,7 +51,7 @@
   ];
 
   /* ============================================
-     자격증 탭 정의 (순서 = 화면 표시 순서)
+     아랫줄 자격증 탭
      ============================================ */
   const CATEGORIES = [
     { key: 'safety',       label: '🏭 산업안전기사' },
@@ -86,50 +78,65 @@
      추가 스타일 (css 파일 수정 불필요)
      ============================================ */
   function injectStyle() {
-    if (document.getElementById('cbt-front-style')) return;
+    if (document.getElementById('cbt-career-style')) return;
 
     const css = `
-      /* 커리어 탭 강조 */
-      .main-tab[data-front="1"] { color: #1d4ed8; }
-      .main-tab[data-front="1"].active { color: #1d4ed8; }
-      .main-tab[data-front="1"] .tab-cnt {
-        background: #2563eb; color: #fff; font-size: .64rem; letter-spacing: .03em;
+      /* ===== 윗줄 커리어 탭 ===== */
+      .career-bar {
+        display: flex; align-items: center; gap: 8px;
+        flex-wrap: wrap; margin: 26px 0 12px;
       }
-      .main-tabs { scroll-behavior: smooth; }
+      .career-bar-label {
+        font-size: .78rem; font-weight: 700; color: #94a3b8;
+        letter-spacing: .04em; margin-right: 2px;
+      }
+      .career-tab {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 10px 16px; border-radius: 99px; cursor: pointer;
+        font-family: inherit; font-size: .93rem; font-weight: 700;
+        color: #1d4ed8; background: linear-gradient(135deg,#eff6ff,#f0fdfa);
+        border: 1px solid #dbeafe;
+        transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+      }
+      .career-tab:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(37,99,235,.18);
+        border-color: #93c5fd;
+      }
+      .career-tab.active {
+        background: linear-gradient(135deg,#2563eb,#0ea5e9);
+        border-color: #2563eb; color: #fff;
+      }
+      .career-tab .cbadge {
+        background: #2563eb; color: #fff;
+        font-size: .64rem; font-weight: 800; letter-spacing: .04em;
+        padding: 2px 7px; border-radius: 99px;
+      }
+      .career-tab.active .cbadge { background: rgba(255,255,255,.28); }
 
-      /* 토익 패널 안내문 */
+      @media (max-width: 520px) {
+        .career-bar { gap: 6px; margin: 18px 0 10px; }
+        .career-bar-label { width: 100%; margin-bottom: 2px; }
+        .career-tab { flex: 1 1 46%; justify-content: center; padding: 10px 10px; font-size: .87rem; }
+      }
+
+      /* ===== 토익 패널 ===== */
       .front-intro {
         background: linear-gradient(135deg,#eff6ff,#f0fdfa);
         border: 1px solid #dbeafe; border-radius: 12px;
         padding: 12px 14px; margin-bottom: 14px;
         font-size: .88rem; color: #334155; line-height: 1.6;
       }
-
-      /* 카드형 링크 */
       a.exam-card { text-decoration: none; display: block; color: inherit; }
       .front-tag {
         display: inline-block; background: #2563eb; color: #fff;
         font-size: .68rem; font-weight: 800; letter-spacing: .05em;
         padding: 3px 9px; border-radius: 99px; margin-bottom: 8px;
       }
-
-      /* 상단 카드형 바로가기 */
-      .quick-nav { display: grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap: 12px; margin-bottom: 18px; }
-      .quick-nav-card {
-        display: flex; align-items: center; gap: 12px; padding: 14px 16px;
-        border-radius: 14px; text-decoration: none;
-        background: linear-gradient(135deg,#eff6ff,#f0fdfa);
-        border: 1px solid #dbeafe; transition: .18s;
-      }
-      .quick-nav-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37,99,235,.15); }
-      .qn-ico { font-size: 1.6rem; }
-      .qn-title { font-weight: 700; color: #1e293b; font-size: .96rem; }
-      .qn-desc { font-size: .78rem; color: #64748b; margin-top: 2px; }
-      .qn-arrow { margin-left: auto; color: #94a3b8; }
     `;
 
     const style = document.createElement('style');
-    style.id = 'cbt-front-style';
+    style.id = 'cbt-career-style';
     style.textContent = css;
     document.head.appendChild(style);
   }
@@ -300,34 +307,6 @@
   }
 
   /* ============================================
-     상단 카드형 바로가기 (옵션)
-     ============================================ */
-  function mountQuickNav() {
-    if (!SHOW_QUICK_NAV) return;
-    const main = document.querySelector('main.container');
-    if (!main || document.getElementById('quick-nav-wrap')) return;
-
-    const wrap = document.createElement('section');
-    wrap.id = 'quick-nav-wrap';
-    wrap.innerHTML = `
-      <div class="quick-nav">
-        <a class="quick-nav-card" href="resume.html">
-          <span class="qn-ico">📝</span>
-          <span><span class="qn-title">자기소개서 · AI 작성기</span>
-          <span class="qn-desc">채용공고 + 경력 → 전략·초안 생성</span></span>
-          <span class="qn-arrow">→</span>
-        </a>
-        <a class="quick-nav-card" href="study.html?id=toeic-part1">
-          <span class="qn-ico">🎤</span>
-          <span><span class="qn-title">토익스피킹 자료</span>
-          <span class="qn-desc">파트별 템플릿 · 만능 표현</span></span>
-          <span class="qn-arrow">→</span>
-        </a>
-      </div>`;
-    main.insertBefore(wrap, main.firstElementChild);
-  }
-
-  /* ============================================
      탭 껍데기 확보 (index.html 수정 불필요)
      ============================================ */
   function buildShell() {
@@ -343,22 +322,77 @@
 
     const host = tabsEl.parentElement;
 
-    // 기존 패널 제거 (구버전 HTML / 중복 방지)
+    // 기존 패널 / 커리어바 제거 (중복 방지)
     host.querySelectorAll('.tab-panel').forEach(p => p.remove());
+    const oldBar = document.getElementById('career-bar');
+    if (oldBar) oldBar.remove();
     tabsEl.innerHTML = '';
 
     return { tabsEl, host };
   }
 
-  /* 탭 버튼 생성 공통 */
-  function makeTab(key, label, countText, isFront) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'main-tab';
-    btn.dataset.tab = key;
-    if (isFront) btn.dataset.front = '1';
-    btn.innerHTML = `${label}${countText != null ? `<span class="tab-cnt">${countText}</span>` : ''}`;
-    return btn;
+  /* ============================================
+     ★ 커리어 바 (자격증 탭 윗줄)
+     ============================================ */
+  function buildCareerBar(tabsEl, host) {
+    const bar = document.createElement('div');
+    bar.className = 'career-bar';
+    bar.id = 'career-bar';
+    bar.innerHTML = '<span class="career-bar-label">⚡ 취업 준비</span>';
+
+    const panelKeys = [];
+
+    CAREER_TABS.forEach(cfg => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'career-tab';
+      btn.dataset.tab = cfg.key;
+      btn.innerHTML = `${cfg.label}${cfg.badge ? `<span class="cbadge">${escapeHtml(cfg.badge)}</span>` : ''}`;
+
+      if (cfg.type === 'link') {
+        btn.addEventListener('click', () => { window.location.href = cfg.href; });
+        bar.appendChild(btn);
+        return;
+      }
+
+      /* 카드형 : 패널 생성 */
+      btn.addEventListener('click', () => activateTab(cfg.key));
+      bar.appendChild(btn);
+      panelKeys.push(cfg.key);
+
+      const panel = document.createElement('div');
+      panel.className = 'tab-panel';
+      panel.id = `panel-${cfg.key}`;
+      panel.style.display = 'none';
+
+      if (cfg.intro) {
+        const intro = document.createElement('div');
+        intro.className = 'front-intro';
+        intro.innerHTML = cfg.intro;
+        panel.appendChild(intro);
+      }
+
+      const grid = document.createElement('div');
+      grid.className = 'exam-grid';
+      (cfg.cards || []).forEach(c => {
+        const a = document.createElement('a');
+        a.className = 'exam-card';
+        a.href = c.href;
+        a.innerHTML = `
+          <span class="front-tag">${escapeHtml(c.tag)}</span>
+          <h3>${escapeHtml(c.title)}</h3>
+          <div class="exam-subjects">${escapeHtml(c.desc)}</div>
+        `;
+        grid.appendChild(a);
+      });
+      panel.appendChild(grid);
+      host.appendChild(panel);
+    });
+
+    /* 자격증 탭 줄 바로 위에 삽입 */
+    host.insertBefore(bar, tabsEl);
+
+    return panelKeys;
   }
 
   /* ============================================
@@ -415,62 +449,23 @@
     });
 
     const { tabsEl, host } = buildShell();
-    mountQuickNav();
 
-    const panelKeys = [];
+    /* ★ 윗줄 커리어 바 먼저 생성 */
+    const careerPanelKeys = buildCareerBar(tabsEl, host);
 
-    /* ---------- ★ 1) 커리어 탭 (맨 앞) ---------- */
-    FRONT_TABS.forEach(cfg => {
-      const btn = makeTab(cfg.key, cfg.label, cfg.badge, true);
-
-      if (cfg.type === 'link') {
-        btn.addEventListener('click', () => { window.location.href = cfg.href; });
-        tabsEl.appendChild(btn);
-        return;
-      }
-
-      /* 카드형 패널 */
-      tabsEl.appendChild(btn);
-      panelKeys.push(cfg.key);
-
-      const panel = document.createElement('div');
-      panel.className = 'tab-panel';
-      panel.id = `panel-${cfg.key}`;
-      panel.style.display = 'none';
-
-      if (cfg.intro) {
-        const intro = document.createElement('div');
-        intro.className = 'front-intro';
-        intro.innerHTML = cfg.intro;
-        panel.appendChild(intro);
-      }
-
-      const grid = document.createElement('div');
-      grid.className = 'exam-grid';
-      (cfg.cards || []).forEach(c => {
-        const a = document.createElement('a');
-        a.className = 'exam-card';
-        a.href = c.href;
-        a.innerHTML = `
-          <span class="front-tag">${escapeHtml(c.tag)}</span>
-          <h3>${escapeHtml(c.title)}</h3>
-          <div class="exam-subjects">${escapeHtml(c.desc)}</div>
-        `;
-        grid.appendChild(a);
-      });
-      panel.appendChild(grid);
-      host.appendChild(panel);
-    });
-
-    /* ---------- 2) 자격증 탭 ---------- */
+    /* 아랫줄 자격증 탭 */
     let firstExamKey = null;
+    const panelKeys = careerPanelKeys.slice();
 
     CATEGORIES.forEach(cat => {
       const items = groups[cat.key];
       if (items.length === 0 && !cat.alwaysShow) return;
 
-      const label = `${cat.locked && !isUnlocked() ? '🔒 ' : (cat.locked ? '🔓 ' : '')}${cat.label}`;
-      const btn = makeTab(cat.key, label, items.length, false);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'main-tab';
+      btn.dataset.tab = cat.key;
+      btn.innerHTML = `${cat.locked && !isUnlocked() ? '🔒 ' : (cat.locked ? '🔓 ' : '')}${cat.label}<span class="tab-cnt">${items.length}</span>`;
       tabsEl.appendChild(btn);
       panelKeys.push(cat.key);
 
@@ -503,7 +498,7 @@
       if (!firstExamKey) firstExamKey = cat.key;
     });
 
-    /* ---------- 3) 기본 활성 탭 ---------- */
+    /* 기본 활성 탭 */
     let startKey = firstExamKey || panelKeys[0];
     try {
       const saved = sessionStorage.getItem(TAB_KEY);
@@ -513,18 +508,13 @@
     } catch (e) {}
     if (startKey) activateTab(startKey);
 
-    /* 탭 줄을 항상 맨 앞으로 */
     tabsEl.scrollLeft = 0;
 
-    /* ---------- 4) 탭 클릭 ---------- */
+    /* 자격증 탭 클릭 */
     tabsEl.querySelectorAll('.main-tab').forEach(btn => {
-      const key = btn.dataset.tab;
-      const front = FRONT_TABS.filter(f => f.key === key)[0];
-      if (front && front.type === 'link') return;   // 이미 바인딩됨
-
       btn.addEventListener('click', () => {
-        activateTab(key);
-        if (key === 'dup' && !isUnlocked()) openCodeModal();
+        activateTab(btn.dataset.tab);
+        if (btn.dataset.tab === 'dup' && !isUnlocked()) openCodeModal();
       });
     });
 
@@ -534,8 +524,9 @@
     if (isUnlocked()) unlockDup();
   }
 
+  /* 두 줄 모두 반영 */
   function activateTab(key) {
-    document.querySelectorAll('.main-tab').forEach(b => {
+    document.querySelectorAll('.main-tab, .career-tab').forEach(b => {
       b.classList.toggle('active', b.dataset.tab === key);
     });
     document.querySelectorAll('.tab-panel').forEach(p => {
