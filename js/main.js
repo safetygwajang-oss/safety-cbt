@@ -1,6 +1,10 @@
 /* ============================================
    안전과장 CBT - 홈 대시보드
-   main.js (v4 - 자격증별 탭 분류 + 문항수/시험시간 자동 보정)
+   main.js (v6)
+   - ★ 자기소개서 · 토익스피킹 탭을 맨 앞에 배치
+   - 자격증별 탭 분류 + 문항수/시험시간 자동 보정
+   - 마지막 선택 탭 기억
+   ★ index.html 에서 toeic.js / resume-tab.js 는 제거하세요
    ============================================ */
 
 (function () {
@@ -19,8 +23,43 @@
   const codeStore = sessionStorage;
   const CODE_KEY = 'dup-access-ok';
 
+  /* 마지막으로 본 탭 기억 */
+  const TAB_KEY = 'cbt-last-tab';
+
+  /* 상단 카드형 바로가기도 함께 쓰고 싶으면 true */
+  const SHOW_QUICK_NAV = false;
+
   /* ============================================
-     탭 정의 (순서 = 화면 표시 순서)
+     ★ 맨 앞에 붙는 커리어 탭
+     type: 'link'  → 누르면 바로 이동
+           'cards' → 패널에 카드 목록 표시
+     ============================================ */
+  const FRONT_TABS = [
+    {
+      key: 'resume',
+      label: '📝 자기소개서',
+      badge: 'AI',
+      type: 'link',
+      href: 'resume.html'
+    },
+    {
+      key: 'toeic',
+      label: '🎤 토익스피킹',
+      badge: '5',
+      type: 'cards',
+      intro: '<b>TOEIC Speaking</b> 파트별 답변 템플릿 · 만능 표현 정리 (PART 1~5)',
+      cards: [
+        { href: 'study.html?id=toeic-part1', tag: 'PART 1', title: '문장 읽기',            desc: 'Read a text aloud · 발음 · 강세 · 끊어읽기' },
+        { href: 'study.html?id=toeic-part2', tag: 'PART 2', title: '사진 묘사',            desc: 'Describe a picture · 3단 구성 템플릿' },
+        { href: 'study.html?id=toeic-part3', tag: 'PART 3', title: '듣고 질문에 답하기',   desc: 'Respond to questions · 즉답 패턴' },
+        { href: 'study.html?id=toeic-part4', tag: 'PART 4', title: '제공된 정보로 답하기', desc: 'Respond using information · 표 읽기' },
+        { href: 'study.html?id=toeic-part5', tag: 'PART 5', title: '의견 제시하기',        desc: 'Express an opinion · 서론-본론-결론' }
+      ]
+    }
+  ];
+
+  /* ============================================
+     자격증 탭 정의 (순서 = 화면 표시 순서)
      ============================================ */
   const CATEGORIES = [
     { key: 'safety',       label: '🏭 산업안전기사' },
@@ -34,12 +73,65 @@
   document.addEventListener('DOMContentLoaded', init);
 
   async function init() {
+    injectStyle();
     renderStats();
     renderBookmarks();
     renderRecent();
     await renderExamList();
     bindEvents();
     bindCodeModal();
+  }
+
+  /* ============================================
+     추가 스타일 (css 파일 수정 불필요)
+     ============================================ */
+  function injectStyle() {
+    if (document.getElementById('cbt-front-style')) return;
+
+    const css = `
+      /* 커리어 탭 강조 */
+      .main-tab[data-front="1"] { color: #1d4ed8; }
+      .main-tab[data-front="1"].active { color: #1d4ed8; }
+      .main-tab[data-front="1"] .tab-cnt {
+        background: #2563eb; color: #fff; font-size: .64rem; letter-spacing: .03em;
+      }
+      .main-tabs { scroll-behavior: smooth; }
+
+      /* 토익 패널 안내문 */
+      .front-intro {
+        background: linear-gradient(135deg,#eff6ff,#f0fdfa);
+        border: 1px solid #dbeafe; border-radius: 12px;
+        padding: 12px 14px; margin-bottom: 14px;
+        font-size: .88rem; color: #334155; line-height: 1.6;
+      }
+
+      /* 카드형 링크 */
+      a.exam-card { text-decoration: none; display: block; color: inherit; }
+      .front-tag {
+        display: inline-block; background: #2563eb; color: #fff;
+        font-size: .68rem; font-weight: 800; letter-spacing: .05em;
+        padding: 3px 9px; border-radius: 99px; margin-bottom: 8px;
+      }
+
+      /* 상단 카드형 바로가기 */
+      .quick-nav { display: grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap: 12px; margin-bottom: 18px; }
+      .quick-nav-card {
+        display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+        border-radius: 14px; text-decoration: none;
+        background: linear-gradient(135deg,#eff6ff,#f0fdfa);
+        border: 1px solid #dbeafe; transition: .18s;
+      }
+      .quick-nav-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37,99,235,.15); }
+      .qn-ico { font-size: 1.6rem; }
+      .qn-title { font-weight: 700; color: #1e293b; font-size: .96rem; }
+      .qn-desc { font-size: .78rem; color: #64748b; margin-top: 2px; }
+      .qn-arrow { margin-left: auto; color: #94a3b8; }
+    `;
+
+    const style = document.createElement('style');
+    style.id = 'cbt-front-style';
+    style.textContent = css;
+    document.head.appendChild(style);
   }
 
   /* ============================================
@@ -59,40 +151,31 @@
 
   /* ============================================
      ★ 자격증별 문항수 / 시험시간 보정
-     (data/index.json이 잘못돼 있어도 화면은 정확히 표시)
      ============================================ */
   function fixMeta(exam) {
     const text = `${exam.id || ''} ${exam.title || ''}`;
     const out = Object.assign({}, exam);
 
-    // 중복기출 모음집 : 문항수는 원본 유지, 시간만 문항수 기준(문항×1.5분)
     if (/중복기출/.test(text)) {
       if (out.questions) out.duration = Math.max(30, Math.ceil(out.questions * 1.5));
       return out;
     }
-
-    // 위험물기능장 : 60문항 / 60분 / 과목 구분 없음
     if (/위험물기능장/.test(text)) {
       out.questions = 60;
       out.duration = 60;
-      out.subjects = null;   // "위험물안전관리 · 공업경영" 표기 숨김
+      out.subjects = null;
       return out;
     }
-
-    // 산업위생관리기사 : 100문항(5과목) / 150분
     if (/산업위생관리기사/.test(text)) {
       out.questions = 100;
       out.duration = 150;
       return out;
     }
-
-    // 산업안전기사 · 건설안전기사 : 120문항(6과목) / 150분
     if (/건설안전기사|산업안전기사/.test(text)) {
       out.questions = 120;
       out.duration = 150;
       return out;
     }
-
     return out;
   }
 
@@ -117,9 +200,9 @@
       ? window.Storage.getStats()
       : { totalSessions: 0, avgScore: 0, bookmarkCount: 0 };
 
-    $('stat-sessions').textContent = stats.totalSessions;
-    $('stat-avg').innerHTML = `${stats.avgScore}<span style="font-size:1rem;">점</span>`;
-    $('stat-bookmarks').textContent = stats.bookmarkCount;
+    if ($('stat-sessions')) $('stat-sessions').textContent = stats.totalSessions;
+    if ($('stat-avg')) $('stat-avg').innerHTML = `${stats.avgScore}<span style="font-size:1rem;">점</span>`;
+    if ($('stat-bookmarks')) $('stat-bookmarks').textContent = stats.bookmarkCount;
   }
 
   // ===== 북마크 모아보기 =====
@@ -127,6 +210,8 @@
     const list = window.Storage && window.Storage.getBookmarkList
       ? window.Storage.getBookmarkList()
       : [];
+
+    if (!$('bookmark-section')) return;
 
     if (list.length === 0) {
       $('bookmark-section').style.display = 'none';
@@ -172,6 +257,8 @@
       ? window.Storage.getAllSessions()
       : {};
 
+    if (!$('recent-section')) return;
+
     const arr = Object.entries(sessions)
       .map(([id, data]) => ({ sessionId: id, ...data }))
       .sort((a, b) => (b.submittedAt || 0) - (a.submittedAt || 0))
@@ -213,6 +300,34 @@
   }
 
   /* ============================================
+     상단 카드형 바로가기 (옵션)
+     ============================================ */
+  function mountQuickNav() {
+    if (!SHOW_QUICK_NAV) return;
+    const main = document.querySelector('main.container');
+    if (!main || document.getElementById('quick-nav-wrap')) return;
+
+    const wrap = document.createElement('section');
+    wrap.id = 'quick-nav-wrap';
+    wrap.innerHTML = `
+      <div class="quick-nav">
+        <a class="quick-nav-card" href="resume.html">
+          <span class="qn-ico">📝</span>
+          <span><span class="qn-title">자기소개서 · AI 작성기</span>
+          <span class="qn-desc">채용공고 + 경력 → 전략·초안 생성</span></span>
+          <span class="qn-arrow">→</span>
+        </a>
+        <a class="quick-nav-card" href="study.html?id=toeic-part1">
+          <span class="qn-ico">🎤</span>
+          <span><span class="qn-title">토익스피킹 자료</span>
+          <span class="qn-desc">파트별 템플릿 · 만능 표현</span></span>
+          <span class="qn-arrow">→</span>
+        </a>
+      </div>`;
+    main.insertBefore(wrap, main.firstElementChild);
+  }
+
+  /* ============================================
      탭 껍데기 확보 (index.html 수정 불필요)
      ============================================ */
   function buildShell() {
@@ -223,16 +338,27 @@
       tabsEl = document.createElement('div');
       tabsEl.className = 'main-tabs';
       section.appendChild(tabsEl);
-      document.querySelector('main.container').appendChild(section);
+      (document.querySelector('main.container') || document.body).appendChild(section);
     }
 
     const host = tabsEl.parentElement;
 
-    // 기존 패널(구버전 HTML) 제거
+    // 기존 패널 제거 (구버전 HTML / 중복 방지)
     host.querySelectorAll('.tab-panel').forEach(p => p.remove());
     tabsEl.innerHTML = '';
 
     return { tabsEl, host };
+  }
+
+  /* 탭 버튼 생성 공통 */
+  function makeTab(key, label, countText, isFront) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'main-tab';
+    btn.dataset.tab = key;
+    if (isFront) btn.dataset.front = '1';
+    btn.innerHTML = `${label}${countText != null ? `<span class="tab-cnt">${countText}</span>` : ''}`;
+    return btn;
   }
 
   /* ============================================
@@ -288,23 +414,66 @@
       }
     });
 
-    // 탭/패널 생성
     const { tabsEl, host } = buildShell();
-    let firstKey = null;
+    mountQuickNav();
+
+    const panelKeys = [];
+
+    /* ---------- ★ 1) 커리어 탭 (맨 앞) ---------- */
+    FRONT_TABS.forEach(cfg => {
+      const btn = makeTab(cfg.key, cfg.label, cfg.badge, true);
+
+      if (cfg.type === 'link') {
+        btn.addEventListener('click', () => { window.location.href = cfg.href; });
+        tabsEl.appendChild(btn);
+        return;
+      }
+
+      /* 카드형 패널 */
+      tabsEl.appendChild(btn);
+      panelKeys.push(cfg.key);
+
+      const panel = document.createElement('div');
+      panel.className = 'tab-panel';
+      panel.id = `panel-${cfg.key}`;
+      panel.style.display = 'none';
+
+      if (cfg.intro) {
+        const intro = document.createElement('div');
+        intro.className = 'front-intro';
+        intro.innerHTML = cfg.intro;
+        panel.appendChild(intro);
+      }
+
+      const grid = document.createElement('div');
+      grid.className = 'exam-grid';
+      (cfg.cards || []).forEach(c => {
+        const a = document.createElement('a');
+        a.className = 'exam-card';
+        a.href = c.href;
+        a.innerHTML = `
+          <span class="front-tag">${escapeHtml(c.tag)}</span>
+          <h3>${escapeHtml(c.title)}</h3>
+          <div class="exam-subjects">${escapeHtml(c.desc)}</div>
+        `;
+        grid.appendChild(a);
+      });
+      panel.appendChild(grid);
+      host.appendChild(panel);
+    });
+
+    /* ---------- 2) 자격증 탭 ---------- */
+    let firstExamKey = null;
 
     CATEGORIES.forEach(cat => {
       const items = groups[cat.key];
       if (items.length === 0 && !cat.alwaysShow) return;
 
-      // 탭 버튼
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'main-tab';
-      btn.dataset.tab = cat.key;
-      btn.innerHTML = `${cat.locked && !isUnlocked() ? '🔒 ' : (cat.locked ? '🔓 ' : '')}${cat.label}<span class="tab-cnt">${items.length}</span>`;
+      const label = `${cat.locked && !isUnlocked() ? '🔒 ' : (cat.locked ? '🔓 ' : '')}${cat.label}`;
+      const btn = makeTab(cat.key, label, items.length, false);
       tabsEl.appendChild(btn);
+      panelKeys.push(cat.key);
 
-      // 패널
       const panel = document.createElement('div');
       panel.className = 'tab-panel';
       panel.id = `panel-${cat.key}`;
@@ -329,28 +498,39 @@
       panel.appendChild(grid);
 
       host.appendChild(panel);
-
       paint(grid, items, attempted, inProgress);
 
-      if (!firstKey) firstKey = cat.key;
+      if (!firstExamKey) firstExamKey = cat.key;
     });
 
-    // 첫 탭 활성화
-    if (firstKey) activateTab(firstKey);
+    /* ---------- 3) 기본 활성 탭 ---------- */
+    let startKey = firstExamKey || panelKeys[0];
+    try {
+      const saved = sessionStorage.getItem(TAB_KEY);
+      if (saved && panelKeys.indexOf(saved) >= 0) {
+        if (saved !== 'dup' || isUnlocked()) startKey = saved;
+      }
+    } catch (e) {}
+    if (startKey) activateTab(startKey);
 
-    // 탭 클릭
+    /* 탭 줄을 항상 맨 앞으로 */
+    tabsEl.scrollLeft = 0;
+
+    /* ---------- 4) 탭 클릭 ---------- */
     tabsEl.querySelectorAll('.main-tab').forEach(btn => {
+      const key = btn.dataset.tab;
+      const front = FRONT_TABS.filter(f => f.key === key)[0];
+      if (front && front.type === 'link') return;   // 이미 바인딩됨
+
       btn.addEventListener('click', () => {
-        activateTab(btn.dataset.tab);
-        if (btn.dataset.tab === 'dup' && !isUnlocked()) openCodeModal();
+        activateTab(key);
+        if (key === 'dup' && !isUnlocked()) openCodeModal();
       });
     });
 
-    // 잠금 해제 버튼
     const openBtn = $('open-code-btn');
     if (openBtn) openBtn.addEventListener('click', openCodeModal);
 
-    // 이미 인증된 상태면 해제
     if (isUnlocked()) unlockDup();
   }
 
@@ -361,6 +541,7 @@
     document.querySelectorAll('.tab-panel').forEach(p => {
       p.style.display = (p.id === `panel-${key}`) ? 'block' : 'none';
     });
+    try { sessionStorage.setItem(TAB_KEY, key); } catch (e) {}
   }
 
   /* ===== 카드 그리기 ===== */
@@ -373,7 +554,7 @@
     }
 
     list.forEach(raw => {
-      const exam = fixMeta(raw);   // ★ 문항수 / 시험시간 보정
+      const exam = fixMeta(raw);
 
       const card = document.createElement('div');
       card.className = 'exam-card';
@@ -417,6 +598,7 @@
 
   /* ===== 입장코드 ===== */
   function openCodeModal() {
+    if (!$('code-modal')) return;
     $('code-error').style.display = 'none';
     $('code-input').value = '';
     $('code-modal').classList.add('show');
@@ -435,6 +617,8 @@
   }
 
   function bindCodeModal() {
+    if (!$('code-modal')) return;
+
     const submit = () => {
       if ($('code-input').value.trim() === ACCESS_CODE) {
         $('code-modal').classList.remove('show');
@@ -458,28 +642,36 @@
 
   /* ===== 설정 ===== */
   function bindEvents() {
-    $('settings-btn').addEventListener('click', () => $('settings-modal').classList.add('show'));
-    $('close-settings-btn').addEventListener('click', () => $('settings-modal').classList.remove('show'));
-    $('settings-modal').addEventListener('click', (e) => {
-      if (e.target === $('settings-modal')) $('settings-modal').classList.remove('show');
-    });
+    if ($('settings-btn')) {
+      $('settings-btn').addEventListener('click', () => $('settings-modal').classList.add('show'));
+    }
+    if ($('close-settings-btn')) {
+      $('close-settings-btn').addEventListener('click', () => $('settings-modal').classList.remove('show'));
+    }
+    if ($('settings-modal')) {
+      $('settings-modal').addEventListener('click', (e) => {
+        if (e.target === $('settings-modal')) $('settings-modal').classList.remove('show');
+      });
+    }
 
-    $('clear-data-btn').addEventListener('click', () => {
-      if (!confirm('⚠️ 모든 응시 기록과 북마크를 삭제합니다.\n\n정말 초기화하시겠습니까?')) return;
-      if (!confirm('한 번 더 확인합니다.\n\n정말 모든 데이터를 삭제할까요?')) return;
+    if ($('clear-data-btn')) {
+      $('clear-data-btn').addEventListener('click', () => {
+        if (!confirm('⚠️ 모든 응시 기록과 북마크를 삭제합니다.\n\n정말 초기화하시겠습니까?')) return;
+        if (!confirm('한 번 더 확인합니다.\n\n정말 모든 데이터를 삭제할까요?')) return;
 
-      if (window.Storage && window.Storage.clearAll) window.Storage.clearAll();
+        if (window.Storage && window.Storage.clearAll) window.Storage.clearAll();
 
-      const keysToRemove = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('exam-progress-')) keysToRemove.push(key);
-      }
-      keysToRemove.forEach(k => localStorage.removeItem(k));
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('exam-progress-')) keysToRemove.push(key);
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
 
-      alert('✅ 모든 데이터가 초기화되었습니다.');
-      location.reload();
-    });
+        alert('✅ 모든 데이터가 초기화되었습니다.');
+        location.reload();
+      });
+    }
   }
 
   /* ===== 유틸 ===== */
