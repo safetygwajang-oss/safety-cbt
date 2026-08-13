@@ -581,18 +581,36 @@
       return { stop: function () { clearInterval(id); } };
     }
 
-    /* 출처 URL 추출 — 정규식은 문자열로 만들어 줄바꿈 사고 차단 */
-    var URL_RE_SRC = 'https?://[^\\s"\'\\\\)\\]
-]+';
-
+        /* 출처 URL 추출 (정규식 없이 문자 스캔) */
     function pickSources(msg) {
       var out = [], seen = {};
       try {
         var raw = JSON.stringify(msg && msg.executed_tools ? msg.executed_tools : '');
-        var re = new RegExp(URL_RE_SRC, 'g'), m;
-        while ((m = re.exec(raw))) {
-          var u = m[0].replace(/[.,]+$/, '');
-          if (seen[u] || u.indexOf('groq.com') >= 0) continue;
+        var stop = ' "\'<>)]},;\\';
+        var i = 0;
+
+        while (true) {
+          var p = raw.indexOf('http', i);
+          if (p < 0) break;
+
+          var j = p;
+          while (j < raw.length) {
+            var ch = raw.charAt(j);
+            if (stop.indexOf(ch) >= 0 || ch === '\n' || ch === '\t') break;
+            j++;
+          }
+
+          var u = raw.substring(p, j);
+          i = (j > p) ? j : p + 4;
+
+          while (u.length && '.,'.indexOf(u.charAt(u.length - 1)) >= 0) {
+            u = u.substring(0, u.length - 1);
+          }
+
+          if (u.length < 12) continue;
+          if (u.indexOf('groq.com') >= 0) continue;
+          if (seen[u]) continue;
+
           seen[u] = 1;
           out.push({ uri: u, title: (u.split('/')[2] || u) });
           if (out.length >= 12) break;
@@ -600,6 +618,7 @@
       } catch (e) {}
       return out;
     }
+
 
     async function call(prompt, opt) {
       opt = opt || {};
