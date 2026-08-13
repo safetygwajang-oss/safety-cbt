@@ -308,3 +308,50 @@
 @media (max-width: 768px) {
   .ad-inline { margin: 20px 0; min-height: 90px; }
 }
+/* ============================================
+   4. 콘텐츠 보호 (protect.js)
+   ============================================ */
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;   /* 모바일 롱프레스 메뉴 차단 */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 입력창·허용 영역은 정상 선택 가능 */
+input, textarea, select, [contenteditable="true"], .allow-select {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default;
+}
+
+img { -webkit-user-drag: none; user-drag: none; pointer-events: auto; }
+
+/* 안내 토스트 */
+.protect-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 34px;
+  transform: translateX(-50%) translateY(14px);
+  background: rgba(17, 24, 39, 0.92);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 11px 18px;
+  border-radius: 24px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 99999;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  white-space: nowrap;
+}
+.protect-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
