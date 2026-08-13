@@ -140,10 +140,21 @@
 
     <!-- ===== 탭: 회차 선택 / 중복기출 ===== -->
     <section>
-      <div class="main-tabs">
+            <div class="main-tabs">
         <button class="main-tab active" data-tab="rounds" type="button">📅 회차 선택</button>
         <button class="main-tab" data-tab="dup" type="button">🔒 중복기출 모음집</button>
+        <button class="main-tab" data-tab="toeic" type="button">🗣️ 토익스피킹 <span class="tab-cnt">5</span></button>
       </div>
+
+      <!-- 토익스피킹 패널 -->
+      <div class="tab-panel" id="panel-toeic" style="display:none;">
+        <div class="study-intro">
+          <b>TOEIC Speaking</b> · 5파트 11문항 / 약 20분 / 0~200점(Level 1~8)<br>
+          파트별 <b>템플릿과 만능문장</b>을 정리했습니다. 소리 내어 3회 이상 읽어보세요.
+        </div>
+        <div class="exam-grid" id="toeic-list"></div>
+      </div>
+
 
       <!-- 회차 선택 패널 -->
       <div class="tab-panel" id="panel-rounds">
@@ -219,11 +230,13 @@
     <div class="footer-links">
       <a href="privacy.html">개인정보처리방침</a>·<a href="mailto:본인이메일@example.com">문의</a>
     </div>
-    출처 : 각종 CBT 사이트(최강 자격증 기출문제 전자문제집 CBT, CBT 문제은행, 모두CBT 등)
+    출처 : 시계토끼 제니쌤, 제이크 토익스피킹, 한국산업인력공단, 각종 CBT 사이트(최강 자격증 기출문제 전자문제집 CBT, CBT 문제은행, 모두CBT 등)
   </footer>
 
   <script src="js/protect.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/toeic.js"></script>
+
 </body>
 </html>
