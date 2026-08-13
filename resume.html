@@ -48,7 +48,8 @@
         <span><b>1</b> 작성방법</span>
         <span><b>2</b> AI 작성기</span>
         <span><b>3</b> 맞춤법 검사</span>
-        <span><b>엔진</b> Gemini 2.5 Flash</span>
+        <span><b>엔진</b> Groq · Llama 3.3 / Compound</span>
+
       </div>
       <div class="study-toc">
         <b>목차</b>
@@ -284,35 +285,37 @@
       <p class="sec-note">회사 정보를 <b>실시간 검색</b>해 확인한 뒤, 채용공고 요건과 경력사항을 연결해 전략과 초안을 만듭니다.</p>
 
       <!-- API 키 / 사용 설정 -->
+           <!-- API 접속 설정 -->
       <details class="ai-key-box">
         <summary>🔑 AI 사용 설정 <span id="keyState" class="key-state">확인 중</span></summary>
 
-        <!-- 공용 키 정상 동작 시 -->
-        <div id="sharedNotice" class="sec-tip" style="margin:8px 0;" hidden>
-          🎁 <b>공용 AI 키가 적용되어 있습니다.</b> 키 입력 없이 바로 사용하실 수 있습니다.<br>
-          오늘 남은 횟수 : <b id="apiLeft">-</b>회
-          <span style="color:#64748b;">· 한도를 넘기면 아래에서
-          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">무료 개인 키</a>를
-          등록해 제한 없이 이용하세요.</span>
+        <!-- 서버 프록시 정상 -->
+        <div id="proxyNotice" class="sec-tip" style="margin:8px 0;" hidden>
+          ✅ <b>서버를 통해 안전하게 연결됩니다.</b> 키 입력 없이 바로 사용하실 수 있습니다.
         </div>
 
-        <!-- 주입 실패 시 (관리자 진단용) -->
+        <!-- 공용 주입 키 정상 -->
+        <div id="sharedNotice" class="sec-tip" style="margin:8px 0;" hidden>
+          🎁 <b>공용 AI 키가 적용되어 있습니다.</b> 오늘 남은 횟수 : <b id="apiLeft">-</b>회
+        </div>
+
+        <!-- 설정 미완료(관리자 진단) -->
         <div id="injectWarn" class="sec-warn" style="margin:8px 0;" hidden>
-          ⚙️ <b>공용 키가 아직 적용되지 않았습니다.</b>
-          <span id="injectReason"></span><br>
+          ⚙️ <b>공용 AI 연결이 아직 설정되지 않았습니다.</b> <span id="injectReason"></span><br>
           <span style="color:#64748b;font-size:.85em;">
-            관리자 확인 : ① Settings → Pages → Source = <b>GitHub Actions</b>
-            ② Actions 탭 워크플로 성공(✅) ③ 브라우저 강력 새로고침(Ctrl+Shift+R)
+            관리자 확인 : ① <code>js/api-config.js</code> 의 <code>PROXY_URL</code> 입력
+            ② Cloudflare Worker 배포 및 <code>GROQ_API_KEY</code> 시크릿 등록
+            ③ Worker 의 <code>ALLOW</code> 목록에 이 사이트 주소 추가
           </span>
         </div>
 
         <p class="ai-hint">
-          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>에서
-          무료 발급 → 아래에 붙여넣기. 키는 <b>이 브라우저에만 저장</b>되며 별도 서버로 전송되지 않습니다.
+          <a href="https://console.groq.com/keys" target="_blank" rel="noopener">Groq Console</a>에서
+          무료 발급(카드 등록 불필요) → 아래에 붙여넣기. 키는 <b>이 브라우저에만 저장</b>됩니다.
           개인 키를 등록하면 <b>공용 한도와 무관하게</b> 사용됩니다.
         </p>
         <div class="ai-row">
-          <input type="password" id="apiKey" class="ai-input allow-select" placeholder="AIza... (선택 입력)" autocomplete="off">
+          <input type="password" id="apiKey" class="ai-input allow-select" placeholder="gsk_... (선택 입력)" autocomplete="off">
           <button class="btn-sm" id="saveKey">저장</button>
           <button class="btn-sm" id="clearKey">삭제</button>
         </div>
