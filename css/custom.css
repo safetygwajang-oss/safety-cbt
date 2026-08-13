@@ -151,7 +151,15 @@
   border-radius: var(--radius); padding: 14px 18px; font-size: 0.88rem;
 }
 .study-toc b { color: var(--secondary); display: block; margin-bottom: 6px; }
-.study-toc ol { margin: 0; padding-left: 20px; line-height: 1.9; }
+.study-toc ol,
+.study-toc ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;      /* 브라우저 자동 번호 제거 */
+  line-height: 1.9;
+}
+.study-toc li { padding-left: 2px; }
+
 .study-toc a { color: var(--gray-600); text-decoration: none; }
 .study-toc a:hover { color: var(--primary); text-decoration: underline; }
 
