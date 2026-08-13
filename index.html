@@ -12,34 +12,25 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/custom.css">
 
-  <!-- ※ custom.css에 광고/푸터 스타일을 이미 넣으셨다면 이 <style> 블록은 삭제 가능 -->
   <style>
     html, body { min-height: 100%; }
     body { display: flex; flex-direction: column; min-height: 100vh; }
     body > main { flex: 1 0 auto; }
 
-    /* 상단바 정렬 */
     .topbar .container { display: flex; align-items: center; gap: 14px; }
     .topbar .logo { flex: 0 0 auto; white-space: nowrap; }
     .topbar .topbar-actions { flex: 0 0 auto; margin-left: auto; }
 
-    /* 로고 옆 쿠팡 배너 */
     .topbar-ad {
       flex: 1 1 auto; display: flex; align-items: center;
       justify-content: flex-start; overflow: hidden; max-height: 60px; line-height: 0;
     }
     .topbar-ad a { display: block; line-height: 0; }
-    .topbar-ad img {
-      display: block; height: 46px; width: auto; max-width: 100%; border-radius: 6px;
-    }
+    .topbar-ad img { display: block; height: 46px; width: auto; max-width: 100%; border-radius: 6px; }
 
-    /* 광고 영역 공통 */
     .ad-zone {
-      display: block;
-      margin: 26px auto 10px;
-      max-width: 100%;
-      overflow: hidden;
-      text-align: center;
+      display: block; margin: 26px auto 10px; max-width: 100%;
+      overflow: hidden; text-align: center;
     }
     .ad-zone .adsbygoogle { display: block; width: 100%; }
     .ad-label {
@@ -48,7 +39,6 @@
     }
     .ad-zone-coupang { display: flex; justify-content: center; }
 
-    /* 하단 출처 푸터 */
     .site-footer {
       flex-shrink: 0; margin-top: auto; padding: 18px 12px 22px;
       text-align: center; font-size: 0.72rem; line-height: 1.6;
@@ -72,7 +62,6 @@
     <div class="container">
       <a href="index.html" class="logo" style="text-decoration:none;">⛑️ 안전과장 · 골드박스</a>
 
-      <!-- 로고 옆 쿠팡 배너 -->
       <div class="topbar-ad">
         <a href="https://link.coupang.com/a/gaVHjnvo96" target="_blank" rel="nofollow sponsored noopener" referrerpolicy="unsafe-url">
           <img src="https://ads-partners.coupang.com/banners/1014721?trackingCode=AF3164006&subId=&traceId=V0-301-969b06e95b87326d-I1014721&w=728&h=90" alt="광고">
@@ -89,7 +78,7 @@
   <main class="container">
     <!-- 히어로 -->
     <section class="hero">
-      <h2>안전과장 CBT</h2>
+      <h2>안전과장 골드박스</h2>
       <p>실전 대비 문제풀이 · 오답 재도전 · 북마크 학습</p>
     </section>
 
@@ -118,9 +107,7 @@
            data-ad-slot="1373941745"
            data-ad-format="auto"
            data-full-width-responsive="true"></ins>
-      <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-      </script>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
 
     <!-- 북마크 모아보기 -->
@@ -138,32 +125,16 @@
       <div class="exam-grid" id="recent-list"></div>
     </section>
 
-    <!-- ===== 탭: 회차 선택 / 중복기출 ===== -->
+    <!-- ===== 탭 영역 (main.js가 자동 생성 / toeic.js가 토익 탭 추가) ===== -->
     <section>
-            <div class="main-tabs">
-        <button class="main-tab active" data-tab="rounds" type="button">📅 회차 선택</button>
-        <button class="main-tab" data-tab="dup" type="button">🔒 중복기출 모음집</button>
-        <button class="main-tab" data-tab="toeic" type="button">🗣️ 토익스피킹 <span class="tab-cnt">5</span></button>
-      </div>
+      <div class="main-tabs" id="main-tabs"></div>
 
-      <!-- 토익스피킹 패널 -->
-      <div class="tab-panel" id="panel-toeic" style="display:none;">
-        <div class="study-intro">
-          <b>TOEIC Speaking</b> · 5파트 11문항 / 약 20분 / 0~200점(Level 1~8)<br>
-          파트별 <b>템플릿과 만능문장</b>을 정리했습니다. 소리 내어 3회 이상 읽어보세요.
-        </div>
-        <div class="exam-grid" id="toeic-list"></div>
-      </div>
-
-
-      <!-- 회차 선택 패널 -->
       <div class="tab-panel" id="panel-rounds">
         <div class="exam-grid" id="exam-list">
           <p class="loading" style="grid-column:1/-1;">회차 목록을 불러오는 중...</p>
         </div>
       </div>
 
-      <!-- 중복기출 패널 -->
       <div class="tab-panel" id="panel-dup" style="display:none;">
         <div class="lock-box" id="dup-locked">
           <div class="lock-icon">🔒</div>
@@ -183,12 +154,10 @@
            data-ad-slot="8589448751"
            data-ad-format="auto"
            data-full-width-responsive="true"></ins>
-      <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-      </script>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
 
-    <!-- ===== 쿠팡 캐러셀 (필요 없으면 이 블록 전체 삭제) ===== -->
+    <!-- ===== 쿠팡 캐러셀 ===== -->
     <div class="ad-zone ad-zone-coupang">
       <script src="https://ads-partners.coupang.com/g.js"></script>
       <script>
@@ -236,7 +205,7 @@
   <script src="js/protect.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/main.js"></script>
+  <!-- ⬇️ 반드시 main.js 다음에 -->
   <script src="js/toeic.js"></script>
-
 </body>
 </html>
