@@ -15,8 +15,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: 소스 체크아웃
         uses: actions/checkout@v4
@@ -36,8 +39,9 @@ jobs:
           s = io.open(path, encoding='utf-8').read()
           if '__GEMINI_API_KEY__' not in s:
               raise SystemExit('플레이스홀더를 찾지 못했습니다: ' + path)
-          io.open(path, 'w', encoding='utf-8').write(s.replace('__GEMINI_API_KEY__', key))
-          print('주입 완료 (길이 %d)' % len(key))
+          io.open(path, 'w', encoding='utf-8').write(
+              s.replace('__GEMINI_API_KEY__', key))
+          print('주입 완료 (키 길이 %d)' % len(key))
           PY
 
       - name: Pages 설정
