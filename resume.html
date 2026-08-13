@@ -287,12 +287,23 @@
       <details class="ai-key-box">
         <summary>🔑 AI 사용 설정 <span id="keyState" class="key-state">확인 중</span></summary>
 
+        <!-- 공용 키 정상 동작 시 -->
         <div id="sharedNotice" class="sec-tip" style="margin:8px 0;" hidden>
           🎁 <b>공용 AI 키가 적용되어 있습니다.</b> 키 입력 없이 바로 사용하실 수 있습니다.<br>
           오늘 남은 횟수 : <b id="apiLeft">-</b>회
           <span style="color:#64748b;">· 한도를 넘기면 아래에서
           <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">무료 개인 키</a>를
           등록해 제한 없이 이용하세요.</span>
+        </div>
+
+        <!-- 주입 실패 시 (관리자 진단용) -->
+        <div id="injectWarn" class="sec-warn" style="margin:8px 0;" hidden>
+          ⚙️ <b>공용 키가 아직 적용되지 않았습니다.</b>
+          <span id="injectReason"></span><br>
+          <span style="color:#64748b;font-size:.85em;">
+            관리자 확인 : ① Settings → Pages → Source = <b>GitHub Actions</b>
+            ② Actions 탭 워크플로 성공(✅) ③ 브라우저 강력 새로고침(Ctrl+Shift+R)
+          </span>
         </div>
 
         <p class="ai-hint">
@@ -306,6 +317,7 @@
           <button class="btn-sm" id="clearKey">삭제</button>
         </div>
       </details>
+
 
       <!-- 입력 폼 -->
       <div class="ai-form">
@@ -460,7 +472,7 @@
     /* ============================================
        API 키 / 사용 가능 여부
        ============================================ */
-    function refreshKeyState() {
+        function refreshKeyState() {
       if (!window.ResumeAI) return;
 
       var info = ResumeAI.keyInfo();
@@ -482,6 +494,44 @@
           el.className = 'key-state';
         }
       }
+
+      var hasShared = !!(window.CBT_API && window.CBT_API.hasShared());
+
+      /* 공용 키 정상 배너 */
+      var notice = $('#sharedNotice');
+      if (notice) notice.hidden = !(hasShared && !own);
+
+      /* 주입 실패 진단 배너 */
+      var warn = $('#injectWarn');
+      if (warn) {
+        var isLocal = location.protocol === 'file:' ||
+                      /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+        var st = window.CBT_API ? window.CBT_API.injectState() : 'no_file';
+        var show = !hasShared && !own && !isLocal;
+        warn.hidden = !show;
+        if (show) {
+          var reason = {
+            not_injected: '(원인: 빌드 시 키 치환이 실행되지 않음)',
+            empty:        '(원인: 주입된 값이 비어 있음)',
+            too_short:    '(원인: 주입된 값이 비정상)',
+            no_file:      '(원인: api-config.js 파일이 로드되지 않음 — 경로 확인)'
+          }[st] || '';
+          var r = $('#injectReason');
+          if (r) r.textContent = reason;
+        }
+      }
+
+      var left = $('#apiLeft');
+      if (left) left.textContent = ResumeAI.remaining();
+
+      if (own && $('#apiKey')) $('#apiKey').value = ResumeAI.getKey();
+
+      if (!info.usable) {
+        var box = $('.ai-key-box');
+        if (box) box.open = true;
+      }
+    }
+
 
       /* 공용 키 안내 배너 */
       var notice    = $('#sharedNotice');
