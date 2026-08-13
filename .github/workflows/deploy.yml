@@ -1,0 +1,53 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 소스 체크아웃
+        uses: actions/checkout@v4
+
+      - name: API 키 주입
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "::error::GEMINI_API_KEY 시크릿이 등록되지 않았습니다."
+            exit 1
+          fi
+          python3 - <<'PY'
+          import os, io
+          path = 'js/api-config.js'
+          key  = os.environ['GEMINI_API_KEY']
+          s = io.open(path, encoding='utf-8').read()
+          if '__GEMINI_API_KEY__' not in s:
+              raise SystemExit('플레이스홀더를 찾지 못했습니다: ' + path)
+          io.open(path, 'w', encoding='utf-8').write(s.replace('__GEMINI_API_KEY__', key))
+          print('주입 완료 (길이 %d)' % len(key))
+          PY
+
+      - name: Pages 설정
+        uses: actions/configure-pages@v5
+
+      - name: 아티팩트 업로드
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: 배포
+        id: deployment
+        uses: actions/deploy-pages@v4
