@@ -6,12 +6,85 @@
   <title>안전과장 CBT</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/custom.css">
+
+  <!-- ===== 추가 스타일: 로고 옆 광고 + 하단 출처 ===== -->
+  <style>
+    /* 페이지 전체를 세로 flex로 만들어 푸터를 항상 화면 맨 아래로 */
+    html, body { min-height: 100%; }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    body > main { flex: 1 0 auto; }
+
+    /* 상단바: 로고 - 광고 - 우측버튼 정렬 */
+    .topbar .container {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .topbar .logo { flex: 0 0 auto; white-space: nowrap; }
+    .topbar .topbar-actions { flex: 0 0 auto; margin-left: auto; }
+
+    /* 로고 옆 광고 영역 */
+    .topbar-ad {
+      flex: 1 1 auto;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      overflow: hidden;
+      max-height: 60px;
+      line-height: 0;
+    }
+    .topbar-ad img {
+      display: block;
+      height: 46px;      /* 상단바 높이에 맞춰 축소 */
+      width: auto;
+      max-width: 100%;
+      border-radius: 6px;
+    }
+    /* 좁은 화면에서는 상단 광고 숨김 (레이아웃 깨짐 방지) */
+    @media (max-width: 900px) {
+      .topbar-ad { display: none; }
+    }
+
+    /* 본문 하단 배너 광고 (캐러셀) */
+    .ad-bottom {
+      margin: 30px auto 10px;
+      display: flex;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* 하단 출처 표기 */
+    .site-footer {
+      flex-shrink: 0;
+      margin-top: auto;
+      padding: 18px 12px 22px;
+      text-align: center;
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: #9aa1ab;
+      border-top: 1px solid #e5e7eb;
+      background: #fff;
+      word-break: keep-all;
+    }
+  </style>
 </head>
 <body>
   <!-- 상단 바 -->
   <header class="topbar">
     <div class="container">
       <a href="index.html" class="logo" style="text-decoration:none;">⛑️ 안전과장 · CBT</a>
+
+      <!-- ===== [광고 2] 로고 옆 배너 광고 ===== -->
+      <div class="topbar-ad">
+        <a href="https://link.coupang.com/a/gaVHjnvo96" target="_blank" rel="nofollow sponsored noopener" referrerpolicy="unsafe-url">
+          <img src="https://ads-partners.coupang.com/banners/1014721?trackingCode=AF3164006&subId=&traceId=V0-301-969b06e95b87326d-I1014721&w=728&h=90" alt="광고">
+        </a>
+      </div>
+
       <div class="topbar-actions">
         <span id="user-badge" class="auth-badge" style="display:none;">👤 <span id="user-name">-</span></span>
         <button id="settings-btn" class="btn-sm" title="설정">⚙️</button>
@@ -81,6 +154,14 @@
         <div class="exam-grid" id="dup-list" style="display:none;"></div>
       </div>
     </section>
+
+    <!-- ===== [광고 1] 본문 하단 캐러셀 광고 ===== -->
+    <div class="ad-bottom">
+      <script src="https://ads-partners.coupang.com/g.js"></script>
+      <script>
+        new PartnersCoupang.G({"id":1014723,"trackingCode":"AF3164006","subId":null,"template":"carousel","width":"680","height":"140"});
+      </script>
+    </div>
   </main>
 
   <!-- 입장코드 모달 -->
@@ -110,6 +191,11 @@
       </div>
     </div>
   </div>
+
+  <!-- ===== 하단 출처 표기 ===== -->
+  <footer class="site-footer">
+    출처 : 각종 CBT 사이트(최강 자격증 기출문제 전자문제집 CBT, CBT 문제은행, 모두CBT 등)
+  </footer>
 
   <script src="js/protect.js"></script>
   <script src="js/storage.js"></script>
