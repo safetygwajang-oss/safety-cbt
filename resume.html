@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>자기소개서 작성법 · AI 자동 작성기 · 안전과장 CBT</title>
   <meta name="description" content="채용공고와 경력사항을 넣으면 회사 정보를 검색해 자기소개서 작성 전략과 초안을 만들어 줍니다. 맞춤법 검사기 포함.">
+  <link rel="canonical" href="resume.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="자기소개서 작성법 · AI 자동 작성기">
+  <meta property="og:description" content="채용공고·경력사항을 넣으면 회사 정보를 검색해 전략과 초안을 만들어 줍니다. 맞춤법 검사기 포함.">
+  <meta name="twitter:card" content="summary_large_image">
 
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9283463208175336"
      crossorigin="anonymous"></script>
@@ -12,6 +18,15 @@
 
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/custom.css">
+
+  <style>
+    /* 이 페이지 전용 소량 보강 (custom.css 를 건드리지 않기 위함) */
+    .ai-count { font-size:.8rem; color:#64748b; margin-left:auto; }
+    .ai-count.warn { color:#dc2626; font-weight:700; }
+    .ai-mini-note { font-size:.78rem; color:#94a3b8; margin:4px 0 0; }
+    .key-state.ok { color:#059669; }
+    #sharedNotice a { font-weight:600; }
+  </style>
 </head>
 <body>
   <header class="topbar">
@@ -60,7 +75,7 @@
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
 
-        <!-- ==================== 1 ==================== -->
+    <!-- ==================== 1 ==================== -->
     <section class="study-sec" id="g1">
       <h3>1. 자기소개서는 무엇을 보는 글인가</h3>
       <p class="sec-note">
@@ -268,15 +283,25 @@
       <h3>7. 🤖 AI 자기소개서 작성기</h3>
       <p class="sec-note">회사 정보를 <b>실시간 검색</b>해 확인한 뒤, 채용공고 요건과 경력사항을 연결해 전략과 초안을 만듭니다.</p>
 
-      <!-- API 키 -->
+      <!-- API 키 / 사용 설정 -->
       <details class="ai-key-box">
-        <summary>🔑 Gemini API 키 설정 <span id="keyState" class="key-state">미설정</span></summary>
+        <summary>🔑 AI 사용 설정 <span id="keyState" class="key-state">확인 중</span></summary>
+
+        <div id="sharedNotice" class="sec-tip" style="margin:8px 0;" hidden>
+          🎁 <b>공용 AI 키가 적용되어 있습니다.</b> 키 입력 없이 바로 사용하실 수 있습니다.<br>
+          오늘 남은 횟수 : <b id="apiLeft">-</b>회
+          <span style="color:#64748b;">· 한도를 넘기면 아래에서
+          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">무료 개인 키</a>를
+          등록해 제한 없이 이용하세요.</span>
+        </div>
+
         <p class="ai-hint">
-          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>에서 무료 발급 →
-          아래에 붙여넣기. 키는 <b>이 브라우저에만 저장</b>되며 서버로 전송되지 않습니다.
+          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>에서
+          무료 발급 → 아래에 붙여넣기. 키는 <b>이 브라우저에만 저장</b>되며 별도 서버로 전송되지 않습니다.
+          개인 키를 등록하면 <b>공용 한도와 무관하게</b> 사용됩니다.
         </p>
         <div class="ai-row">
-          <input type="password" id="apiKey" class="ai-input allow-select" placeholder="AIza..." autocomplete="off">
+          <input type="password" id="apiKey" class="ai-input allow-select" placeholder="AIza... (선택 입력)" autocomplete="off">
           <button class="btn-sm" id="saveKey">저장</button>
           <button class="btn-sm" id="clearKey">삭제</button>
         </div>
@@ -290,7 +315,10 @@
           <input type="text" id="job" class="ai-input allow-select" placeholder="예) 생산기술 / 안전환경">
         </div>
 
-        <label class="ai-label">채용공고 <span>(전체 복사 붙여넣기)</span></label>
+        <label class="ai-label">
+          채용공고 <span>(전체 복사 붙여넣기)</span>
+          <span class="ai-count" id="jdCount">0자</span>
+        </label>
         <textarea id="jd" class="ai-textarea allow-select" rows="7"
           placeholder="담당업무 / 필수요건 / 우대사항 / 자격요건을 그대로 붙여넣으세요."></textarea>
 
@@ -309,7 +337,10 @@
         <input type="text" id="itemCustom" class="ai-input allow-select"
                placeholder="직접 입력 (쉼표로 구분) 예) 회사가 나를 뽑아야 하는 이유">
 
-        <label class="ai-label">경력·경험 사항 <span>(이력서 붙여넣기 — 수치가 많을수록 결과가 좋아집니다)</span></label>
+        <label class="ai-label">
+          경력·경험 사항 <span>(이력서 붙여넣기 — 수치가 많을수록 결과가 좋아집니다)</span>
+          <span class="ai-count" id="careerCount">0자</span>
+        </label>
         <textarea id="career" class="ai-textarea allow-select" rows="8"
           placeholder="회사/기간/직무&#10;- 담당업무 :&#10;- 성과(수치) :&#10;- 사용 도구·자격증 :&#10;&#10;학력, 프로젝트, 대외활동, 자격증도 함께 적어주세요."></textarea>
 
@@ -330,8 +361,10 @@
         <div class="ai-btns">
           <button class="btn-primary" id="btnStrategy">📋 작성 전략 만들기</button>
           <button class="btn-primary" id="btnDraft">✍️ 자기소개서 초안 쓰기</button>
+          <button class="btn-sm" id="btnFormClear">🧹 입력 초기화</button>
         </div>
         <p class="ai-hint">① 전략으로 방향을 잡고 → ② 초안을 뽑는 순서를 권장합니다. 생성에 20~60초 걸립니다.</p>
+        <p class="ai-mini-note">입력값은 <b>내 브라우저에만</b> 임시 저장되어 새로 접속해도 이어서 작성할 수 있습니다. 공용 PC에서는 사용 후 <b>입력 초기화</b>를 눌러 주세요.</p>
       </div>
 
       <!-- 결과 -->
@@ -364,7 +397,7 @@
       <p class="sec-note">완성한 자기소개서를 붙여넣으면 맞춤법·띄어쓰기·비문을 교정하고 수정 내역을 표로 보여줍니다.</p>
 
       <textarea id="spellIn" class="ai-textarea allow-select" rows="9"
-        placeholder="검사할 글을 붙여넣으세요. (권장 3,000자 이내)"></textarea>
+        placeholder="검사할 글을 붙여넣으세요. (권장 3,000자 이내 · 최대 6,000자)"></textarea>
 
       <div class="ai-row" style="margin-top:8px;">
         <select id="spellLevel" class="ai-input">
@@ -388,7 +421,7 @@
       </div>
 
       <div class="sec-tip">
-        AI 교정은 참고용입니다. 최종 제출 전 <a href="http://speller.cs.pusan.ac.kr/" target="_blank" rel="noopener">부산대 한국어 맞춤법 검사기</a>로 한 번 더 확인하는 것을 권합니다.
+        AI 교정은 참고용입니다. 최종 제출 전 <a href="https://speller.cs.pusan.ac.kr/" target="_blank" rel="noopener">부산대 한국어 맞춤법 검사기</a>로 한 번 더 확인하는 것을 권합니다.
       </div>
     </section>
 
@@ -402,49 +435,188 @@
     <div class="footer-links">
       <a href="privacy.html">개인정보처리방침</a>·<a href="index.html">홈</a>
     </div>
-    AI가 생성한 문장은 초안이며 사실 확인은 이용자 책임입니다. 입력 내용은 서버에 저장되지 않습니다.<br>
+    AI가 생성한 문장은 초안이며 사실 확인은 이용자 책임입니다. 입력 내용은 별도 서버에 저장되지 않습니다.<br>
     본 콘텐츠의 무단 복제·배포를 금지합니다.
   </footer>
 
+  <!-- 공용/개인 키 관리 → AI 엔진 순서 유지 -->
+  <script src="js/api-config.js"></script>
   <script src="js/resume-ai.js"></script>
   <script>
   (function () {
+    'use strict';
+
     var $ = function (s) { return document.querySelector(s); };
     var lastText = '', lastSpell = '';
 
-    /* ===== API 키 ===== */
-    function refreshKeyState() {
-      var has = !!ResumeAI.getKey();
-      var el = $('#keyState');
-      el.textContent = has ? '설정됨' : '미설정';
-      el.className = 'key-state' + (has ? ' ok' : '');
-      if (has) $('#apiKey').value = ResumeAI.getKey();
+    /* 요소가 없어도 오류가 나지 않게 하는 안전 바인더 */
+    function on(sel, evt, fn) {
+      var el = $(sel);
+      if (el) el.addEventListener(evt, fn);
+      return el;
     }
-    refreshKeyState();
 
-    $('#saveKey').onclick = function () {
-      var v = $('#apiKey').value.trim();
+    /* ============================================
+       API 키 / 사용 가능 여부
+       ============================================ */
+    function refreshKeyState() {
+      if (!window.ResumeAI) return;
+
+      var info = ResumeAI.keyInfo();
+      var own  = !!ResumeAI.getKey();
+      var el   = $('#keyState');
+
+      if (el) {
+        if (own) {
+          el.textContent = '개인 키 사용 중';
+          el.className = 'key-state ok';
+        } else if (info.usable) {
+          el.textContent = '공용 키 사용 가능';
+          el.className = 'key-state ok';
+        } else if (info.quota) {
+          el.textContent = '오늘 한도 초과';
+          el.className = 'key-state';
+        } else {
+          el.textContent = '키 필요';
+          el.className = 'key-state';
+        }
+      }
+
+      /* 공용 키 안내 배너 */
+      var notice    = $('#sharedNotice');
+      var hasShared = !!(window.CBT_API && window.CBT_API.hasShared());
+      if (notice) notice.hidden = !(hasShared && !own);
+
+      var left = $('#apiLeft');
+      if (left) left.textContent = ResumeAI.remaining();
+
+      if (own && $('#apiKey')) $('#apiKey').value = ResumeAI.getKey();
+
+      /* 사용 불가 상태면 설정 박스를 자동으로 펼침 */
+      if (!info.usable) {
+        var box = $('.ai-key-box');
+        if (box) box.open = true;
+      }
+    }
+
+    on('#saveKey', 'click', function () {
+      var v = ($('#apiKey').value || '').trim();
       if (!v) { alert('API 키를 입력해 주세요.'); return; }
-      ResumeAI.setKey(v); refreshKeyState(); alert('저장되었습니다.');
-    };
-    $('#clearKey').onclick = function () {
-      ResumeAI.setKey(''); $('#apiKey').value = ''; refreshKeyState();
-    };
+      if (v.length < 20) { alert('키 형식이 올바르지 않은 것 같습니다. 다시 확인해 주세요.'); return; }
+      ResumeAI.setKey(v);
+      refreshKeyState();
+      alert('저장되었습니다. 이제 사용 한도 없이 이용하실 수 있습니다.');
+    });
 
-    /* ===== 항목 수집 ===== */
+    on('#clearKey', 'click', function () {
+      ResumeAI.setKey('');
+      if ($('#apiKey')) $('#apiKey').value = '';
+      refreshKeyState();
+      alert('개인 키를 삭제했습니다. 공용 키로 전환됩니다.');
+    });
+
+    /* ============================================
+       입력 자동 저장 / 복원
+       ============================================ */
+    var FORM_LS = 'cbt_resume_form';
+    var FIELDS  = ['company', 'job', 'jd', 'career', 'itemCustom', 'len', 'tone'];
+    var saveTimer = null;
+
+    function saveForm() {
+      try {
+        var data = {};
+        FIELDS.forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) data[id] = el.value;
+        });
+        var chips = [];
+        document.querySelectorAll('#itemChips input:checked')
+          .forEach(function (c) { chips.push(c.value); });
+        data.chips = chips;
+        data.spell = ($('#spellIn') && $('#spellIn').value) || '';
+        localStorage.setItem(FORM_LS, JSON.stringify(data));
+      } catch (e) {}
+    }
+
+    function saveFormLater() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveForm, 500);
+    }
+
+    function loadForm() {
+      var data;
+      try { data = JSON.parse(localStorage.getItem(FORM_LS) || 'null'); } catch (e) { return; }
+      if (!data) return;
+
+      FIELDS.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el && typeof data[id] === 'string') el.value = data[id];
+      });
+
+      if (Array.isArray(data.chips)) {
+        document.querySelectorAll('#itemChips input').forEach(function (c) {
+          c.checked = data.chips.indexOf(c.value) >= 0;
+        });
+      }
+      if (typeof data.spell === 'string' && $('#spellIn')) $('#spellIn').value = data.spell;
+    }
+
+    on('#btnFormClear', 'click', function () {
+      if (!confirm('입력한 내용을 모두 지우시겠습니까?')) return;
+      FIELDS.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el && el.tagName !== 'SELECT') el.value = '';
+      });
+      document.querySelectorAll('#itemChips input').forEach(function (c, i) {
+        c.checked = (i < 3);   /* 기본 3개만 체크 */
+      });
+      try { localStorage.removeItem(FORM_LS); } catch (e) {}
+      updateCounts();
+      var r = $('#aiResult'); if (r) r.hidden = true;
+      alert('입력 내용을 초기화했습니다.');
+    });
+
+    /* ============================================
+       글자수 카운터
+       ============================================ */
+    function setCount(sel, len, limit) {
+      var el = $(sel);
+      if (!el) return;
+      el.textContent = len.toLocaleString() + '자';
+      if (limit) el.className = 'ai-count' + (len > limit ? ' warn' : '');
+    }
+
+    function updateCounts() {
+      setCount('#jdCount',     ($('#jd') ? $('#jd').value.length : 0));
+      setCount('#careerCount', ($('#career') ? $('#career').value.length : 0));
+      setCount('#spellCount',  ($('#spellIn') ? $('#spellIn').value.length : 0), 6000);
+    }
+
+    ['#jd', '#career', '#company', '#job', '#itemCustom', '#spellIn'].forEach(function (sel) {
+      on(sel, 'input', function () { updateCounts(); saveFormLater(); });
+    });
+    ['#len', '#tone'].forEach(function (sel) { on(sel, 'change', saveFormLater); });
+    document.querySelectorAll('#itemChips input').forEach(function (c) {
+      c.addEventListener('change', saveFormLater);
+    });
+
+    /* ============================================
+       항목 수집 / 입력 검증
+       ============================================ */
     function getItems() {
       var arr = [];
       document.querySelectorAll('#itemChips input:checked').forEach(function (c) { arr.push(c.value); });
-      var custom = $('#itemCustom').value.trim();
+      var custom = ($('#itemCustom').value || '').trim();
       if (custom) custom.split(',').forEach(function (s) { if (s.trim()) arr.push(s.trim()); });
       return arr;
     }
 
     function collect() {
+      var job = ($('#job').value || '').trim();
       return {
-        company: $('#company').value.trim() + (($('#job').value.trim()) ? ' / 직무: ' + $('#job').value.trim() : ''),
-        jd: $('#jd').value.trim(),
-        career: $('#career').value.trim(),
+        company: ($('#company').value || '').trim() + (job ? ' / 직무: ' + job : ''),
+        jd: ($('#jd').value || '').trim(),
+        career: ($('#career').value || '').trim(),
         items: getItems().map(function (s, i) { return (i + 1) + '. ' + s; }).join('\n'),
         len: $('#len').value,
         tone: $('#tone').value
@@ -452,17 +624,30 @@
     }
 
     function validate(v) {
-      if (!ResumeAI.getKey()) { alert('먼저 Gemini API 키를 설정해 주세요.'); $('.ai-key-box').open = true; return false; }
-      if (v.jd.length < 30) { alert('채용공고를 30자 이상 붙여넣어 주세요.'); return false; }
-      if (v.career.length < 30) { alert('경력·경험 사항을 30자 이상 입력해 주세요.'); return false; }
+      var info = ResumeAI.keyInfo();
+      if (!info.usable) {
+        alert(info.error || 'AI를 사용할 수 없습니다.');
+        var box = $('.ai-key-box'); if (box) box.open = true;
+        return false;
+      }
+      if (v.jd.length < 30) { alert('채용공고를 30자 이상 붙여넣어 주세요.'); $('#jd').focus(); return false; }
+      if (v.career.length < 30) { alert('경력·경험 사항을 30자 이상 입력해 주세요.'); $('#career').focus(); return false; }
       if (!getItems().length) { alert('작성 항목을 1개 이상 선택해 주세요.'); return false; }
+      if (v.jd.length + v.career.length > 20000) {
+        alert('입력이 너무 깁니다. 채용공고와 경력사항을 합쳐 20,000자 이내로 줄여 주세요.');
+        return false;
+      }
       return true;
     }
 
-    function busy(on, msg) {
-      $('#btnStrategy').disabled = on;
-      $('#btnDraft').disabled = on;
-      if (on) {
+    /* ============================================
+       생성 실행
+       ============================================ */
+    function busy(on_, msg) {
+      var b1 = $('#btnStrategy'), b2 = $('#btnDraft');
+      if (b1) b1.disabled = on_;
+      if (b2) b2.disabled = on_;
+      if (on_) {
         $('#aiResult').hidden = false;
         $('#resultTitle').textContent = msg || '생성 중';
         $('#aiResultBody').innerHTML = '<div class="ai-loading"><span class="spin"></span> ' +
@@ -472,11 +657,18 @@
       }
     }
 
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
     function showErr(e) {
-      var m = e && e.message || '알 수 없는 오류';
-      if (m === 'NO_KEY') m = 'API 키가 없습니다. 키를 설정해 주세요.';
+      var m = (e && e.message) || '알 수 없는 오류';
+      if (m === 'NO_KEY') m = 'API 키가 없습니다. 위 [AI 사용 설정]에서 키를 등록해 주세요.';
       if (m === 'BAD_KEY') m = 'API 키가 올바르지 않습니다. 다시 확인해 주세요.';
-      $('#aiResultBody').innerHTML = '<div class="sec-warn">⚠️ ' + m + '</div>';
+      $('#aiResultBody').innerHTML =
+        '<div class="sec-warn">⚠️ ' + esc(m).replace(/\n/g, '<br>') + '</div>';
     }
 
     function renderSources(src) {
@@ -484,7 +676,8 @@
       var seen = {}, h = '<b>🔎 참고한 검색 출처</b><ul>';
       src.forEach(function (s) {
         if (seen[s.uri]) return; seen[s.uri] = 1;
-        h += '<li><a href="' + s.uri + '" target="_blank" rel="noopener nofollow">' + s.title + '</a></li>';
+        h += '<li><a href="' + esc(s.uri) + '" target="_blank" rel="noopener nofollow">' +
+             esc(s.title) + '</a></li>';
       });
       $('#aiSources').innerHTML = h + '</ul>';
     }
@@ -492,85 +685,151 @@
     async function run(kind) {
       var v = collect();
       if (!validate(v)) return;
+
+      saveForm();
       var title = kind === 'strategy' ? '📋 자기소개서 작성 전략' : '✍️ 자기소개서 초안';
       busy(true, kind === 'strategy' ? '회사 정보를 검색하고 전략을 짜는 중' : '초안을 작성하는 중');
+
       try {
-        var prompt = kind === 'strategy' ? ResumeAI.prompts.strategy(v) : ResumeAI.prompts.draft(v);
-        var r = await ResumeAI.call(prompt, { search: true, temp: kind === 'strategy' ? 0.6 : 0.8 });
+        var prompt = kind === 'strategy'
+          ? ResumeAI.prompts.strategy(v)
+          : ResumeAI.prompts.draft(v);
+        var r = await ResumeAI.call(prompt, {
+          search: true,
+          temp: kind === 'strategy' ? 0.6 : 0.8
+        });
         lastText = r.text;
         $('#resultTitle').textContent = title;
         $('#aiResultBody').innerHTML = ResumeAI.md(r.text);
         renderSources(r.sources);
-      } catch (e) { showErr(e); }
-      finally { busy(false); }
+      } catch (e) {
+        showErr(e);
+      } finally {
+        busy(false);
+        refreshKeyState();     /* 남은 횟수 갱신 */
+      }
     }
 
-    $('#btnStrategy').onclick = function () { run('strategy'); };
-    $('#btnDraft').onclick = function () { run('draft'); };
+    on('#btnStrategy', 'click', function () { run('strategy'); });
+    on('#btnDraft', 'click', function () { run('draft'); });
 
-    /* ===== 복사 / 저장 ===== */
-    $('#btnCopy').onclick = function () {
-      if (!lastText) return;
-      navigator.clipboard.writeText(lastText)
-        .then(function () { alert('복사되었습니다.'); })
-        .catch(function () { alert('복사에 실패했습니다. 결과를 직접 선택해 주세요.'); });
-    };
+    /* ============================================
+       복사 / 저장
+       ============================================ */
+    function copyText(txt, okMsg) {
+      if (!txt) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt)
+          .then(function () { alert(okMsg); })
+          .catch(fallback);
+      } else { fallback(); }
 
-    $('#btnDownload').onclick = function () {
+      function fallback() {
+        try {
+          var ta = document.createElement('textarea');
+          ta.value = txt;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          alert(okMsg);
+        } catch (e) {
+          alert('복사에 실패했습니다. 결과를 직접 선택해 복사해 주세요.');
+        }
+      }
+    }
+
+    on('#btnCopy', 'click', function () { copyText(lastText, '복사되었습니다.'); });
+
+    on('#btnDownload', 'click', function () {
       if (!lastText) return;
-      var blob = new Blob([lastText], { type: 'text/plain;charset=utf-8' });
+      var blob = new Blob(['\uFEFF' + lastText], { type: 'text/plain;charset=utf-8' });
       var a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = '자기소개서_' + new Date().toISOString().slice(0, 10) + '.txt';
-      a.click(); URL.revokeObjectURL(a.href);
-    };
-
-    /* ===== 맞춤법 검사 ===== */
-    $('#spellIn').addEventListener('input', function () {
-      $('#spellCount').textContent = this.value.length.toLocaleString() + '자';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
     });
 
-    $('#btnSpellClear').onclick = function () {
-      $('#spellIn').value = ''; $('#spellCount').textContent = '0자'; $('#spellResult').hidden = true;
-    };
+    /* ============================================
+       맞춤법 검사
+       ============================================ */
+    on('#btnSpellClear', 'click', function () {
+      $('#spellIn').value = '';
+      updateCounts();
+      $('#spellResult').hidden = true;
+      saveFormLater();
+    });
 
-    $('#btnSpell').onclick = async function () {
-      var t = $('#spellIn').value.trim();
-      if (!ResumeAI.getKey()) { alert('먼저 Gemini API 키를 설정해 주세요.'); $('.ai-key-box').open = true; return; }
+    on('#btnSpell', 'click', async function () {
+      var btn = this;
+      var t = ($('#spellIn').value || '').trim();
+
+      var info = ResumeAI.keyInfo();
+      if (!info.usable) {
+        alert(info.error || 'AI를 사용할 수 없습니다.');
+        var box = $('.ai-key-box'); if (box) box.open = true;
+        return;
+      }
       if (t.length < 10) { alert('검사할 글을 10자 이상 입력해 주세요.'); return; }
       if (t.length > 6000) { alert('6,000자 이내로 나눠서 검사해 주세요.'); return; }
 
-      this.disabled = true;
+      btn.disabled = true;
       $('#spellResult').hidden = false;
-      $('#spellBody').innerHTML = '<div class="ai-loading"><span class="spin"></span> 교정 중입니다...</div>';
+      $('#spellBody').innerHTML = '<div class="ai-loading"><span class="spin"></span> 교정 중입니다... (10~30초)</div>';
+      $('#spellResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
       try {
-        var r = await ResumeAI.call(ResumeAI.prompts.spell(t, $('#spellLevel').value), { search: false, temp: 0.2 });
-        lastSpell = (r.text.split(/##\s*수정 내역/)[0] || r.text).replace(/^##\s*교정문\s*/m, '').trim();
+        var r = await ResumeAI.call(
+          ResumeAI.prompts.spell(t, $('#spellLevel').value),
+          { search: false, temp: 0.2 }
+        );
+        lastSpell = (r.text.split(/##\s*수정 내역/)[0] || r.text)
+          .replace(/^##\s*교정문\s*/m, '').trim();
         $('#spellBody').innerHTML = ResumeAI.md(r.text);
       } catch (e) {
-        var m = e && e.message || '오류';
+        var m = (e && e.message) || '오류';
         if (m === 'BAD_KEY') m = 'API 키가 올바르지 않습니다.';
-        $('#spellBody').innerHTML = '<div class="sec-warn">⚠️ ' + m + '</div>';
+        if (m === 'NO_KEY')  m = 'API 키가 없습니다. 위 [AI 사용 설정]을 확인해 주세요.';
+        $('#spellBody').innerHTML =
+          '<div class="sec-warn">⚠️ ' + esc(m).replace(/\n/g, '<br>') + '</div>';
       }
-      this.disabled = false;
-    };
 
-    $('#btnSpellCopy').onclick = function () {
-      if (!lastSpell) return;
-      navigator.clipboard.writeText(lastSpell)
-        .then(function () { alert('교정문이 복사되었습니다.'); })
-        .catch(function () { alert('복사에 실패했습니다.'); });
-    };
+      btn.disabled = false;
+      refreshKeyState();
+    });
 
-    /* 목차 스무스 스크롤 */
+    on('#btnSpellCopy', 'click', function () { copyText(lastSpell, '교정문이 복사되었습니다.'); });
+
+    /* ============================================
+       목차 스무스 스크롤
+       ============================================ */
     document.querySelectorAll('.study-toc a').forEach(function (a) {
       a.addEventListener('click', function (e) {
-        var t = document.querySelector(this.getAttribute('href'));
+        var href = this.getAttribute('href');
+        if (!href || href.charAt(0) !== '#') return;
+        var t = document.querySelector(href);
         if (!t) return;
         e.preventDefault();
-        window.scrollTo({ top: t.getBoundingClientRect().top + window.pageYOffset - 70, behavior: 'smooth' });
+        window.scrollTo({
+          top: t.getBoundingClientRect().top + window.pageYOffset - 70,
+          behavior: 'smooth'
+        });
       });
     });
+
+    /* ============================================
+       부팅
+       ============================================ */
+    loadForm();
+    updateCounts();
+    refreshKeyState();
+    window.addEventListener('beforeunload', saveForm);
+    window.addEventListener('pageshow', refreshKeyState);
   })();
   </script>
 </body>
