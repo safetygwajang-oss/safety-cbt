@@ -1,8 +1,13 @@
-/* ============================================
-   추가 스타일 - 자격증별 탭 / 중복기출 잠금
-   ============================================ */
+/* ============================================================
+   안전과장 CBT · custom.css
+   1) 자격증별 탭 / 중복기출 잠금
+   2) 토익스피킹 학습자료 (study.html)
+   3) 인라인 광고 (콘텐츠 사이)
+   ============================================================ */
 
-/* ===== 상단 탭 ===== */
+/* ============================================
+   1. 상단 탭
+   ============================================ */
 .main-tabs {
   display: flex;
   gap: 4px;
@@ -43,11 +48,12 @@
   border-bottom-color: var(--primary);
 }
 
-/* 탭 안 문항수 배지 */
+/* 탭 안 문항수 배지 (중복 선언 통합) */
 .tab-cnt {
   display: inline-block;
   min-width: 20px;
   padding: 1px 7px;
+  margin-left: 2px;
   background: var(--gray-200);
   color: var(--gray-600);
   border-radius: 20px;
@@ -107,6 +113,9 @@
   line-height: 1.4;
 }
 
+/* ===== 토익 탭 활성 시 다른 목록 숨김 ===== */
+.toeic-hidden { display: none !important; }
+
 /* ===== 모바일 ===== */
 @media (max-width: 768px) {
   .main-tabs { margin: 20px 0 16px; }
@@ -116,8 +125,10 @@
   }
   .lock-box { padding: 36px 16px; }
 }
+
+
 /* ============================================
-   토익스피킹 학습자료 (study.html)
+   2. 토익스피킹 학습자료 (study.html)
    ============================================ */
 .study-intro {
   background: var(--gray-100, #f6f7f9);
@@ -131,84 +142,169 @@
 }
 
 .study-head { margin: 26px 0 10px; }
+
 .study-badge {
-  display: inline-block; background: var(--primary); color: #fff;
-  font-size: 0.7rem; font-weight: 800; letter-spacing: 0.06em;
-  padding: 4px 10px; border-radius: 20px; margin-bottom: 10px;
+  display: inline-block;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
 }
-.study-title { font-size: 1.6rem; color: var(--secondary); margin: 0 0 6px; word-break: keep-all; }
-.study-sub { color: var(--gray-500); font-size: 0.9rem; margin: 0 0 14px; }
+
+.study-title {
+  font-size: 1.6rem;
+  color: var(--secondary);
+  margin: 0 0 6px;
+  word-break: keep-all;
+}
+
+.study-sub {
+  color: var(--gray-500);
+  font-size: 0.9rem;
+  margin: 0 0 14px;
+}
 
 .study-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
 .study-meta span {
-  background: #fff; border: 1px solid var(--gray-200, #e5e7eb);
-  border-radius: 20px; padding: 5px 12px; font-size: 0.78rem; color: var(--gray-600);
+  background: #fff;
+  border: 1px solid var(--gray-200, #e5e7eb);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  color: var(--gray-600);
 }
 .study-meta b { color: var(--primary); margin-right: 4px; }
 
+/* ===== 목차 (자동 번호 제거 → 제목의 번호만 사용) ===== */
 .study-toc {
-  background: #fff; border: 1px solid var(--gray-200, #e5e7eb);
-  border-radius: var(--radius); padding: 14px 18px; font-size: 0.88rem;
+  background: #fff;
+  border: 1px solid var(--gray-200, #e5e7eb);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  font-size: 0.88rem;
 }
 .study-toc b { color: var(--secondary); display: block; margin-bottom: 6px; }
 .study-toc ol,
 .study-toc ul {
   margin: 0;
   padding-left: 0;
-  list-style: none;      /* 브라우저 자동 번호 제거 */
+  list-style: none;
   line-height: 1.9;
 }
 .study-toc li { padding-left: 2px; }
-
 .study-toc a { color: var(--gray-600); text-decoration: none; }
 .study-toc a:hover { color: var(--primary); text-decoration: underline; }
 
+/* ===== 본문 섹션 ===== */
 .study-sec {
-  background: #fff; border: 1px solid var(--gray-200, #e5e7eb);
-  border-radius: var(--radius); padding: 22px 22px 18px; margin-bottom: 18px;
+  background: #fff;
+  border: 1px solid var(--gray-200, #e5e7eb);
+  border-radius: var(--radius);
+  padding: 22px 22px 18px;
+  margin-bottom: 18px;
   scroll-margin-top: 80px;
 }
 .study-sec h3 {
-  margin: 0 0 10px; font-size: 1.1rem; color: var(--secondary);
-  border-bottom: 2px solid var(--gray-100, #f1f3f5); padding-bottom: 8px; word-break: keep-all;
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+  color: var(--secondary);
+  border-bottom: 2px solid var(--gray-100, #f1f3f5);
+  padding-bottom: 8px;
+  word-break: keep-all;
 }
+
 .sec-note { color: var(--gray-600); font-size: 0.88rem; line-height: 1.75; margin: 0 0 12px; }
 .sec-bullets { margin: 0 0 12px; padding-left: 20px; }
-.sec-bullets li { font-size: 0.88rem; line-height: 1.85; color: var(--gray-700, #374151); word-break: keep-all; }
+.sec-bullets li {
+  font-size: 0.88rem;
+  line-height: 1.85;
+  color: var(--gray-700, #374151);
+  word-break: keep-all;
+}
 
 .sec-table-wrap { overflow-x: auto; margin-bottom: 12px; }
 .sec-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; min-width: 420px; }
 .sec-table th, .sec-table td {
-  border: 1px solid var(--gray-200, #e5e7eb); padding: 8px 10px; text-align: left; vertical-align: top;
+  border: 1px solid var(--gray-200, #e5e7eb);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
 }
-.sec-table th { background: var(--gray-100, #f6f7f9); color: var(--secondary); font-weight: 700; white-space: nowrap; }
+.sec-table th {
+  background: var(--gray-100, #f6f7f9);
+  color: var(--secondary);
+  font-weight: 700;
+  white-space: nowrap;
+}
 
 .phrase-list { display: grid; gap: 8px; }
 .phrase {
-  background: var(--gray-100, #f8f9fb); border-radius: 10px;
-  padding: 11px 14px; border-left: 3px solid var(--primary);
+  background: var(--gray-100, #f8f9fb);
+  border-radius: 10px;
+  padding: 11px 14px;
+  border-left: 3px solid var(--primary);
 }
 .ph-en { font-size: 0.95rem; font-weight: 600; color: #1f2937; line-height: 1.55; }
 .ph-ko { font-size: 0.82rem; color: var(--gray-500); margin-top: 3px; line-height: 1.55; }
 .ph-tip { font-size: 0.78rem; color: var(--primary); margin-top: 5px; line-height: 1.55; }
 
 .sec-tip, .sec-warn {
-  border-radius: 8px; padding: 11px 14px; font-size: 0.84rem; line-height: 1.7; margin-top: 12px;
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-size: 0.84rem;
+  line-height: 1.7;
+  margin-top: 12px;
 }
 .sec-tip { background: #eef7ff; color: #1d5c9e; }
 .sec-warn { background: #fff5f5; color: #b4232a; }
 
-.study-nav { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 24px 0 10px; }
+.study-nav {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 24px 0 10px;
+}
 .study-nav a { text-decoration: none; }
 
 @media (max-width: 768px) {
   .study-title { font-size: 1.3rem; }
   .study-sec { padding: 18px 16px 14px; }
 }
-/* 토익 탭 활성 시 다른 목록 숨김 */
-.toeic-hidden { display: none !important; }
-.tab-cnt {
-  display: inline-block; background: rgba(0,0,0,.12); color: inherit;
-  font-size: .7rem; font-weight: 700; padding: 1px 7px;
-  border-radius: 20px; margin-left: 4px;
+
+
+/* ============================================
+   3. 콘텐츠 사이 인라인 광고 (inline-ads.js)
+   ============================================ */
+.ad-inline {
+  margin: 26px 0;
+  padding: 6px 0;
+  min-height: 100px;
+  border-top: 1px solid var(--gray-200, #e5e7eb);
+  border-bottom: 1px solid var(--gray-200, #e5e7eb);
+  background: #fcfcfd;
+  overflow: hidden;
+}
+
+.ad-inline .ad-label {
+  display: block;
+  font-size: 0.6rem;
+  color: #c2c8ce;
+  letter-spacing: 0.08em;
+  text-align: center;
+  margin: 4px 0 6px;
+}
+
+.ad-inline ins { display: block; width: 100%; }
+
+/* 시험/해설 화면에 넣을 경우 : 보기와 충분히 띄워 오클릭 방지 */
+.exam-body .ad-inline,
+.review-list .ad-inline { margin-top: 48px; }
+
+@media (max-width: 768px) {
+  .ad-inline { margin: 20px 0; min-height: 90px; }
 }
