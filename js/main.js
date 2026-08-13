@@ -338,7 +338,7 @@
     const bar = document.createElement('div');
     bar.className = 'career-bar';
     bar.id = 'career-bar';
-    bar.innerHTML = '<span class="career-bar-label">⚡ 취업 준비</span>';
+    bar.innerHTML = '<span class="career-bar-label"> </span>';
 
     const panelKeys = [];
 
