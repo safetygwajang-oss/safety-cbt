@@ -737,42 +737,6 @@
       }
     }
 
-
-      var key = getKey(), url, headers;
-      if (key) {
-        url = 'https://api.groq.com/openai/v1/chat/completions';
-        headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key };
-      } else {
-        url = (window.CBT_API && CBT_API.PROXY_URL) || '/api/ai';
-        headers = { 'Content-Type': 'application/json' };
-      }
-
-      var tk = ticker(opt);
-      try {
-        var res = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(payload) });
-        var data = null;
-        try { data = await res.json(); } catch (e) {}
-
-        if (!res.ok || !data) {
-          if (res.status === 401 || res.status === 403) throw new Error('BAD_KEY');
-          if (res.status === 429) throw new Error('요청이 많아 잠시 제한되었습니다. 1~2분 후 다시 시도해 주세요.');
-          var em = (data && data.error && (data.error.message || data.error)) || ('서버 오류 (HTTP ' + res.status + ')');
-          throw new Error(String(em));
-        }
-
-        var ch = (data.choices && data.choices[0]) || {};
-        var txt = (ch.message && ch.message.content) || '';
-        if (!txt.trim()) throw new Error('빈 응답을 받았습니다. 다시 시도해 주세요.');
-
-        if (!key) bump();
-        if (typeof opt.onProgress === 'function') opt.onProgress(97, '정리하는 중');
-
-        return { text: txt.trim(), sources: pickSources(ch.message), model: data.model || payload.model };
-      } finally {
-        tk.stop();
-      }
-    }
-
     function esc(s) {
       return String(s == null ? '' : s)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;')
