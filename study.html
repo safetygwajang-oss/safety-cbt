@@ -92,11 +92,12 @@
       h += '</div>';
     }
     if (d.sections && d.sections.length) {
-      h += '<div class="study-toc"><b>목차</b><ol>';
+      h += '<div class="study-toc"><b>목차</b><ul>';
       d.sections.forEach(function (s, i) {
         h += '<li><a href="#sec' + i + '">' + esc(s.title) + '</a></li>';
       });
-      h += '</ol></div>';
+      h += '</ul></div>';
+
     }
     document.getElementById('study-head').innerHTML = h;
     document.title = d.title + ' · 안전과장 CBT';
