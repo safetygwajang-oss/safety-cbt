@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>토익스피킹 학습자료 · 안전과장 골드박스</title>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9283463208175336"
+     crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="container">
+      <a href="index.html" class="logo" style="text-decoration:none;">⛑️ 안전과장 · CBT</a>
+      <div class="topbar-actions">
+        <a href="index.html" class="btn-sm" style="text-decoration:none;">🏠 홈</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="study-head" class="study-head">
+      <p class="loading">자료를 불러오는 중...</p>
+    </div>
+
+    <!-- 애드센스 광고 1 -->
+    <div class="ad-zone">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-9283463208175336"
+           data-ad-slot="1373941745"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <div id="study-body"></div>
+
+    <div class="study-nav" id="study-nav"></div>
+
+    <!-- 애드센스 광고 2 -->
+    <div class="ad-zone">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-9283463208175336"
+           data-ad-slot="8589448751"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-links">
+      <a href="privacy.html">개인정보처리방침</a>·<a href="index.html">홈</a>
+    </div>
+    출처 : 각종 CBT 사이트(최강 자격증 기출문제 전자문제집 CBT, CBT 문제은행, 모두CBT 등)
+  </footer>
+
+<script>
+(function () {
+  var PARTS = ['toeic-part1','toeic-part2','toeic-part3','toeic-part4','toeic-part5'];
+  var LABEL = { 'toeic-part1':'PART 1','toeic-part2':'PART 2','toeic-part3':'PART 3','toeic-part4':'PART 4','toeic-part5':'PART 5' };
+
+  var id = new URLSearchParams(location.search).get('id') || 'toeic-part1';
+  var esc = function (s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  };
+
+  fetch('data/' + id + '.json')
+    .then(function (r) { if (!r.ok) throw new Error('not found'); return r.json(); })
+    .then(render)
+    .catch(function () {
+      document.getElementById('study-head').innerHTML =
+        '<p class="loading">자료를 불러올 수 없습니다. (data/' + esc(id) + '.json)</p>';
+    });
+
+  function render(d) {
+    /* ── 헤더 ── */
+    var h = '<div class="study-badge">' + esc(d.badge || 'TOEIC Speaking') + '</div>' +
+            '<h2 class="study-title">' + esc(d.title) + '</h2>';
+    if (d.subtitle) h += '<p class="study-sub">' + esc(d.subtitle) + '</p>';
+    if (d.meta && d.meta.length) {
+      h += '<div class="study-meta">';
+      d.meta.forEach(function (m) {
+        h += '<span><b>' + esc(m.k) + '</b> ' + esc(m.v) + '</span>';
+      });
+      h += '</div>';
+    }
+    if (d.sections && d.sections.length) {
+      h += '<div class="study-toc"><b>목차</b><ol>';
+      d.sections.forEach(function (s, i) {
+        h += '<li><a href="#sec' + i + '">' + esc(s.title) + '</a></li>';
+      });
+      h += '</ol></div>';
+    }
+    document.getElementById('study-head').innerHTML = h;
+    document.title = d.title + ' · 안전과장 CBT';
+
+    /* ── 본문 ── */
+    var b = '';
+    (d.sections || []).forEach(function (s, i) {
+      b += '<section class="study-sec" id="sec' + i + '">';
+      b += '<h3>' + esc(s.title) + '</h3>';
+      if (s.note) b += '<p class="sec-note">' + esc(s.note) + '</p>';
+
+      if (s.bullets) {
+        b += '<ul class="sec-bullets">';
+        s.bullets.forEach(function (t) { b += '<li>' + esc(t) + '</li>'; });
+        b += '</ul>';
+      }
+
+      if (s.table) {
+        b += '<div class="sec-table-wrap"><table class="sec-table"><thead><tr>';
+        s.table.head.forEach(function (t) { b += '<th>' + esc(t) + '</th>'; });
+        b += '</tr></thead><tbody>';
+        s.table.rows.forEach(function (row) {
+          b += '<tr>';
+          row.forEach(function (c) { b += '<td>' + esc(c) + '</td>'; });
+          b += '</tr>';
+        });
+        b += '</tbody></table></div>';
+      }
+
+      if (s.phrases) {
+        b += '<div class="phrase-list">';
+        s.phrases.forEach(function (p) {
+          b += '<div class="phrase">' +
+               '<div class="ph-en">' + esc(p.en) + '</div>' +
+               '<div class="ph-ko">' + esc(p.ko) + '</div>' +
+               (p.tip ? '<div class="ph-tip">💡 ' + esc(p.tip) + '</div>' : '') +
+               '</div>';
+        });
+        b += '</div>';
+      }
+
+      if (s.tip) b += '<div class="sec-tip">✅ ' + esc(s.tip) + '</div>';
+      if (s.warn) b += '<div class="sec-warn">⚠️ ' + esc(s.warn) + '</div>';
+      b += '</section>';
+    });
+    document.getElementById('study-body').innerHTML = b;
+
+    /* ── 이전/다음 파트 ── */
+    var idx = PARTS.indexOf(id), nav = '';
+    if (idx > 0) nav += '<a class="btn" href="study.html?id=' + PARTS[idx-1] + '">← ' + LABEL[PARTS[idx-1]] + '</a>';
+    nav += '<a class="btn" href="index.html#toeic">목록</a>';
+    if (idx > -1 && idx < PARTS.length - 1) nav += '<a class="btn-primary" href="study.html?id=' + PARTS[idx+1] + '">' + LABEL[PARTS[idx+1]] + ' →</a>';
+    document.getElementById('study-nav').innerHTML = nav;
+  }
+})();
+</script>
+</body>
+</html>
