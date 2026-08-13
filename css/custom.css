@@ -197,3 +197,10 @@
   .study-title { font-size: 1.3rem; }
   .study-sec { padding: 18px 16px 14px; }
 }
+/* 토익 탭 활성 시 다른 목록 숨김 */
+.toeic-hidden { display: none !important; }
+.tab-cnt {
+  display: inline-block; background: rgba(0,0,0,.12); color: inherit;
+  font-size: .7rem; font-weight: 700; padding: 1px 7px;
+  border-radius: 20px; margin-left: 4px;
+}
