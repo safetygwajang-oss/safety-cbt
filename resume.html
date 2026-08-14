@@ -3,14 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>자기소개서 작성법 · AI 자동 작성기 · 안전과장 골드박스</title>
-  <meta name="description" content="채용공고와 경력사항을 넣으면 회사 정보를 검색해 자기소개서 작성 전략과 초안을 만들어 줍니다.">
+  <title>자기소개서 AI 작성기 · 빨간펜 검토 · 안전과장 골드박스</title>
+  <meta name="description" content="회사명과 담당업무, 내 경험만 적으면 AI가 회사 정보를 찾아 자기소개서 전략과 초안을 만들고, 완성한 글을 빨간펜으로 검토해 줍니다.">
   <link rel="canonical" href="resume.html">
-
   <meta property="og:type" content="article">
-  <meta property="og:title" content="자기소개서 작성법 · AI 자동 작성기">
-  <meta property="og:description" content="채용공고·경력사항을 넣으면 회사 정보를 검색해 전략과 초안을 만들어 줍니다.">
-  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:title" content="자기소개서 AI 작성기 · 빨간펜 검토">
+  <meta property="og:description" content="회사명·담당업무·내 경험만 적으면 끝. AI가 회사 정보를 찾아 써 줍니다.">
 
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9283463208175336"
      crossorigin="anonymous"></script>
@@ -20,13 +18,20 @@
   <link rel="stylesheet" href="css/custom.css">
 
   <style>
-    /* ===== 이 페이지 전용 보강 ===== */
     .ai-count { font-size:.8rem; color:#64748b; margin-left:auto; }
     .ai-count.warn { color:#dc2626; font-weight:700; }
     .ai-mini-note { font-size:.78rem; color:#94a3b8; margin:4px 0 0; }
     .key-state.ok { color:#059669; }
+    .mode-hint { font-size:.8rem; color:#94a3b8; margin:6px 0 0; }
 
-    /* 진행률 바 */
+    .step-box {
+      background:linear-gradient(135deg,#eff6ff,#f0fdfa);
+      border:1px solid #dbeafe; border-radius:12px;
+      padding:14px 16px; margin-bottom:18px;
+      font-size:.88rem; line-height:1.8; color:#334155;
+    }
+    .step-box b { color:#1d4ed8; }
+
     .ai-progress { margin:12px 0 4px; }
     .ai-progress-track { height:10px; background:#e2e8f0; border-radius:99px; overflow:hidden; }
     .ai-progress-fill {
@@ -38,12 +43,10 @@
       display:flex; justify-content:space-between; align-items:center;
       font-size:.83rem; color:#475569; margin-top:6px;
     }
-    .ai-progress-meta b { color:#2563eb; font-variant-numeric:tabular-nums; }
+    .ai-progress-meta b { color:#2563eb; }
     .ai-progress.done .ai-progress-fill { background:linear-gradient(90deg,#10b981,#059669); }
     .ai-progress.err  .ai-progress-fill { background:#dc2626; }
-    .boot-error { margin:10px 0; }
 
-    /* 프롬프트 출력 박스 */
     .prompt-pre {
       white-space:pre-wrap; word-break:break-word;
       background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;
@@ -51,30 +54,37 @@
       max-height:420px; overflow:auto;
     }
 
-    /* ===== 광고 영역 ===== */
+    /* 빨간펜 */
+    .pen-bad { background:#fef2f2; border-left:3px solid #dc2626; color:#b91c1c;
+      padding:8px 12px; border-radius:6px; margin:8px 0; font-size:.9rem; }
+    .pen-del { background:#fff7ed; border-left:3px solid #f97316; color:#9a3412;
+      padding:8px 12px; border-radius:6px; margin:8px 0; font-size:.9rem; }
+    .pen-fix { background:#f0fdf4; border-left:3px solid #16a34a; color:#15803d;
+      padding:8px 12px; border-radius:6px; margin:8px 0; font-size:.9rem; font-weight:600; }
+    .pen-add { background:#eff6ff; border-left:3px solid #2563eb; color:#1d4ed8;
+      padding:8px 12px; border-radius:6px; margin:8px 0; font-size:.9rem; }
+    .pen-why { color:#64748b; font-size:.84rem; padding-left:14px; margin:2px 0 10px; }
+    .ai-output del { color:#dc2626; text-decoration-color:#dc2626; }
+    .ai-output h4 { margin:18px 0 8px; padding-bottom:6px; border-bottom:2px solid #f1f5f9; }
+    .ai-output h5 { margin:14px 0 6px; color:#334155; }
+
+    /* 광고 */
     .ad-zone { min-height:0 !important; margin:14px 0; text-align:center; }
     .ad-zone.ad-empty { display:none !important; }
     ins.adsbygoogle { display:block; min-height:0 !important; }
     ins.adsbygoogle[data-ad-status="unfilled"] { display:none !important; }
-    .ad-label {
-      display:block; text-align:center; font-size:.68rem;
-      letter-spacing:.09em; color:#cbd5e1; margin-bottom:6px;
-    }
+    .ad-label { display:block; text-align:center; font-size:.68rem;
+      letter-spacing:.09em; color:#cbd5e1; margin-bottom:6px; }
     .ad-zone.ad-empty .ad-label { display:none !important; }
 
-    /* ===== ★ 하단 영역 스타일 (깨짐 방지) ===== */
-    .study-nav {
-      display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
-      margin:28px 0 10px;
-    }
+    /* 하단 */
+    .study-nav { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:28px 0 10px; }
     .study-nav .btn {
       display:inline-block; padding:10px 18px; border-radius:10px;
       border:1px solid #e2e8f0; background:#fff; color:#334155;
       font-size:.9rem; font-weight:600; text-decoration:none;
-      transition:.15s;
     }
     .study-nav .btn:hover { border-color:#93c5fd; color:#1d4ed8; }
-
     .site-footer {
       margin-top:36px; padding:22px 16px 30px;
       border-top:1px solid #e2e8f0; background:#fff;
@@ -82,12 +92,9 @@
       word-break:keep-all;
     }
     .site-footer .footer-links { margin-bottom:8px; }
-    .site-footer a {
-      color:#64748b; text-decoration:none; margin:0 6px; font-weight:600;
-    }
+    .site-footer a { color:#64748b; text-decoration:none; margin:0 6px; font-weight:600; }
     .site-footer a:hover { text-decoration:underline; color:#2563eb; }
 
-    /* 워터마크가 본문을 가리지 않도록 */
     body::before, .watermark { pointer-events:none; z-index:0 !important; }
     main, .container, section, footer { position:relative; z-index:1; }
   </style>
@@ -106,24 +113,21 @@
 
     <div class="study-head">
       <div class="study-badge">CAREER · 자기소개서</div>
-      <h2 class="study-title">자기소개서 작성법 &amp; AI 자동 작성기</h2>
-      <p class="study-sub">채용공고 · 경력사항을 넣으면 회사 정보를 검색해 전략과 초안을 만들어 줍니다.</p>
+      <h2 class="study-title">자기소개서 AI 작성기 &amp; 빨간펜 검토</h2>
+      <p class="study-sub">회사명 · 담당업무 · 내 경험만 적으면 끝. 회사 정보는 AI가 찾아서 넣어 줍니다.</p>
       <div class="study-meta">
-        <span><b>6</b> 작성방법</span>
-        <span><b>1</b> AI 작성기</span>
-        <span><b>DART</b> 공시자료 반영</span>
-        <span><b>엔진</b> Groq · Llama 3.3 / Compound</span>
+        <span><b>1분</b> 입력</span>
+        <span><b>자동</b> 회사 조사</span>
+        <span><b>빨간펜</b> 첨삭</span>
+        <span><b>엔진</b> Groq</span>
       </div>
       <div class="study-toc">
         <b>목차</b>
         <ul>
-          <li><a href="#g1">1. 자기소개서는 무엇을 보는 글인가</a></li>
-          <li><a href="#g2">2. 채용공고 해독법 — 키워드 추출</a></li>
-          <li><a href="#g3">3. STAR 기법 — 경험을 근거로 바꾸는 틀</a></li>
-          <li><a href="#g4">4. 항목별 작성 공식</a></li>
-          <li><a href="#g5">5. 소제목·첫 문장 만들기</a></li>
-          <li><a href="#g6">6. 제출 전 체크리스트 &amp; 감점 표현</a></li>
-          <li><a href="#writer">7. 🤖 AI 자기소개서 작성기</a></li>
+          <li><a href="#writer">🤖 AI 작성기 · 빨간펜 검토 (바로 사용)</a></li>
+          <li><a href="#g1">1. 자기소개서 평가 기준</a></li>
+          <li><a href="#g2">2. STAR 기법 — 경험을 근거로 바꾸기</a></li>
+          <li><a href="#g3">3. 항목별 공식 &amp; 감점 표현</a></li>
         </ul>
       </div>
     </div>
@@ -138,245 +142,39 @@
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
 
-    <!-- ==================== 1 ==================== -->
-    <section class="study-sec" id="g1">
-      <h3>1. 자기소개서는 무엇을 보는 글인가</h3>
-      <p class="sec-note">
-        평가자는 지원자의 인생을 궁금해하지 않습니다. <b>“이 사람을 뽑으면 우리 일이 되는가”</b> 하나만 봅니다.
-        그래서 자기소개서는 <b>과거를 소개하는 글이 아니라, 미래의 기여를 증명하는 문서</b>입니다.
-      </p>
-
-      <div class="sec-table-wrap">
-        <table class="sec-table">
-          <thead><tr><th>3원칙</th><th>뜻</th><th>실제 적용</th></tr></thead>
-          <tbody>
-            <tr><td><b>① 기여</b></td><td>“어떻게 살았나” ❌ → “무엇을 해낼 수 있나” ✅</td><td>모든 문단 끝에 회사 이익을 연결</td></tr>
-            <tr><td><b>② 근거</b></td><td>주장 1개 = 사례 1개 + 수치 1개</td><td>형용사를 지우고 숫자를 넣기</td></tr>
-            <tr><td><b>③ 연결</b></td><td>내 경험 ↔ 공고 요건이 겹쳐야 함</td><td>공고에 쓰인 단어를 그대로 사용</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="sec-table-wrap">
-        <table class="sec-table">
-          <thead><tr><th>평가 항목</th><th>평가자가 확인하는 것</th><th>합격 글의 특징</th></tr></thead>
-          <tbody>
-            <tr><td>직무 적합성</td><td>공고 요건과 경험이 겹치는가</td><td>공고 키워드가 항목마다 등장</td></tr>
-            <tr><td>성과 재현성</td><td>우리 회사에서도 같은 성과가 날까</td><td>판단 근거와 과정이 드러남</td></tr>
-            <tr><td>조직 적합성</td><td>같이 일할 만한 사람인가</td><td>갈등 상황의 대응이 구체적</td></tr>
-            <tr><td>지원 진정성</td><td>아무 데나 넣은 건 아닌가</td><td>회사 사업·최근 이슈를 알고 있음</td></tr>
-            <tr><td>문서 역량</td><td>보고서를 맡길 수 있나</td><td>두괄식·짧은 문장·오탈자 0</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="sec-tip">
-        모든 문장에 <b>“그래서 뭘 할 수 있는데?”</b>를 붙여보세요. 답이 안 나오는 문장은 지워도 되는 문장입니다.
-      </div>
-    </section>
-
-    <!-- ==================== 2 ==================== -->
-    <section class="study-sec" id="g2">
-      <h3>2. 채용공고 해독 &amp; 기업분석 5단계</h3>
-      <p class="sec-note">
-        자기소개서의 정답은 대부분 <b>채용공고 안</b>에 있습니다. 공고를 해체하는 것이 첫 번째 작업입니다.
-      </p>
-
-      <ul class="sec-bullets">
-        <li><b>① 채용공고</b> — 담당업무·필수요건·우대사항을 3덩어리로 자릅니다. <u>가장 중요한 1차 자료</u></li>
-        <li><b>② DART 사업보고서</b> — 실제 사업 내용·매출 구성·투자 계획. <u>지원동기의 최고 재료</u></li>
-        <li><b>③ 홈페이지</b> — 인재상·핵심가치·비전. 성격/가치관 항목의 기준이 됩니다.</li>
-        <li><b>④ 제품·서비스</b> — 직접 써보거나 현장을 보고 느낀 점 1개는 강력한 차별점입니다.</li>
-        <li><b>⑤ 현직자 후기</b> — 실제 업무 강도·조직 문화. 입사 후 포부를 현실적으로 만듭니다.</li>
-      </ul>
-
-      <div class="sec-table-wrap">
-        <table class="sec-table">
-          <thead><tr><th>공고 표현</th><th>실제 요구 역량</th><th>준비할 경험</th></tr></thead>
-          <tbody>
-            <tr><td>유관부서 협업</td><td>이해관계 조율·설득</td><td>부서 간 의견 충돌을 조정한 사례</td></tr>
-            <tr><td>데이터 기반 개선</td><td>지표 해석 → 개선 실행</td><td>수치 전/후 비교가 가능한 개선 경험</td></tr>
-            <tr><td>다수 과제 동시 수행</td><td>우선순위·일정 관리</td><td>납기 압박 상황의 처리 방식</td></tr>
-            <tr><td>대외기관 대응</td><td>법규 이해·문서 대응</td><td>감사·심사·점검 대응 경험</td></tr>
-            <tr><td>주도적으로</td><td>지시 없이 문제를 찾아 해결</td><td>내가 먼저 제안해 바꾼 경험</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="sec-warn">
-        공고에 없는 역량을 자랑하는 것은 <b>감점</b>입니다. “내가 잘한 경험”이 아니라 <b>“회사가 요구한 경험”</b>이 먼저입니다.
-      </div>
-    </section>
-
-    <!-- ==================== 3 ==================== -->
-    <section class="study-sec" id="g3">
-      <h3>3. 경험 정리 &amp; STAR 기법</h3>
-      <p class="sec-note">
-        글을 바로 쓰지 마세요. <b>경험을 표로 먼저 정리</b>하면 어떤 항목에 무엇을 넣을지 자동으로 정해집니다.
-      </p>
-
-      <div class="sec-table-wrap">
-        <table class="sec-table">
-          <thead><tr><th>단계</th><th>쓸 내용</th><th>분량</th><th>흔한 실수</th></tr></thead>
-          <tbody>
-            <tr><td><b>S</b> 상황</td><td>언제·어디서·어떤 제약</td><td>15%</td><td>배경 설명이 절반을 차지</td></tr>
-            <tr><td><b>T</b> 과제</td><td>내가 맡은 문제와 목표</td><td>15%</td><td>“팀이”만 있고 “내가”가 없음</td></tr>
-            <tr><td><b>A</b> 행동</td><td>내 판단 → 실행 → 설득 과정</td><td>50%</td><td>노력했다·최선을 다했다</td></tr>
-            <tr><td><b>R</b> 결과</td><td>수치 변화 + 배운 점</td><td>20%</td><td>결과 없이 소감만</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="sec-tip">
-        <b>수치가 없을 때</b> — 금액이 없으면 <b>비율</b>, 비율이 없으면 <b>횟수·기간·인원·건수</b>로 바꿔보세요.
-        “불량 감소” → “불량률 4.2% → 1.8%”, “빨리 처리” → “결재 소요 5일 → 2일”
-      </div>
-
-      <div class="phrase-list">
-        <div class="phrase">
-          <div class="ph-en">❌ 팀원들과 적극적으로 소통하며 열정적으로 프로젝트를 완수했습니다.</div>
-          <div class="ph-ko">검증 불가능한 자기평가 → 평가자는 아무 정보도 얻지 못합니다.</div>
-        </div>
-        <div class="phrase">
-          <div class="ph-en">✅ 설비 정지 원인을 3개로 좁힌 뒤 점검 주기를 주 1회로 조정해, 6개월간 비가동 시간을 32시간에서 9시간으로 줄였습니다.</div>
-          <div class="ph-ko">판단 → 실행 → 수치. 우리 회사에서도 같은 성과를 낼 사람으로 읽힙니다.</div>
-          <div class="ph-tip">문장 하나에 <b>행동 + 결과</b>가 함께 들어가 있는지 확인하세요.</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== 4 ==================== -->
-    <section class="study-sec" id="g4">
-      <h3>4. 항목별 작성 공식</h3>
-
-      <div class="sec-table-wrap">
-        <table class="sec-table">
-          <thead><tr><th>항목</th><th>구성 공식</th><th>핵심 포인트</th></tr></thead>
-          <tbody>
-            <tr><td><b>지원동기</b></td><td>회사 사업/이슈 → 내 경험 접점 → 기여 지점</td><td>“존경합니다” ❌ / “이 사업에 제 경험이 쓰입니다” ✅</td></tr>
-            <tr><td><b>입사 후 포부</b></td><td>1년(적응·습득) → 3년(주도) → 5년+(전문성)</td><td>공고의 담당업무 문장을 그대로 인용</td></tr>
-            <tr><td><b>직무역량</b></td><td>필수요건 1개 = STAR 사례 1개</td><td>가장 강한 근거를 맨 앞에</td></tr>
-            <tr><td><b>성장과정</b></td><td>가치관이 생긴 사건 → 지금 일하는 방식</td><td>가족 소개 ❌ / 직무 연결 ✅</td></tr>
-            <tr><td><b>성격 장단점</b></td><td>장점=직무 강점 / 단점=개선 <u>진행형</u></td><td>“꼼꼼해서 느립니다” 식 위장 금지</td></tr>
-            <tr><td><b>협업·갈등</b></td><td>갈등 원인 분석 → 내 조정 행동 → 관계 유지</td><td>상대를 이긴 이야기 ❌</td></tr>
-            <tr><td><b>실패·도전</b></td><td>실패 인정 → 원인 규명 → 재발 방지 적용</td><td>성공담으로 바꿔치기 금지</td></tr>
-            <tr><td><b>직업윤리</b></td><td>원칙과 손해가 충돌한 상황 → 선택 → 결과</td><td>추상적 다짐 대신 실제 선택 사례</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="sec-table-wrap">
-        <table class="sec-table">
-          <thead><tr><th>항목</th><th>흔한 문장</th><th>바꿔 쓴 문장</th></tr></thead>
-          <tbody>
-            <tr><td>지원동기</td><td>귀사의 비전에 공감해 지원했습니다.</td><td>이차전지 양극재 증설 계획을 보고, 3년간 라인 증설 시운전을 담당한 경험이 초기 안정화에 쓰일 수 있다고 판단했습니다.</td></tr>
-            <tr><td>입사 후 포부</td><td>열심히 배우고 성장하겠습니다.</td><td>1년차에 공정 데이터 판독 기준을 익히고, 3년차에는 예방정비 표준을 직접 작성하겠습니다.</td></tr>
-            <tr><td>직무역량</td><td>책임감이 강합니다.</td><td>야간 설비 이상 2건을 교대 인수 전 마감 처리해, 6개월간 인수인계 누락을 0건으로 유지했습니다.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- ==================== 5 ==================== -->
-    <section class="study-sec" id="g5">
-      <h3>5. 소제목 &amp; 첫 문장 만들기</h3>
-      <p class="sec-note">서류 1건에 주어지는 시간은 평균 <b>1~2분</b>입니다. 첫 3줄에서 승부가 납니다.</p>
-
-      <div class="sec-table-wrap">
-        <table class="sec-table">
-          <thead><tr><th>소제목 유형</th><th>예시</th></tr></thead>
-          <tbody>
-            <tr><td>① 수치형</td><td>비가동 32시간을 9시간으로</td></tr>
-            <tr><td>② 문제해결형</td><td>반복 불량, 원인은 설비가 아니었습니다</td></tr>
-            <tr><td>③ 대비형</td><td>속도보다 재발 방지를 택한 이유</td></tr>
-            <tr><td>④ 역할 선언형</td><td>가장 먼저 현장에 가는 담당자</td></tr>
-            <tr><td>⑤ 키워드형</td><td>기록으로 증명하는 안전관리</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <ul class="sec-bullets">
-        <li>소제목은 <b>15자 이내</b>, 결과나 방법이 드러나야 합니다.</li>
-        <li>첫 문장은 <b>두괄식</b> — 결론 / 수치 / 문제 정의 중 하나로 시작합니다.</li>
-        <li>“저는 ~한 사람입니다”로 시작하지 마세요. 가장 많이 읽히고 가장 안 믿기는 문장입니다.</li>
-        <li>한 문장은 <b>60자 이내</b>, 한 문장에 메시지 하나.</li>
-        <li>속담·명언·사자성어로 시작하는 도입부는 분량만 잡아먹습니다.</li>
-      </ul>
-    </section>
-
-    <!-- ==================== 6 ==================== -->
-    <section class="study-sec" id="g6">
-      <h3>6. 감점 표현 &amp; 제출 전 체크리스트</h3>
-
-      <div class="sec-table-wrap">
-        <table class="sec-table">
-          <thead><tr><th>피해야 할 표현</th><th>왜 감점인가</th><th>대체 표현</th></tr></thead>
-          <tbody>
-            <tr><td>열정을 갖고 / 최선을 다해</td><td>검증 불가능</td><td>목표를 정하고 끝까지 실행한 사례 제시</td></tr>
-            <tr><td>남들보다 뛰어난</td><td>비교 근거 없음</td><td>기준·수치로 표현</td></tr>
-            <tr><td>소통의 달인 / 분위기 메이커</td><td>업무 성과와 무관</td><td>이견을 조정해 일정을 지킨 사례</td></tr>
-            <tr><td>귀사 / 저희 회사</td><td>성의 부족·오기 위험</td><td>회사명 직접 표기</td></tr>
-            <tr><td>뼈를 묻겠습니다 / 시켜만 주신다면</td><td>구시대적·수동적</td><td>맡고 싶은 업무를 구체적으로</td></tr>
-            <tr><td>어릴 때부터 꿈이었습니다</td><td>직무 근거가 안 됨</td><td>준비한 과정과 결과물 제시</td></tr>
-            <tr><td>부족하지만 / 미흡하지만</td><td>스스로 감점 요인 제공</td><td>보완 중인 방법으로 서술</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <ul class="sec-bullets">
-        <li>☐ <b>회사명·직무명 오기</b> 없는가 — 다른 회사명이 남아 있으면 즉시 탈락</li>
-        <li>☐ 공고 키워드가 각 항목에 최소 1회 이상 들어갔는가</li>
-        <li>☐ 모든 사례에 <b>수치</b>가 있는가</li>
-        <li>☐ 60자 넘는 문장을 잘랐는가</li>
-        <li>☐ 글자수 기준의 <b>90~100%</b>를 채웠는가 (80% 미만은 성의 부족으로 읽힘)</li>
-        <li>☐ 항목마다 서로 <b>다른 경험</b>을 썼는가 (같은 사례 반복 ❌)</li>
-        <li>☐ 소리 내어 읽었을 때 걸리는 문장이 없는가</li>
-        <li>☐ 맞춤법 검사를 돌렸는가</li>
-      </ul>
-
-      <div class="sec-tip">
-        <b>마지막 점검</b> — 자기소개서를 처음 보는 사람에게 읽히고 “이 사람 무슨 일 하는 사람이야?”라고 물어보세요.
-        직무명이 바로 나오면 성공, 헤매면 다시 써야 합니다.
-      </div>
-    </section>
-
 
     <!-- ==================== AI 작성기 ==================== -->
     <section class="study-sec" id="writer">
-      <h3>7. 🤖 AI 자기소개서 작성기</h3>
-      <p class="sec-note">회사 공시자료(DART)와 검색 결과를 근거로, 채용공고 요건과 경력사항을 연결해 전략과 초안을 만듭니다.</p>
+      <h3>🤖 AI 자기소개서 작성기</h3>
+
+      <div class="step-box">
+        <b>사용법</b><br>
+        ① 회사명 · 담당업무 · 내 경험 3칸만 채우기 →
+        ② <b>전략 만들기</b> 또는 <b>초안 쓰기</b> →
+        ③ 직접 다듬은 뒤 아래 <b>🖍️ 빨간펜 검토</b>로 점검
+      </div>
 
       <!-- AI 접속 설정 -->
       <details class="ai-key-box">
         <summary>🔑 AI 사용 설정 <span id="keyState" class="key-state">확인 중…</span></summary>
 
         <div id="proxyNotice" class="sec-tip" style="margin:8px 0;" hidden>
-          ✅ <b>서버를 통해 안전하게 연결되었습니다.</b> 키 입력 없이 바로 사용하실 수 있습니다.
+          ✅ <b>바로 사용 가능합니다.</b> 키 입력이 필요 없습니다.
           <span style="color:#64748b;">오늘 남은 횟수 : <b id="apiLeft">-</b></span>
         </div>
 
         <div id="serverWarn" class="sec-tip" style="margin:8px 0;" hidden>
           💡 <b>자동 생성 서버를 사용할 수 없습니다.</b>
-          대신 <b>「프롬프트 복사」</b> 버튼으로 완성된 지시문을 받아
-          <b>ChatGPT · Gemini · Claude</b> 에 붙여넣으면 동일한 결과를 얻을 수 있습니다.
-          <details style="margin-top:6px;">
-            <summary style="cursor:pointer;color:#64748b;font-size:.85em;">관리자용 진단 정보</summary>
-            <span style="color:#64748b;font-size:.85em;">
-              <span id="serverReason"></span>
-              ① <code>functions/api/ai.js</code> 위치 확인
-              ② Cloudflare Pages → Variables and Secrets 에 <code>GROQ_API_KEY</code> (Production+Preview)
-              ③ 재배포 후 <a href="/api/ai" target="_blank" rel="noopener">/api/ai</a> 에서 <code>keyConfigured:true</code>
-            </span>
-          </details>
+          <b>「프롬프트 복사」</b> 버튼으로 지시문을 받아 ChatGPT · Gemini 에 붙여넣으면 같은 결과를 얻을 수 있습니다.
+          <span id="serverReason" style="color:#94a3b8;font-size:.85em;"></span>
         </div>
 
         <p class="ai-hint">
-          개인 키로도 사용할 수 있습니다 —
-          <a href="https://console.groq.com/keys" target="_blank" rel="noopener">Groq Console</a>에서
-          무료 발급(카드 등록 불필요) → 아래 붙여넣기. 키는 <b>이 브라우저에만 저장</b>됩니다.
+          개인 키를 쓰려면 <a href="https://console.groq.com/keys" target="_blank" rel="noopener">Groq Console</a>에서
+          무료 발급 후 아래에 붙여넣으세요. 키는 <b>이 브라우저에만</b> 저장됩니다.
         </p>
         <div class="ai-row">
-          <input type="password" id="apiKey" class="ai-input allow-select" placeholder="gsk_... (선택 입력)" autocomplete="off">
+          <input type="password" id="apiKey" class="ai-input allow-select" placeholder="gsk_... (선택)" autocomplete="off">
           <button class="btn-sm" id="saveKey">저장</button>
           <button class="btn-sm" id="clearKey">삭제</button>
         </div>
@@ -384,77 +182,41 @@
 
       <!-- 입력 폼 -->
       <div class="ai-form">
-        <label class="ai-label">회사명 · 직무 <span>(검색 정확도↑)</span></label>
-        <div class="ai-row">
-          <input type="text" id="company" class="ai-input allow-select" placeholder="예) 포스코퓨처엠">
-          <input type="text" id="job" class="ai-input allow-select" placeholder="예) 생산기술 / 안전환경">
-        </div>
+        <label class="ai-label">① 지원 회사명 <span>(필수)</span></label>
+        <input type="text" id="company" class="ai-input allow-select" placeholder="예) 포스코퓨처엠">
 
-        <label class="ai-label">
-          채용공고 <span>(전체 복사 붙여넣기 · 30자 이상)</span>
-          <span class="ai-count" id="jdCount">0자</span>
-        </label>
-        <textarea id="jd" class="ai-textarea allow-select" rows="7"
-          placeholder="담당업무 / 필수요건 / 우대사항 / 자격요건을 그대로 붙여넣으세요."></textarea>
+        <label class="ai-label" style="margin-top:14px;">② 담당 업무 · 직무 <span>(필수)</span></label>
+        <input type="text" id="job" class="ai-input allow-select" placeholder="예) 안전관리자 / 생산기술 / 품질보증">
 
-        <label class="ai-label">자기소개서 작성 항목</label>
-        <div class="chip-group" id="itemChips">
-          <label class="chip"><input type="checkbox" value="지원동기" checked><span>지원동기</span></label>
-          <label class="chip"><input type="checkbox" value="입사 후 포부" checked><span>입사 후 포부</span></label>
-          <label class="chip"><input type="checkbox" value="직무역량 및 강점" checked><span>직무역량·강점</span></label>
-          <label class="chip"><input type="checkbox" value="성장과정"><span>성장과정</span></label>
-          <label class="chip"><input type="checkbox" value="성격의 장단점"><span>성격 장단점</span></label>
-          <label class="chip"><input type="checkbox" value="협업 및 갈등 극복 경험"><span>협업·갈등극복</span></label>
-          <label class="chip"><input type="checkbox" value="문제해결 경험"><span>문제해결</span></label>
-          <label class="chip"><input type="checkbox" value="도전 및 실패 경험"><span>도전·실패</span></label>
-          <label class="chip"><input type="checkbox" value="직업윤리 및 가치관"><span>직업윤리</span></label>
-        </div>
-        <input type="text" id="itemCustom" class="ai-input allow-select"
-               placeholder="직접 입력 (쉼표로 구분) 예) 퇴직 사유, 회사가 나를 뽑아야 하는 이유">
-
-        <label class="ai-label">
-          경력·경험 사항 <span>(이력서 붙여넣기 · 30자 이상 — 수치가 많을수록 결과가 좋아집니다)</span>
+        <label class="ai-label" style="margin-top:14px;">
+          ③ 내 경험 — 편하게 쭉 적어주세요 <span>(필수 · 30자 이상)</span>
           <span class="ai-count" id="careerCount">0자</span>
         </label>
-        <textarea id="career" class="ai-textarea allow-select" rows="8"
-          placeholder="회사/기간/직무&#10;- 담당업무 :&#10;- 성과(수치) :&#10;- 사용 도구·자격증 :&#10;&#10;학력, 프로젝트, 대외활동, 자격증도 함께 적어주세요."></textarea>
+        <textarea id="career" class="ai-textarea allow-select" rows="10"
+          placeholder="형식 신경 쓰지 말고 편하게 적으세요.&#10;&#10;예)&#10;○○기업에서 3년간 안전관리자로 일했습니다.&#10;위험성평가와 협력사 안전관리를 담당했고 재해율을 0.42%에서 0.11%로 낮췄습니다.&#10;PSM 공정안전보고서를 작성해 제출하고 심사도 통과했습니다.&#10;산업안전기사, 위험물기능장 자격증이 있습니다."></textarea>
+        <p class="mode-hint">💡 회사 사업 내용·최근 이슈는 AI가 나무위키·뉴스에서 자동으로 찾아 반영합니다.</p>
 
-        <label class="ai-label">
-          회사 공시자료 <span>(선택 · DART 사업보고서 「사업의 내용」 붙여넣기 — 정확도 크게 향상)</span>
-          <span class="ai-count" id="dartCount">0자</span>
-        </label>
-        <div class="ai-row" style="margin-bottom:6px;">
-          <button class="btn-sm" id="btnDart" type="button">🔍 DART에서 이 회사 검색</button>
-          <span class="ai-mini-note" style="margin:0;">
-            DART → 회사명 검색 → 정기공시(사업보고서) → <b>Ⅱ. 사업의 내용</b> 복사
-          </span>
-        </div>
-        <textarea id="dart" class="ai-textarea allow-select" rows="6"
-          placeholder="예) 당사는 이차전지 소재(양극재·음극재), 기초소재, 내화물 사업을 영위하고 있습니다. 2024년 매출 구성은 …&#10;&#10;※ 사업의 개요 / 주요 제품 / 매출 구성 / 신규 투자 / 위험요인 부분이 특히 유용합니다."></textarea>
+        <details style="margin-top:12px;">
+          <summary style="cursor:pointer;color:#64748b;font-size:.88rem;">
+            ➕ 채용공고가 있다면 붙여넣기 (선택 · 정확도 상승)
+          </summary>
+          <textarea id="jd" class="ai-textarea allow-select" rows="6" style="margin-top:8px;"
+            placeholder="담당업무 / 필수요건 / 우대사항만 붙여넣으면 충분합니다."></textarea>
+        </details>
 
-        <div class="ai-row">
+        <div class="ai-row" style="margin-top:14px;">
           <select id="len" class="ai-input">
             <option value="500">항목당 500자</option>
             <option value="700" selected>항목당 700자</option>
             <option value="1000">항목당 1,000자</option>
-            <option value="1500">항목당 1,500자</option>
-          </select>
-          <select id="tone" class="ai-input">
-            <option value="간결한 문어체, ~합니다">간결·담백 (권장)</option>
-            <option value="적극적이고 자신감 있는 문어체">적극·자신감</option>
-            <option value="차분하고 논리적인 분석형 문어체">차분·논리</option>
           </select>
         </div>
 
         <div class="ai-btns">
           <button class="btn-primary" id="btnStrategy">📋 작성 전략 만들기</button>
           <button class="btn-primary" id="btnDraft">✍️ 자기소개서 초안 쓰기</button>
-          <button class="btn-sm" id="btnPromptStrategy">📄 전략 프롬프트 복사</button>
-          <button class="btn-sm" id="btnPromptDraft">📄 초안 프롬프트 복사</button>
-          <button class="btn-sm" id="btnFormClear">🧹 입력 초기화</button>
         </div>
 
-        <!-- 진행률 -->
         <div class="ai-progress" id="aiProgress" hidden>
           <div class="ai-progress-track"><span class="ai-progress-fill" id="aiProgressFill"></span></div>
           <div class="ai-progress-meta">
@@ -463,8 +225,22 @@
           </div>
         </div>
 
-        <p class="ai-hint">① 전략으로 방향을 잡고 → ② 초안을 뽑는 순서를 권장합니다. 생성에 20~60초 걸립니다.</p>
-        <p class="ai-mini-note">입력값은 <b>내 브라우저에만</b> 임시 저장되어 새로 접속해도 이어서 작성할 수 있습니다. 공용 PC에서는 사용 후 <b>입력 초기화</b>를 눌러 주세요.</p>
+        <hr style="margin:26px 0; border:none; border-top:1px dashed #e2e8f0;">
+
+        <label class="ai-label">
+          🖍️ 완성한 자기소개서 검토받기 <span>(작성한 글 붙여넣기 · 200자 이상)</span>
+          <span class="ai-count" id="essayCount">0자</span>
+        </label>
+        <textarea id="essay" class="ai-textarea allow-select" rows="10"
+          placeholder="작성 완료한 자기소개서를 그대로 붙여넣으세요.&#10;문항이 여러 개면 [지원동기] 처럼 문항명을 앞에 적어주면 더 정확합니다."></textarea>
+
+        <div class="ai-btns">
+          <button class="btn-primary" id="btnReview" style="background:#dc2626;">🖍️ 빨간펜으로 검토받기</button>
+          <button class="btn-sm" id="btnPrompt">📄 프롬프트 복사</button>
+          <button class="btn-sm" id="btnFormClear">🧹 입력 초기화</button>
+        </div>
+
+        <p class="ai-mini-note">입력값은 <b>내 브라우저에만</b> 임시 저장됩니다. 공용 PC에서는 사용 후 <b>입력 초기화</b>를 눌러 주세요.</p>
       </div>
 
       <!-- 결과 -->
@@ -481,7 +257,8 @@
       </div>
     </section>
 
-    <!-- 광고 하단 -->
+
+    <!-- 광고 중간 -->
     <div class="ad-zone">
       <span class="ad-label">ADVERTISEMENT</span>
       <ins class="adsbygoogle" style="display:block"
@@ -490,6 +267,106 @@
            data-ad-format="auto" data-full-width-responsive="true"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
+
+
+    <!-- ==================== 1 ==================== -->
+    <section class="study-sec" id="g1">
+      <h3>1. 자기소개서 평가 기준</h3>
+      <p class="sec-note">
+        평가자는 <b>“이 사람을 뽑으면 우리 일이 되는가”</b> 하나만 봅니다.
+        자기소개서는 과거를 소개하는 글이 아니라 <b>미래의 기여를 증명하는 문서</b>입니다.
+      </p>
+
+      <div class="sec-table-wrap">
+        <table class="sec-table">
+          <thead><tr><th>평가 항목</th><th>확인하는 것</th><th>합격 글의 특징</th></tr></thead>
+          <tbody>
+            <tr><td>직무 적합성</td><td>공고 요건과 경험이 겹치는가</td><td>공고 키워드가 항목마다 등장</td></tr>
+            <tr><td>성과 재현성</td><td>우리 회사에서도 같은 성과가 날까</td><td>판단 근거와 과정이 드러남</td></tr>
+            <tr><td>조직 적합성</td><td>같이 일할 만한 사람인가</td><td>갈등 상황 대응이 구체적</td></tr>
+            <tr><td>지원 진정성</td><td>아무 데나 넣은 건 아닌가</td><td>회사 사업·최근 이슈를 알고 있음</td></tr>
+            <tr><td>문서 역량</td><td>보고서를 맡길 수 있나</td><td>두괄식·짧은 문장·오탈자 0</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sec-tip">
+        모든 문장에 <b>“그래서 뭘 할 수 있는데?”</b>를 붙여보세요. 답이 안 나오는 문장은 지워도 됩니다.
+      </div>
+    </section>
+
+    <!-- ==================== 2 ==================== -->
+    <section class="study-sec" id="g2">
+      <h3>2. STAR 기법 — 경험을 근거로 바꾸기</h3>
+
+      <div class="sec-table-wrap">
+        <table class="sec-table">
+          <thead><tr><th>단계</th><th>쓸 내용</th><th>분량</th><th>흔한 실수</th></tr></thead>
+          <tbody>
+            <tr><td><b>S</b> 상황</td><td>언제·어디서·어떤 제약</td><td>15%</td><td>배경 설명이 절반 차지</td></tr>
+            <tr><td><b>T</b> 과제</td><td>내가 맡은 문제와 목표</td><td>15%</td><td>“팀이”만 있고 “내가”가 없음</td></tr>
+            <tr><td><b>A</b> 행동</td><td>내 판단 → 실행 → 설득</td><td>50%</td><td>노력했다·최선을 다했다</td></tr>
+            <tr><td><b>R</b> 결과</td><td>수치 변화 + 배운 점</td><td>20%</td><td>결과 없이 소감만</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sec-tip">
+        <b>수치가 없을 때</b> — 금액이 없으면 <b>비율</b>, 비율이 없으면 <b>횟수·기간·인원·건수</b>로.
+        “불량 감소” → “불량률 4.2% → 1.8%”
+      </div>
+
+      <div class="phrase-list">
+        <div class="phrase">
+          <div class="ph-en">❌ 팀원들과 소통하며 열정적으로 프로젝트를 완수했습니다.</div>
+          <div class="ph-ko">검증 불가능한 자기평가 → 평가자는 아무 정보도 얻지 못합니다.</div>
+        </div>
+        <div class="phrase">
+          <div class="ph-en">✅ 설비 정지 원인을 3개로 좁힌 뒤 점검 주기를 주 1회로 조정해, 6개월간 비가동 시간을 32시간에서 9시간으로 줄였습니다.</div>
+          <div class="ph-ko">판단 → 실행 → 수치. 같은 성과를 낼 사람으로 읽힙니다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 3 ==================== -->
+    <section class="study-sec" id="g3">
+      <h3>3. 항목별 공식 &amp; 감점 표현</h3>
+
+      <div class="sec-table-wrap">
+        <table class="sec-table">
+          <thead><tr><th>항목</th><th>구성 공식</th><th>핵심</th></tr></thead>
+          <tbody>
+            <tr><td><b>지원동기</b></td><td>회사 사업/이슈 → 내 경험 접점 → 기여 지점</td><td>“이 사업에 제 경험이 쓰입니다”</td></tr>
+            <tr><td><b>직무역량</b></td><td>요구 역량 1개 = STAR 사례 1개</td><td>가장 강한 근거를 맨 앞에</td></tr>
+            <tr><td><b>입사 후 포부</b></td><td>1년(습득) → 3년(주도) → 5년+(전문성)</td><td>담당업무 문장을 그대로 인용</td></tr>
+            <tr><td><b>성격 장단점</b></td><td>장점=직무 강점 / 단점=개선 진행형</td><td>위장형 단점 금지</td></tr>
+            <tr><td><b>협업·갈등</b></td><td>원인 분석 → 내 조정 행동 → 관계 유지</td><td>상대를 이긴 이야기 ❌</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sec-table-wrap">
+        <table class="sec-table">
+          <thead><tr><th>피해야 할 표현</th><th>대체 표현</th></tr></thead>
+          <tbody>
+            <tr><td>열정을 갖고 / 최선을 다해</td><td>목표를 정하고 끝까지 실행한 사례</td></tr>
+            <tr><td>남들보다 뛰어난</td><td>기준·수치로 표현</td></tr>
+            <tr><td>소통의 달인 / 분위기 메이커</td><td>이견을 조정해 일정을 지킨 사례</td></tr>
+            <tr><td>귀사 / 저희 회사</td><td>회사명 직접 표기</td></tr>
+            <tr><td>뼈를 묻겠습니다</td><td>맡고 싶은 업무를 구체적으로</td></tr>
+            <tr><td>부족하지만 / 미흡하지만</td><td>보완 중인 방법으로 서술</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="sec-bullets">
+        <li>☐ 회사명·직무명 오기 없는가 <b>(다른 회사명 남으면 즉시 탈락)</b></li>
+        <li>☐ 모든 사례에 <b>수치</b>가 있는가</li>
+        <li>☐ 한 문장 <b>60자 이내</b>로 잘랐는가</li>
+        <li>☐ 글자수 기준의 <b>90~100%</b>를 채웠는가</li>
+        <li>☐ 항목마다 <b>서로 다른 경험</b>을 썼는가</li>
+      </ul>
+    </section>
 
     <div class="study-nav">
       <a class="btn" href="index.html">🏠 홈</a>
@@ -508,14 +385,12 @@
   </footer>
 
 
-  <!-- ============================================================
-       A) 서버 상태 확인기
-       ============================================================ -->
+  <!-- ========== A) 서버 상태 확인 ========== -->
   <script>
   (function () {
     'use strict';
     var PROXY_URL = '/api/ai';
-    var state = { checking: true, proxy: false, keyConfigured: false, msg: '', models: [] };
+    var state = { checking: true, proxy: false, keyConfigured: false, msg: '' };
 
     function finish(patch) {
       for (var k in patch) state[k] = patch[k];
@@ -533,8 +408,7 @@
           return finish({
             proxy: !!(j && j.ok && j.keyConfigured),
             keyConfigured: !!(j && j.keyConfigured),
-            models: (j && j.models) || [],
-            msg: (j && j.ok && !j.keyConfigured) ? '서버에 GROQ_API_KEY 가 적용되지 않았습니다.' : ''
+            msg: (j && j.ok && !j.keyConfigured) ? '서버에 GROQ_API_KEY 가 없습니다.' : ''
           });
         })
         .catch(function (e) {
@@ -545,7 +419,6 @@
     window.CBT_API = {
       PROXY_URL: PROXY_URL,
       state: function () { return state; },
-      hasProxy: function () { return state.proxy; },
       ready: function () { return probe; },
       debug: function () { console.log('[CBT_API]', state); return state; }
     };
@@ -553,9 +426,7 @@
   </script>
 
 
-  <!-- ============================================================
-       B) AI 엔진
-       ============================================================ -->
+  <!-- ========== B) AI 엔진 ========== -->
   <script>
   (function () {
     'use strict';
@@ -566,20 +437,19 @@
     var M_SEARCH = 'groq/compound';
     var M_PLAIN  = 'llama-3.3-70b-versatile';
 
-    /* ---------- 시스템 지시 (언어·금지어 강화) ---------- */
     var SYS =
       '당신은 대한민국 대기업 인사담당자 경력 15년의 채용 컨설턴트입니다.\n' +
       '[언어 규칙 - 최우선]\n' +
-      '1. 출력은 한국어(한글)와 숫자, 기본 문장부호만 사용합니다.\n' +
+      '1. 출력은 한국어와 숫자, 기본 문장부호만 사용합니다.\n' +
       '2. 한자, 일본어, 중국어, 베트남어, 러시아어, 태국어 문자를 절대 쓰지 마십시오.\n' +
-      '3. 영어는 고유명사(회사명, 자격증명 등)에만 허용합니다.\n' +
+      '3. 영어는 고유명사(회사명, 자격증명)에만 허용합니다.\n' +
       '4. 뜻을 알 수 없는 조합어나 깨진 문자를 만들지 마십시오.\n' +
       '[금지 표현]\n' +
       '열정을 갖고, 최선을 다해, 남들보다 뛰어난, 소통의 달인, 분위기 메이커,\n' +
       '뼈를 묻겠습니다, 시켜만 주신다면, 귀사, 저희 회사, 부족하지만, 미흡하지만\n' +
       '[작성 원칙]\n' +
-      '제공된 사실만 사용하고 창작하지 않습니다. 수치와 행동 중심으로 씁니다.\n' +
-      '회사 정보는 제공된 공시자료 또는 검색으로 확인된 내용만 씁니다.\n' +
+      '지원자가 적은 사실만 사용하고 창작하지 않습니다.\n' +
+      '회사 정보는 검색으로 확인된 내용만 쓰고, 불확실하면 확인 필요로 표기합니다.\n' +
       '결과는 마크다운으로 정리합니다.';
 
     function today() { return new Date().toISOString().slice(0, 10); }
@@ -605,7 +475,7 @@
     }
 
     function keyInfo() {
-      var st = window.CBT_API ? CBT_API.state() : { checking: false, proxy: false, msg: '설정 스크립트 없음' };
+      var st = window.CBT_API ? CBT_API.state() : { checking: false, proxy: false, msg: '설정 없음' };
       if (getKey()) return { usable: true, mode: 'key', checking: false };
       if (st.checking) return { usable: false, checking: true };
       if (!st.proxy) {
@@ -614,7 +484,7 @@
       }
       if (counts().n >= DAILY) {
         return { usable: false, quota: true,
-                 error: '오늘 공용 사용 한도(' + DAILY + '회)를 모두 사용했습니다.' };
+                 error: '오늘 사용 한도(' + DAILY + '회)를 모두 사용했습니다.' };
       }
       return { usable: true, mode: 'proxy', checking: false };
     }
@@ -632,7 +502,6 @@
       return { stop: function () { clearInterval(id); } };
     }
 
-       /* ---------- 출처 URL 추출 ---------- */
     function pickSources(msg) {
       var out = [], seen = {};
       try {
@@ -640,29 +509,23 @@
         var raw = JSON.stringify(src);
         var stop = ' "\'<>)]},;\\';
         var i = 0;
-
         while (true) {
           var p = raw.indexOf('http', i);
           if (p < 0) break;
-
           var j = p;
           while (j < raw.length) {
             var ch = raw.charAt(j);
             if (stop.indexOf(ch) >= 0 || ch === '\n' || ch === '\t') break;
             j++;
           }
-
           var u = raw.substring(p, j);
           i = (j > p) ? j : p + 4;
-
           while (u.length && '.,'.indexOf(u.charAt(u.length - 1)) >= 0) {
             u = u.substring(0, u.length - 1);
           }
-
           if (u.length < 12) continue;
           if (u.indexOf('groq.com') >= 0) continue;
           if (seen[u]) continue;
-
           seen[u] = 1;
           out.push({ uri: u, title: (u.split('/')[2] || u) });
           if (out.length >= 12) break;
@@ -671,38 +534,33 @@
       return out;
     }
 
-    /* ---------- 외국 문자 판정 ---------- */
     function isBadChar(code) {
-      if (code >= 0x0100 && code <= 0x02AF) return true;   /* 라틴 확장(베트남어 등) */
-      if (code >= 0x0400 && code <= 0x052F) return true;   /* 키릴 */
-      if (code >= 0x0590 && code <= 0x08FF) return true;   /* 히브리·아랍 */
-      if (code >= 0x0900 && code <= 0x0DFF) return true;   /* 인도계 */
-      if (code >= 0x0E00 && code <= 0x0E7F) return true;   /* 태국어 */
-      if (code >= 0x1E00 && code <= 0x1EFF) return true;   /* 라틴 추가확장 */
-      if (code >= 0x3040 && code <= 0x30FF) return true;   /* 히라가나·가타카나 */
-      if (code >= 0x3400 && code <= 0x4DBF) return true;   /* 한자 확장 */
-      if (code >= 0x4E00 && code <= 0x9FFF) return true;   /* 한자 */
-      if (code >= 0xF900 && code <= 0xFAFF) return true;   /* 한자 호환 */
+      if (code >= 0x0100 && code <= 0x02AF) return true;
+      if (code >= 0x0400 && code <= 0x052F) return true;
+      if (code >= 0x0590 && code <= 0x08FF) return true;
+      if (code >= 0x0900 && code <= 0x0DFF) return true;
+      if (code >= 0x0E00 && code <= 0x0E7F) return true;
+      if (code >= 0x1E00 && code <= 0x1EFF) return true;
+      if (code >= 0x3040 && code <= 0x30FF) return true;
+      if (code >= 0x3400 && code <= 0x4DBF) return true;
+      if (code >= 0x4E00 && code <= 0x9FFF) return true;
+      if (code >= 0xF900 && code <= 0xFAFF) return true;
       return false;
     }
 
     var BANNED = ['열정을 갖고', '최선을 다해', '남들보다 뛰어난', '소통의 달인',
                   '분위기 메이커', '뼈를 묻', '시켜만 주신다면', '부족하지만', '미흡하지만'];
 
-    /* ---------- 출력 정리 ---------- */
     function cleanText(text, company) {
       var kept = '', removed = 0, i, code;
-
       for (i = 0; i < text.length; i++) {
         code = text.charCodeAt(i);
         if (isBadChar(code)) { removed++; continue; }
         kept += text.charAt(i);
       }
-
       kept = kept.split('  ').join(' ');
 
-      var name = (company || '').split('/')[0];
-      name = name.replace(/^\s+|\s+$/g, '');
+      var name = (company || '').replace(/^\s+|\s+$/g, '');
       if (name) {
         kept = kept.split('귀사').join(name);
         kept = kept.split('저희 회사').join(name);
@@ -712,7 +570,6 @@
       for (i = 0; i < BANNED.length; i++) {
         if (kept.indexOf(BANNED[i]) >= 0) hits.push(BANNED[i]);
       }
-
       return { text: kept, removed: removed, banned: hits };
     }
 
@@ -724,13 +581,11 @@
       return text.length ? (bad / text.length) : 0;
     }
 
-    /* ---------- 길이 자르기 ---------- */
     function clip(text, max) {
       if (text.length <= max) return text;
       return text.substring(0, max) + '\n\n(입력이 길어 이후 내용은 생략했습니다)';
     }
 
-    /* ---------- 요청 1회 ---------- */
     async function once(promptText, model, maxTok, temp) {
       var payload = {
         model: model,
@@ -751,31 +606,25 @@
         headers = { 'Content-Type': 'application/json' };
       }
 
-      var res = await fetch(url, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(payload)
-      });
-
+      var res = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(payload) });
       var data = null;
       try { data = await res.json(); } catch (e) {}
-
-      return { status: res.status, ok: res.ok, data: data, usedKey: !!key, model: model };
+      return { status: res.status, ok: res.ok, data: data, usedKey: !!key };
     }
 
-    /* ---------- 호출 (축소 재시도 + 언어 재시도) ---------- */
     async function call(prompt, opt) {
       opt = opt || {};
       var info = keyInfo();
       if (!info.usable) throw new Error(info.error || 'NO_KEY');
 
+      var first = opt.search ? M_SEARCH : M_PLAIN;
       var plan = [
-        { model: (opt.search ? M_SEARCH : M_PLAIN), maxTok: 4000, size: 12000 },
+        { model: first,   maxTok: 4000, size: 12000 },
         { model: M_PLAIN, maxTok: 3000, size: 6000 },
         { model: M_PLAIN, maxTok: 2000, size: 3500 }
       ];
 
-      var LANG_FIX = '\n\n[매우 중요] 반드시 한국어(한글)와 숫자로만 작성하십시오. ' +
+      var LANG_FIX = '\n\n[매우 중요] 반드시 한국어와 숫자로만 작성하십시오. ' +
                      '한자, 일본어, 중국어, 베트남어 문자를 한 글자도 쓰지 마십시오.';
 
       var tk = ticker(opt);
@@ -796,7 +645,6 @@
             var txt = (ch.message && ch.message.content) || '';
 
             if (txt.replace(/\s/g, '') !== '') {
-              /* 외국 문자 과다 → 1회 재생성 */
               if (badRatio(txt) > 0.004) {
                 if (typeof opt.onProgress === 'function') {
                   opt.onProgress(60, '외국어 문자가 감지되어 다시 작성하는 중');
@@ -818,7 +666,7 @@
               return {
                 text: txt.replace(/^\s+|\s+$/g, ''),
                 sources: pickSources(ch.message),
-                model: r.data.model || step.model
+                model: (r.data && r.data.model) || step.model
               };
             }
             lastMsg = '빈 응답을 받았습니다.';
@@ -837,17 +685,13 @@
           throw new Error(em);
         }
 
-        throw new Error(
-          '입력이 너무 커서 처리하지 못했습니다.\n' +
-          '채용공고는 담당업무·필수요건·우대사항만 남기고, 작성 항목을 3개 이하로 줄여 보세요.\n' +
-          '(서버 응답 : ' + lastMsg + ')'
-        );
+        throw new Error('입력이 너무 커서 처리하지 못했습니다. 내용을 줄여 다시 시도해 주세요.\n' +
+                        '(서버 응답 : ' + lastMsg + ')');
       } finally {
         tk.stop();
       }
     }
 
-    /* ---------- 마크다운 ---------- */
     function esc(s) {
       return String(s == null ? '' : s)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -859,11 +703,30 @@
 
       function closeList() { if (list) { html += '</' + list + '>'; list = null; } }
 
+      function pen(l, mark, cls, icon) {
+        if (l.indexOf(mark) !== 0) return null;
+        var body = l.substring(mark.length).replace(/^\s*[:：]?\s*/, '');
+        return '<p class="' + cls + '">' + icon + ' ' + body + '</p>';
+      }
+
       lines.forEach(function (raw) {
         var l = raw.replace(/\|/g, ' | ').trim();
-        l = l.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`([^`]+)`/g, '<code>$1</code>');
+
+        l = l.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+             .replace(/~~(.+?)~~/g, '<del>$1</del>')
+             .replace(/`([^`]+)`/g, '<code>$1</code>');
 
         if (!l) { closeList(); return; }
+
+        var p =
+          pen(l, '[문제]', 'pen-bad', '❌') ||
+          pen(l, '[삭제]', 'pen-del', '✂️') ||
+          pen(l, '[수정]', 'pen-fix', '✅') ||
+          pen(l, '[추가]', 'pen-add', '➕') ||
+          pen(l, '[이유]', 'pen-why', '↳');
+
+        if (p) { closeList(); html += p; return; }
+
         if (/^#{3,}\s+/.test(l)) { closeList(); html += '<h5>' + l.replace(/^#{3,}\s+/, '') + '</h5>'; return; }
         if (/^##\s+/.test(l))    { closeList(); html += '<h4>' + l.replace(/^##\s+/, '') + '</h4>'; return; }
         if (/^#\s+/.test(l))     { closeList(); html += '<h4>' + l.replace(/^#\s+/, '') + '</h4>'; return; }
@@ -887,49 +750,78 @@
       return html || '<p>(내용 없음)</p>';
     }
 
-    /* ---------- 프롬프트 ---------- */
-    function base(v) {
+    function head(v) {
       return '## 지원 정보\n' +
-        '- 회사/직무 : ' + (v.company || '(미입력)') + '\n\n' +
-        '## 회사 공시자료 (DART 사업보고서 발췌)\n"""\n' + (v.dart || '(미입력)') + '\n"""\n\n' +
-        '## 채용공고 원문\n"""\n' + v.jd + '\n"""\n\n' +
-        '## 지원자 경력·경험\n"""\n' + v.career + '\n"""\n\n' +
-        '## 작성 항목\n' + v.items + '\n';
+        '- 회사명 : ' + (v.company || '(미입력)') + '\n' +
+        '- 담당 업무 : ' + (v.job || '(미입력)') + '\n\n' +
+        '## 지원자가 적은 경험 (원문)\n"""\n' + v.career + '\n"""\n\n' +
+        (v.jd ? ('## 채용공고\n"""\n' + v.jd + '\n"""\n\n') : '');
     }
 
-    var prompts = {
+    var RESEARCH =
+      '[회사 조사 방법]\n' +
+      '웹검색으로 아래를 확인하십시오.\n' +
+      '1. 나무위키(namu.wiki) 해당 회사 문서 - 사업 영역, 연혁, 특징, 이슈\n' +
+      '2. 회사 공식 홈페이지 - 사업 소개, 인재상\n' +
+      '3. 최근 1년 뉴스 - 투자, 신사업, 수주, 조직 변화\n' +
+      '검색으로 확인되지 않은 내용은 쓰지 말고 확인 필요로 표기하십시오.\n\n';
+
+        var prompts = {
       strategy: function (v) {
-        return base(v) +
-          '\n위 정보를 바탕으로 자기소개서 작성 전략을 세워 주십시오.\n\n' +
-          '[회사 정보 사용 순서]\n' +
-          '1순위 : 위 「회사 공시자료(DART 사업보고서)」 내용\n' +
-          '2순위 : 웹검색 - 금융감독원 전자공시(dart.fss.or.kr) 사업보고서의 사업의 내용,\n' +
-          '        회사 공식 홈페이지, 최근 1년 뉴스, IR 자료\n' +
-          '3순위 : 채용공고에 적힌 사업·조직 설명\n' +
-          '확인되지 않은 내용은 반드시 "확인 필요"로 표기하고 추측하지 마십시오.\n\n' +
-          '다음 순서로 작성하십시오.\n' +
-          '1. 회사 분석 - 주요 사업과 제품, 매출 구성, 최근 1년 투자·신사업·이슈 3가지,\n' +
-          '   위험요인, 이 직무가 회사에서 하는 역할\n' +
-          '2. 공고 키워드 추출 - 필수요건과 우대사항에서 핵심 키워드 7개와 실제 요구 역량\n' +
-          '3. 경력 매칭표 - 키워드별로 어떤 경험을 근거로 쓸지, 부족한 부분은 무엇인지\n' +
-          '4. 항목별 전략 - 항목마다 핵심 메시지 1줄, 사용할 경험, 소제목 후보 2개, 넣을 수치\n' +
-          '5. 주의사항 - 감점 위험 요소 3가지와 보완 방법\n';
+        return head(v) + RESEARCH +
+          '위 정보로 자기소개서 작성 전략을 세워 주십시오.\n\n' +
+          '## 1. 회사 분석\n' +
+          '주요 사업과 제품, 최근 1년 이슈 3가지, 이 직무가 회사에서 하는 역할\n\n' +
+          '## 2. 이 직무에 필요한 역량 5가지\n' +
+          '역량별로 왜 필요한지 한 줄 설명\n\n' +
+          '## 3. 경험 매칭표\n' +
+          '역량마다 지원자의 어떤 경험을 근거로 쓸지, 부족한 부분은 무엇인지\n\n' +
+          '## 4. 항목별 전략\n' +
+          '지원동기 / 직무역량 / 입사 후 포부 세 항목에 대해\n' +
+          '핵심 메시지 1줄, 사용할 경험, 소제목 후보 2개, 반드시 넣을 수치\n\n' +
+          '## 5. 감점 위험 3가지와 보완 방법\n';
       },
+
       draft: function (v) {
-        return base(v) +
-          '\n위 정보를 바탕으로 각 작성 항목의 자기소개서 초안을 작성해 주십시오.\n\n' +
+        return head(v) + RESEARCH +
+          '위 정보로 자기소개서 초안을 작성해 주십시오.\n\n' +
+          '작성 항목은 아래 세 가지입니다.\n' +
+          '1. 지원동기\n' +
+          '2. 직무역량 및 강점\n' +
+          '3. 입사 후 포부\n\n' +
           '작성 규칙\n' +
-          '- 분량 : 항목당 ' + v.len + '자 (±10%)\n' +
-          '- 문체 : ' + v.tone + '\n' +
-          '- 각 항목은 "## N. 항목명" 으로 시작하고, 다음 줄에 15자 이내 소제목을 [ ] 안에 넣습니다.\n' +
-          '- 첫 문장은 두괄식(결론·수치·문제정의)으로 시작합니다.\n' +
-          '- 한 문장은 60자 이내, STAR(상황-과제-행동-결과) 구조를 지킵니다.\n' +
-          '- 회사에 관한 서술은 위 공시자료 또는 검색으로 확인된 사실만 사용합니다.\n' +
-          '- 지원자 경력에 없는 사실을 만들지 않습니다. 수치가 없으면 [수치 입력] 으로 표시합니다.\n' +
-          '- 공고에 등장한 표현을 항목마다 최소 1회 사용합니다.\n' +
-          '- 회사명은 정확히 표기하고 "귀사"라는 단어는 쓰지 않습니다.\n' +
-          '- 각 항목 끝에 "> 보완 필요 : ..." 한 줄을 넣습니다.\n' +
-          '- 마지막에 "## 제출 전 확인" 으로 체크포인트 5개를 정리합니다.\n';
+          '- 분량 : 항목당 ' + v.len + '자 내외\n' +
+          '- 각 항목은 "## N. 항목명" 으로 시작하고 다음 줄에 15자 이내 소제목을 [ ] 안에 넣습니다.\n' +
+          '- 첫 문장은 결론이나 수치로 시작합니다.\n' +
+          '- 한 문장은 60자 이내, 상황-과제-행동-결과 순서를 지킵니다.\n' +
+          '- 지원자가 적지 않은 사실은 만들지 않습니다. 수치가 없으면 [수치 입력] 으로 표시합니다.\n' +
+          '- 회사명은 정확히 쓰고 귀사라는 단어는 쓰지 않습니다.\n' +
+          '- 각 항목 끝에 "> 보완 필요 : ..." 한 줄을 넣습니다.\n';
+      },
+
+      review: function (v) {
+        return head(v) +
+          '## 검토 대상 자기소개서\n"""\n' + v.essay + '\n"""\n\n' +
+          '위 자기소개서를 인사담당자 관점에서 빨간펜으로 첨삭해 주십시오.\n' +
+          '회사와 직무 정보가 필요하면 웹검색(나무위키, 공식 홈페이지, 뉴스)으로 확인하십시오.\n\n' +
+          '[출력 형식을 반드시 지키십시오]\n\n' +
+          '## 총평\n' +
+          '- 점수 : 00점 / 100점\n' +
+          '- 첫인상 : 3줄 이내\n' +
+          '- 서류 통과 가능성 : 높음 또는 보통 또는 낮음 + 이유\n\n' +
+          '## 문단별 첨삭\n' +
+          '문단마다 아래 4줄 형식을 그대로 사용하십시오. 대괄호 표기를 반드시 유지하십시오.\n' +
+          '### 문단 1 : 첫 문장 일부 인용\n' +
+          '[문제] 무엇이 왜 문제인지\n' +
+          '[삭제] ~~삭제를 권하는 원문 문장~~\n' +
+          '[수정] 고쳐 쓴 문장 (바로 쓸 수 있는 완성형)\n' +
+          '[이유] 이렇게 고치면 무엇이 좋아지는지\n\n' +
+          '## 빠진 내용\n' +
+          '[추가] 반드시 넣어야 할 내용과 넣을 위치\n\n' +
+          '## 표현 점검\n' +
+          '- 금지 표현 사용 여부, 60자 초과 문장 개수, 수치 없는 주장 개수\n\n' +
+          '## 최종 수정본\n' +
+          '첨삭을 모두 반영한 전체 글 (그대로 제출할 수 있는 상태)\n';
       }
     };
 
@@ -941,16 +833,14 @@
   </script>
 
 
-  <!-- ============================================================
-       C) 화면 제어
-       ============================================================ -->
+  <!-- ========== C) 화면 제어 ========== -->
   <script>
   (function () {
     'use strict';
 
     var $ = function (s) { return document.querySelector(s); };
     var lastText = '';
-    var pendingKind = 'draft';
+    var pendingKind = 'strategy';
 
     function on(sel, evt, fn) {
       var el = $(sel);
@@ -963,7 +853,7 @@
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    /* ---------- 1) 진행률 바 ---------- */
+    /* ---------- 진행률 ---------- */
     function makeProgress(prefix) {
       var wrap = $('#' + prefix),
           fill = $('#' + prefix + 'Fill'),
@@ -1000,8 +890,10 @@
     }
     var prog = makeProgress('aiProgress');
 
-    /* ---------- 2) 접속 상태 표시 ---------- */
+    /* ---------- 접속 상태 ---------- */
     function refreshKeyState() {
+      if (!window.ResumeAI) return;
+
       var info = ResumeAI.keyInfo() || {};
       var own  = !!ResumeAI.getKey();
       var el   = $('#keyState');
@@ -1009,7 +901,7 @@
       if (el) {
         if (info.checking) { el.textContent = '서버 확인 중…'; el.className = 'key-state'; }
         else if (info.usable) {
-          el.textContent = (info.mode === 'proxy') ? '서버 연결됨 (안전)' : '개인 키 사용 중';
+          el.textContent = (info.mode === 'proxy') ? '바로 사용 가능' : '개인 키 사용 중';
           el.className = 'key-state ok';
         }
         else if (info.quota) { el.textContent = '오늘 한도 초과'; el.className = 'key-state'; }
@@ -1024,7 +916,7 @@
         var show = !!((info.serverDown || info.quota) && !own);
         sw.hidden = !show;
         var r = $('#serverReason');
-        if (show && r) r.textContent = info.serverMsg ? '(' + info.serverMsg + ') ' : '';
+        if (show && r) r.textContent = info.serverMsg ? ' (' + info.serverMsg + ')' : '';
       }
 
       var left = $('#apiLeft');
@@ -1049,9 +941,9 @@
       alert('개인 키를 삭제했습니다.');
     });
 
-    /* ---------- 3) 입력 자동 저장 / 글자수 ---------- */
-    var FORM_LS = 'cbt_resume_form';
-    var FIELDS  = ['company', 'job', 'jd', 'career', 'dart', 'itemCustom', 'len', 'tone'];
+    /* ---------- 자동 저장 / 글자수 ---------- */
+    var FORM_LS = 'cbt_resume_simple';
+    var FIELDS  = ['company', 'job', 'career', 'jd', 'essay', 'len'];
     var saveTimer = null;
 
     function saveForm() {
@@ -1061,9 +953,6 @@
           var el = document.getElementById(id);
           if (el) data[id] = el.value;
         });
-        var chips = [];
-        document.querySelectorAll('#itemChips input:checked').forEach(function (c) { chips.push(c.value); });
-        data.chips = chips;
         localStorage.setItem(FORM_LS, JSON.stringify(data));
       } catch (e) {}
     }
@@ -1076,44 +965,23 @@
         var el = document.getElementById(id);
         if (el && typeof data[id] === 'string') el.value = data[id];
       });
-      if (Array.isArray(data.chips) && data.chips.length) {
-        document.querySelectorAll('#itemChips input').forEach(function (c) {
-          c.checked = data.chips.indexOf(c.value) >= 0;
-        });
-      }
     }
 
-    function setCount(sel, len, needMin) {
+    function setCount(sel, len, min) {
       var el = $(sel);
       if (!el) return;
       el.textContent = len.toLocaleString() + '자';
-      el.className = 'ai-count' + (needMin && len > 0 && len < 30 ? ' warn' : '');
+      el.className = 'ai-count' + (len > 0 && len < min ? ' warn' : '');
     }
     function updateCounts() {
-      setCount('#jdCount', $('#jd') ? $('#jd').value.length : 0, true);
-      setCount('#careerCount', $('#career') ? $('#career').value.length : 0, true);
-      setCount('#dartCount', $('#dart') ? $('#dart').value.length : 0, false);
+      setCount('#careerCount', $('#career') ? $('#career').value.length : 0, 30);
+      setCount('#essayCount', $('#essay') ? $('#essay').value.length : 0, 200);
     }
 
-    ['#jd', '#career', '#dart', '#company', '#job', '#itemCustom'].forEach(function (sel) {
+    ['#company', '#job', '#career', '#jd', '#essay'].forEach(function (sel) {
       on(sel, 'input', function () { updateCounts(); saveLater(); });
     });
-    ['#len', '#tone'].forEach(function (sel) { on(sel, 'change', saveLater); });
-    document.querySelectorAll('#itemChips input').forEach(function (c) {
-      c.addEventListener('change', saveLater);
-    });
-
-    /* DART 검색 버튼 */
-    on('#btnDart', 'click', function () {
-      var name = (($('#company') && $('#company').value) || '').trim();
-      if (!name) {
-        alert('먼저 회사명을 입력해 주세요.');
-        if ($('#company')) $('#company').focus();
-        return;
-      }
-      var url = 'https://dart.fss.or.kr/dsab007/main.do?textCrpNm=' + encodeURIComponent(name);
-      window.open(url, '_blank', 'noopener');
-    });
+    on('#len', 'change', saveLater);
 
     on('#btnFormClear', 'click', function () {
       if (!confirm('입력한 내용을 모두 지우시겠습니까?')) return;
@@ -1121,69 +989,71 @@
         var el = document.getElementById(id);
         if (el && el.tagName !== 'SELECT') el.value = '';
       });
-      document.querySelectorAll('#itemChips input').forEach(function (c, i) { c.checked = (i < 3); });
       try { localStorage.removeItem(FORM_LS); } catch (e) {}
       updateCounts();
       var r = $('#aiResult'); if (r) r.hidden = true;
       var p = $('#aiProgress'); if (p) p.hidden = true;
     });
 
-    /* ---------- 4) 수집 / 검증 ---------- */
-    function getItems() {
-      var arr = [];
-      document.querySelectorAll('#itemChips input:checked').forEach(function (c) { arr.push(c.value); });
-      var custom = (($('#itemCustom') && $('#itemCustom').value) || '').trim();
-      if (custom) custom.split(',').forEach(function (s) { if (s.trim()) arr.push(s.trim()); });
-      return arr;
-    }
-
+    /* ---------- 수집 / 검증 ---------- */
     function collect() {
-      var job = (($('#job') && $('#job').value) || '').trim();
       return {
-        company: (($('#company') && $('#company').value) || '').trim() + (job ? ' / 직무: ' + job : ''),
-        jd: (($('#jd') && $('#jd').value) || '').trim(),
+        company: (($('#company') && $('#company').value) || '').trim(),
+        job: (($('#job') && $('#job').value) || '').trim(),
         career: (($('#career') && $('#career').value) || '').trim(),
-        dart: (($('#dart') && $('#dart').value) || '').trim(),
-        items: getItems().map(function (s, i) { return (i + 1) + '. ' + s; }).join('\n'),
-        len: ($('#len') && $('#len').value) || '700',
-        tone: ($('#tone') && $('#tone').value) || '간결한 문어체, ~합니다'
+        jd: (($('#jd') && $('#jd').value) || '').trim(),
+        essay: (($('#essay') && $('#essay').value) || '').trim(),
+        len: ($('#len') && $('#len').value) || '700'
       };
     }
 
-    function validateInput(v) {
-      if (v.jd.length < 30) {
-        alert('채용공고를 30자 이상 붙여넣어 주세요.\n(현재 ' + v.jd.length + '자)');
-        if ($('#jd')) $('#jd').focus();
+    function validateInput(v, kind) {
+      if (v.company.length < 2) {
+        alert('지원 회사명을 입력해 주세요.');
+        if ($('#company')) $('#company').focus();
+        return false;
+      }
+
+      if (kind === 'review') {
+        if (v.essay.length < 200) {
+          alert('검토할 자기소개서를 200자 이상 붙여넣어 주세요.\n(현재 ' + v.essay.length + '자)');
+          if ($('#essay')) $('#essay').focus();
+          return false;
+        }
+        return true;
+      }
+
+      if (v.job.length < 2) {
+        alert('담당 업무(직무)를 입력해 주세요.');
+        if ($('#job')) $('#job').focus();
         return false;
       }
       if (v.career.length < 30) {
-        alert('경력·경험 사항을 30자 이상 입력해 주세요.\n(현재 ' + v.career.length + '자)\n\n' +
-              '예)\n○○기업 / 2020.03~2024.12 / 안전관리자\n- 담당업무 : 위험성평가, 협력사 안전관리\n- 성과 : 재해율 0.42% → 0.11%');
+        alert('내 경험을 30자 이상 적어주세요.\n(현재 ' + v.career.length + '자)\n\n' +
+              '예) 3년간 안전관리자로 위험성평가와 협력사 관리를 담당했고 재해율을 0.42%에서 0.11%로 낮췄습니다.');
         if ($('#career')) $('#career').focus();
-        return false;
-      }
-      if (!getItems().length) { alert('작성 항목을 1개 이상 선택해 주세요.'); return false; }
-      if (v.jd.length + v.career.length + v.dart.length > 20000) {
-        alert('입력이 너무 깁니다. 합쳐 20,000자 이내로 줄여 주세요.');
         return false;
       }
       return true;
     }
 
-    function validate(v) {
-      if (!validateInput(v)) return false;
+    function validate(v, kind) {
+      if (!validateInput(v, kind)) return false;
 
       var info = ResumeAI.keyInfo() || {};
-      if (info.checking) { alert('서버 연결을 확인하는 중입니다. 3초 후 다시 눌러 주세요.'); return false; }
+      if (info.checking) {
+        alert('서버 연결을 확인하는 중입니다. 3초 후 다시 눌러 주세요.');
+        return false;
+      }
 
       if (!info.usable) {
         var go = confirm(
-          (info.quota ? '오늘 공용 사용 한도를 모두 사용했습니다.\n\n'
+          (info.quota ? '오늘 사용 한도를 모두 사용했습니다.\n\n'
                       : '자동 생성 서버를 사용할 수 없습니다.\n\n') +
-          '[확인] 프롬프트를 복사해 ChatGPT·Gemini에서 바로 생성하기\n' +
+          '[확인] 프롬프트를 복사해 ChatGPT · Gemini에서 바로 생성하기\n' +
           '[취소] 개인 Groq 키 등록하기 (무료 · 30초)'
         );
-        if (go) { showPrompt(pendingKind); }
+        if (go) { showPrompt(kind); }
         else {
           var b = $('.ai-key-box');
           if (b) { b.open = true; b.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
@@ -1207,34 +1077,45 @@
       box.innerHTML = h + '</ul>';
     }
 
-    /* ---------- 5) 프롬프트 복사 모드 ---------- */
+    function titleOf(kind) {
+      if (kind === 'strategy') return '📋 자기소개서 작성 전략';
+      if (kind === 'review') return '🖍️ 빨간펜 검토 결과';
+      return '✍️ 자기소개서 초안';
+    }
+
+    function promptOf(kind, v) {
+      if (kind === 'strategy') return ResumeAI.prompts.strategy(v);
+      if (kind === 'review') return ResumeAI.prompts.review(v);
+      return ResumeAI.prompts.draft(v);
+    }
+
+    /* ---------- 프롬프트 복사 모드 ---------- */
     function showPrompt(kind) {
       var v = collect();
-      if (!validateInput(v)) return;
+      if (!validateInput(v, kind)) return;
       saveForm();
 
-      var isStrategy = (kind === 'strategy');
-      var text = isStrategy ? ResumeAI.prompts.strategy(v) : ResumeAI.prompts.draft(v);
+      var text = promptOf(kind, v);
       lastText = text;
 
       $('#aiResult').hidden = false;
-      $('#resultTitle').textContent = isStrategy ? '📄 전략 프롬프트' : '📄 초안 프롬프트';
+      $('#resultTitle').textContent = '📄 프롬프트 (' + titleOf(kind) + ')';
       $('#aiSources').innerHTML = '';
       $('#aiResultBody').innerHTML =
         '<div class="sec-tip" style="margin-bottom:10px;">아래 내용이 <b>클립보드에 복사</b>되었습니다. ' +
         '<a href="https://chatgpt.com/" target="_blank" rel="noopener">ChatGPT</a> · ' +
         '<a href="https://gemini.google.com/" target="_blank" rel="noopener">Gemini</a> 에 그대로 붙여넣으세요.' +
-        (isStrategy ? '<br>※ 웹 검색 기능을 켜면 회사 정보 정확도가 올라갑니다.' : '') +
-        '</div><pre class="prompt-pre allow-select">' + esc(text) + '</pre>';
+        '<br>※ 웹 검색 기능을 켜면 회사 정보 정확도가 올라갑니다.</div>' +
+        '<pre class="prompt-pre allow-select">' + esc(text) + '</pre>';
 
       var p = $('#aiProgress'); if (p) p.hidden = true;
-      copyText(text, '프롬프트가 복사되었습니다.\nChatGPT·Gemini 등에 붙여넣어 주세요.');
+      copyText(text, '프롬프트가 복사되었습니다.\nChatGPT · Gemini 등에 붙여넣어 주세요.');
       $('#aiResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    /* ---------- 6) 실행 ---------- */
+    /* ---------- 실행 ---------- */
     function setBusy(on_) {
-      ['#btnStrategy', '#btnDraft'].forEach(function (s) {
+      ['#btnStrategy', '#btnDraft', '#btnReview'].forEach(function (s) {
         var b = $(s); if (b) b.disabled = on_;
       });
     }
@@ -1242,28 +1123,36 @@
     async function run(kind) {
       pendingKind = kind;
       var v = collect();
-      if (!validate(v)) return;
+      if (!validate(v, kind)) return;
       saveForm();
-
-      var isStrategy = (kind === 'strategy');
-      var n = getItems().length;
 
       setBusy(true);
       $('#aiResult').hidden = false;
-      $('#resultTitle').textContent = isStrategy ? '📋 자기소개서 작성 전략' : '✍️ 자기소개서 초안';
+      $('#resultTitle').textContent = titleOf(kind);
       $('#aiResultBody').innerHTML = '<div class="ai-loading"><span class="spin"></span> 생성 중입니다…</div>';
       $('#aiSources').innerHTML = '';
-      prog.start(isStrategy ? '회사 정보를 검색하는 중' : '경력을 분석하는 중');
+
+      var startLabel = '경력을 분석하는 중';
+      if (kind === 'strategy') startLabel = '회사 정보를 검색하는 중';
+      if (kind === 'review') startLabel = '자기소개서를 읽는 중';
+
+      prog.start(startLabel);
       var pEl = $('#aiProgress');
       if (pEl && pEl.scrollIntoView) pEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
       try {
-        var promptText = isStrategy ? ResumeAI.prompts.strategy(v) : ResumeAI.prompts.draft(v);
-        var r = await ResumeAI.call(promptText, {
-          search: isStrategy,
-          temp: isStrategy ? 0.6 : 0.8,
-          expectMs: isStrategy ? 30000 : Math.min(90000, 12000 + n * 9000),
-          stageLabel: isStrategy ? '검색 결과로 전략을 구성하는 중' : (n + '개 항목을 작성하는 중'),
+        var stage = '내용을 작성하는 중';
+        if (kind === 'strategy') stage = '검색 결과로 전략을 구성하는 중';
+        if (kind === 'review') stage = '문단별로 첨삭하는 중';
+
+        var expect = 40000;
+        if (kind === 'review') expect = Math.min(90000, 20000 + v.essay.length * 8);
+
+        var r = await ResumeAI.call(promptOf(kind, v), {
+          search: (kind !== 'draft'),
+          temp: (kind === 'review') ? 0.4 : (kind === 'strategy' ? 0.6 : 0.8),
+          expectMs: expect,
+          stageLabel: stage,
           onProgress: function (p, label) { prog.set(p, label); }
         });
 
@@ -1277,7 +1166,7 @@
         if (cleaned.removed > 0) {
           notice += '🧹 외국 문자 ' + cleaned.removed + '자를 자동 제거했습니다. ';
         }
-        if (cleaned.banned.length) {
+        if (cleaned.banned.length && kind !== 'review') {
           notice += '⚠️ 감점 표현 발견 : ' + cleaned.banned.join(', ') + ' → 직접 수정 권장';
         }
 
@@ -1286,14 +1175,14 @@
           ResumeAI.md(cleaned.text);
 
         renderSources(r.sources);
-        prog.done('완료 ✓' + (r.model ? ' · ' + r.model : ''));
+        prog.done('완료 ✓');
       } catch (e) {
         var m = (e && e.message) || '알 수 없는 오류';
         if (m === 'NO_KEY')  m = 'AI 접속 설정이 필요합니다. 위 [AI 사용 설정]을 확인해 주세요.';
         if (m === 'BAD_KEY') m = 'API 키가 올바르지 않습니다. 다시 확인해 주세요.';
         $('#aiResultBody').innerHTML =
           '<div class="sec-warn">⚠️ ' + esc(m).replace(/\n/g, '<br>') +
-          '<br><br>👉 아래 <b>「프롬프트 복사」</b> 버튼으로 ChatGPT·Gemini에서 바로 생성하실 수 있습니다.</div>';
+          '<br><br>👉 <b>「📄 프롬프트 복사」</b> 버튼으로 ChatGPT · Gemini에서 바로 생성하실 수 있습니다.</div>';
         prog.fail('실패 — 위 메시지를 확인해 주세요');
       } finally {
         setBusy(false);
@@ -1303,10 +1192,15 @@
 
     on('#btnStrategy', 'click', function () { run('strategy'); });
     on('#btnDraft', 'click', function () { run('draft'); });
-    on('#btnPromptStrategy', 'click', function () { showPrompt('strategy'); });
-    on('#btnPromptDraft', 'click', function () { showPrompt('draft'); });
+    on('#btnReview', 'click', function () { run('review'); });
+    on('#btnPrompt', 'click', function () {
+      var kind = pendingKind || 'strategy';
+      var v = collect();
+      if (kind !== 'review' && v.essay.length >= 200 && v.career.length < 30) kind = 'review';
+      showPrompt(kind);
+    });
 
-    /* ---------- 7) 복사 / 저장 ---------- */
+    /* ---------- 복사 / 저장 ---------- */
     function copyText(txt, okMsg) {
       if (!txt) { alert('먼저 결과를 생성해 주세요.'); return; }
 
@@ -1351,7 +1245,7 @@
       }
     });
 
-    /* ---------- 8) 목차 스무스 스크롤 ---------- */
+    /* ---------- 목차 스크롤 ---------- */
     document.querySelectorAll('.study-toc a').forEach(function (a) {
       a.addEventListener('click', function (e) {
         var href = this.getAttribute('href');
@@ -1366,7 +1260,7 @@
       });
     });
 
-    /* ---------- 9) 빈 광고 자리 접기 ---------- */
+    /* ---------- 빈 광고 접기 ---------- */
     function collapseAds() {
       document.querySelectorAll('.ad-zone').forEach(function (z) {
         var ins = z.querySelector('ins.adsbygoogle');
@@ -1377,7 +1271,7 @@
     setTimeout(collapseAds, 3000);
     setTimeout(collapseAds, 8000);
 
-    /* ---------- 10) 부팅 ---------- */
+    /* ---------- 부팅 ---------- */
     loadForm();
     updateCounts();
     refreshKeyState();
