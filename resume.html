@@ -51,15 +51,45 @@
       max-height:420px; overflow:auto;
     }
 
-    /* ===== 광고 미노출 시 빈자리 접기 ===== */
-    .ad-zone { min-height:0 !important; margin:12px 0; }
+    /* ===== 광고 영역 ===== */
+    .ad-zone { min-height:0 !important; margin:14px 0; text-align:center; }
     .ad-zone.ad-empty { display:none !important; }
     ins.adsbygoogle { display:block; min-height:0 !important; }
     ins.adsbygoogle[data-ad-status="unfilled"] { display:none !important; }
+    .ad-label {
+      display:block; text-align:center; font-size:.68rem;
+      letter-spacing:.09em; color:#cbd5e1; margin-bottom:6px;
+    }
+    .ad-zone.ad-empty .ad-label { display:none !important; }
+
+    /* ===== ★ 하단 영역 스타일 (깨짐 방지) ===== */
+    .study-nav {
+      display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
+      margin:28px 0 10px;
+    }
+    .study-nav .btn {
+      display:inline-block; padding:10px 18px; border-radius:10px;
+      border:1px solid #e2e8f0; background:#fff; color:#334155;
+      font-size:.9rem; font-weight:600; text-decoration:none;
+      transition:.15s;
+    }
+    .study-nav .btn:hover { border-color:#93c5fd; color:#1d4ed8; }
+
+    .site-footer {
+      margin-top:36px; padding:22px 16px 30px;
+      border-top:1px solid #e2e8f0; background:#fff;
+      text-align:center; font-size:.8rem; line-height:1.9; color:#94a3b8;
+      word-break:keep-all;
+    }
+    .site-footer .footer-links { margin-bottom:8px; }
+    .site-footer a {
+      color:#64748b; text-decoration:none; margin:0 6px; font-weight:600;
+    }
+    .site-footer a:hover { text-decoration:underline; color:#2563eb; }
 
     /* 워터마크가 본문을 가리지 않도록 */
     body::before, .watermark { pointer-events:none; z-index:0 !important; }
-    main, .container, section { position:relative; z-index:1; }
+    main, .container, section, footer { position:relative; z-index:1; }
   </style>
 </head>
 <body>
@@ -81,7 +111,7 @@
       <div class="study-meta">
         <span><b>6</b> 작성방법</span>
         <span><b>1</b> AI 작성기</span>
-        <span><b>실시간</b> 기업검색</span>
+        <span><b>DART</b> 공시자료 반영</span>
         <span><b>엔진</b> Groq · Llama 3.3 / Compound</span>
       </div>
       <div class="study-toc">
@@ -154,8 +184,8 @@
 
       <ul class="sec-bullets">
         <li><b>① 채용공고</b> — 담당업무·필수요건·우대사항을 3덩어리로 자릅니다. <u>가장 중요한 1차 자료</u></li>
-        <li><b>② 홈페이지</b> — 인재상·핵심가치·비전. 성격/가치관 항목의 기준이 됩니다.</li>
-        <li><b>③ 뉴스·IR 자료</b> — 최근 1년 투자·수주·신사업. <u>지원동기의 핵심 재료</u></li>
+        <li><b>② DART 사업보고서</b> — 실제 사업 내용·매출 구성·투자 계획. <u>지원동기의 최고 재료</u></li>
+        <li><b>③ 홈페이지</b> — 인재상·핵심가치·비전. 성격/가치관 항목의 기준이 됩니다.</li>
         <li><b>④ 제품·서비스</b> — 직접 써보거나 현장을 보고 느낀 점 1개는 강력한 차별점입니다.</li>
         <li><b>⑤ 현직자 후기</b> — 실제 업무 강도·조직 문화. 입사 후 포부를 현실적으로 만듭니다.</li>
       </ul>
@@ -315,7 +345,7 @@
     <!-- ==================== AI 작성기 ==================== -->
     <section class="study-sec" id="writer">
       <h3>7. 🤖 AI 자기소개서 작성기</h3>
-      <p class="sec-note">회사 정보를 <b>실시간 검색</b>해 확인한 뒤, 채용공고 요건과 경력사항을 연결해 전략과 초안을 만듭니다.</p>
+      <p class="sec-note">회사 공시자료(DART)와 검색 결과를 근거로, 채용공고 요건과 경력사항을 연결해 전략과 초안을 만듭니다.</p>
 
       <!-- AI 접속 설정 -->
       <details class="ai-key-box">
@@ -390,6 +420,19 @@
         <textarea id="career" class="ai-textarea allow-select" rows="8"
           placeholder="회사/기간/직무&#10;- 담당업무 :&#10;- 성과(수치) :&#10;- 사용 도구·자격증 :&#10;&#10;학력, 프로젝트, 대외활동, 자격증도 함께 적어주세요."></textarea>
 
+        <label class="ai-label">
+          회사 공시자료 <span>(선택 · DART 사업보고서 「사업의 내용」 붙여넣기 — 정확도 크게 향상)</span>
+          <span class="ai-count" id="dartCount">0자</span>
+        </label>
+        <div class="ai-row" style="margin-bottom:6px;">
+          <button class="btn-sm" id="btnDart" type="button">🔍 DART에서 이 회사 검색</button>
+          <span class="ai-mini-note" style="margin:0;">
+            DART → 회사명 검색 → 정기공시(사업보고서) → <b>Ⅱ. 사업의 내용</b> 복사
+          </span>
+        </div>
+        <textarea id="dart" class="ai-textarea allow-select" rows="6"
+          placeholder="예) 당사는 이차전지 소재(양극재·음극재), 기초소재, 내화물 사업을 영위하고 있습니다. 2024년 매출 구성은 …&#10;&#10;※ 사업의 개요 / 주요 제품 / 매출 구성 / 신규 투자 / 위험요인 부분이 특히 유용합니다."></textarea>
+
         <div class="ai-row">
           <select id="len" class="ai-input">
             <option value="500">항목당 500자</option>
@@ -450,22 +493,24 @@
     </div>
 
     <div class="study-nav">
-      <a class="btn" href="index.html">홈</a>
-      <a class="btn" href="study.html?id=toeic-part1">토익스피킹 자료 →</a>
+      <a class="btn" href="index.html">🏠 홈</a>
+      <a class="btn" href="study.html?id=toeic-part1">🎤 토익스피킹 자료 →</a>
     </div>
   </main>
 
   <footer class="site-footer">
     <div class="footer-links">
-      <a href="privacy.html">개인정보처리방침</a>·<a href="index.html">홈</a>
+      <a href="privacy.html">개인정보처리방침</a>
+      <span style="color:#cbd5e1;">|</span>
+      <a href="index.html">홈</a>
     </div>
-    AI가 생성한 문장은 초안이며 사실 확인은 이용자 책임입니다. 입력 내용은 별도 서버에 저장되지 않습니다.<br>
-    본 콘텐츠의 무단 복제·배포를 금지합니다.
+    AI가 생성한 문장은 초안이며 사실 확인은 이용자 책임입니다.<br>
+    입력 내용은 별도 서버에 저장되지 않습니다. · 본 콘텐츠의 무단 복제·배포를 금지합니다.
   </footer>
 
 
   <!-- ============================================================
-       A) 서버 상태 확인기 (구 api-config.js — 이 파일에 내장)
+       A) 서버 상태 확인기
        ============================================================ -->
   <script>
   (function () {
@@ -481,7 +526,7 @@
 
     var probe;
     if (location.protocol === 'file:') {
-      probe = Promise.resolve(finish({ proxy: false, msg: '로컬 파일(file://)에서는 서버 기능을 사용할 수 없습니다.' }));
+      probe = Promise.resolve(finish({ proxy: false, msg: '로컬 파일에서는 서버 기능을 쓸 수 없습니다.' }));
     } else {
       probe = fetch(PROXY_URL, { method: 'GET', cache: 'no-store' })
         .then(function (r) { return r.json(); })
@@ -510,7 +555,7 @@
 
 
   <!-- ============================================================
-       B) AI 엔진 (구 resume-ai.js — 이 파일에 내장)
+       B) AI 엔진
        ============================================================ -->
   <script>
   (function () {
@@ -522,10 +567,21 @@
     var M_SEARCH = 'groq/compound';
     var M_PLAIN  = 'llama-3.3-70b-versatile';
 
-    var SYS = '당신은 대한민국 대기업 인사담당자 경력 15년의 채용 컨설턴트입니다. ' +
-              '한국어로만 답합니다. 과장·거짓 없이, 제공된 경력 사실만 사용합니다. ' +
-              '수치와 행동 중심으로 쓰고, 추상적 미사여구(열정, 최선, 소통의 달인)는 쓰지 않습니다. ' +
-              '결과는 마크다운으로 정리합니다.';
+    /* ---------- 시스템 지시 (언어·금지어 강화) ---------- */
+    var SYS =
+      '당신은 대한민국 대기업 인사담당자 경력 15년의 채용 컨설턴트입니다.\n' +
+      '[언어 규칙 - 최우선]\n' +
+      '1. 출력은 한국어(한글)와 숫자, 기본 문장부호만 사용합니다.\n' +
+      '2. 한자, 일본어, 중국어, 베트남어, 러시아어, 태국어 문자를 절대 쓰지 마십시오.\n' +
+      '3. 영어는 고유명사(회사명, 자격증명 등)에만 허용합니다.\n' +
+      '4. 뜻을 알 수 없는 조합어나 깨진 문자를 만들지 마십시오.\n' +
+      '[금지 표현]\n' +
+      '열정을 갖고, 최선을 다해, 남들보다 뛰어난, 소통의 달인, 분위기 메이커,\n' +
+      '뼈를 묻겠습니다, 시켜만 주신다면, 귀사, 저희 회사, 부족하지만, 미흡하지만\n' +
+      '[작성 원칙]\n' +
+      '제공된 사실만 사용하고 창작하지 않습니다. 수치와 행동 중심으로 씁니다.\n' +
+      '회사 정보는 제공된 공시자료 또는 검색으로 확인된 내용만 씁니다.\n' +
+      '결과는 마크다운으로 정리합니다.';
 
     function today() { return new Date().toISOString().slice(0, 10); }
 
@@ -554,16 +610,12 @@
       if (getKey()) return { usable: true, mode: 'key', checking: false };
       if (st.checking) return { usable: false, checking: true };
       if (!st.proxy) {
-        return {
-          usable: false, serverDown: true, serverMsg: st.msg,
-          error: '서버 AI 연결을 사용할 수 없습니다.'
-        };
+        return { usable: false, serverDown: true, serverMsg: st.msg,
+                 error: '서버 AI 연결을 사용할 수 없습니다.' };
       }
       if (counts().n >= DAILY) {
-        return {
-          usable: false, quota: true,
-          error: '오늘 공용 사용 한도(' + DAILY + '회)를 모두 사용했습니다.\n개인 키를 등록하시면 제한 없이 이용하실 수 있습니다.'
-        };
+        return { usable: false, quota: true,
+                 error: '오늘 공용 사용 한도(' + DAILY + '회)를 모두 사용했습니다.' };
       }
       return { usable: true, mode: 'proxy', checking: false };
     }
@@ -581,11 +633,12 @@
       return { stop: function () { clearInterval(id); } };
     }
 
-        /* 출처 URL 추출 (정규식 없이 문자 스캔) */
+       /* ---------- 출처 URL 추출 ---------- */
     function pickSources(msg) {
       var out = [], seen = {};
       try {
-        var raw = JSON.stringify(msg && msg.executed_tools ? msg.executed_tools : '');
+        var src = (msg && msg.executed_tools) ? msg.executed_tools : '';
+        var raw = JSON.stringify(src);
         var stop = ' "\'<>)]},;\\';
         var i = 0;
 
@@ -619,19 +672,70 @@
       return out;
     }
 
-
-        /* 길이 자르기 */
-    function clip(text, max) {
-      if (text.length <= max) return text;
-      return text.substring(0, max) +
-        '\n\n(입력이 길어 이후 내용은 생략했습니다)';
+    /* ---------- 외국 문자 판정 ---------- */
+    function isBadChar(code) {
+      if (code >= 0x0100 && code <= 0x02AF) return true;   /* 라틴 확장(베트남어 등) */
+      if (code >= 0x0400 && code <= 0x052F) return true;   /* 키릴 */
+      if (code >= 0x0590 && code <= 0x08FF) return true;   /* 히브리·아랍 */
+      if (code >= 0x0900 && code <= 0x0DFF) return true;   /* 인도계 */
+      if (code >= 0x0E00 && code <= 0x0E7F) return true;   /* 태국어 */
+      if (code >= 0x1E00 && code <= 0x1EFF) return true;   /* 라틴 추가확장 */
+      if (code >= 0x3040 && code <= 0x30FF) return true;   /* 히라가나·가타카나 */
+      if (code >= 0x3400 && code <= 0x4DBF) return true;   /* 한자 확장 */
+      if (code >= 0x4E00 && code <= 0x9FFF) return true;   /* 한자 */
+      if (code >= 0xF900 && code <= 0xFAFF) return true;   /* 한자 호환 */
+      return false;
     }
 
-    /* 실제 1회 요청 */
-    async function once(promptText, model, maxTok) {
+    var BANNED = ['열정을 갖고', '최선을 다해', '남들보다 뛰어난', '소통의 달인',
+                  '분위기 메이커', '뼈를 묻', '시켜만 주신다면', '부족하지만', '미흡하지만'];
+
+    /* ---------- 출력 정리 ---------- */
+    function cleanText(text, company) {
+      var kept = '', removed = 0, i, code;
+
+      for (i = 0; i < text.length; i++) {
+        code = text.charCodeAt(i);
+        if (isBadChar(code)) { removed++; continue; }
+        kept += text.charAt(i);
+      }
+
+      kept = kept.split('  ').join(' ');
+
+      var name = (company || '').split('/')[0];
+      name = name.replace(/^\s+|\s+$/g, '');
+      if (name) {
+        kept = kept.split('귀사').join(name);
+        kept = kept.split('저희 회사').join(name);
+      }
+
+      var hits = [];
+      for (i = 0; i < BANNED.length; i++) {
+        if (kept.indexOf(BANNED[i]) >= 0) hits.push(BANNED[i]);
+      }
+
+      return { text: kept, removed: removed, banned: hits };
+    }
+
+    function badRatio(text) {
+      var bad = 0;
+      for (var i = 0; i < text.length; i++) {
+        if (isBadChar(text.charCodeAt(i))) bad++;
+      }
+      return text.length ? (bad / text.length) : 0;
+    }
+
+    /* ---------- 길이 자르기 ---------- */
+    function clip(text, max) {
+      if (text.length <= max) return text;
+      return text.substring(0, max) + '\n\n(입력이 길어 이후 내용은 생략했습니다)';
+    }
+
+    /* ---------- 요청 1회 ---------- */
+    async function once(promptText, model, maxTok, temp) {
       var payload = {
         model: model,
-        temperature: 0.7,
+        temperature: (temp == null ? 0.7 : temp),
         max_completion_tokens: maxTok,
         messages: [
           { role: 'system', content: SYS },
@@ -660,17 +764,20 @@
       return { status: res.status, ok: res.ok, data: data, usedKey: !!key, model: model };
     }
 
+    /* ---------- 호출 (축소 재시도 + 언어 재시도) ---------- */
     async function call(prompt, opt) {
       opt = opt || {};
       var info = keyInfo();
       if (!info.usable) throw new Error(info.error || 'NO_KEY');
 
-      /* 1차 → 실패 시 점점 작게 재시도 */
       var plan = [
         { model: (opt.search ? M_SEARCH : M_PLAIN), maxTok: 4000, size: 12000 },
         { model: M_PLAIN, maxTok: 3000, size: 6000 },
         { model: M_PLAIN, maxTok: 2000, size: 3500 }
       ];
+
+      var LANG_FIX = '\n\n[매우 중요] 반드시 한국어(한글)와 숫자로만 작성하십시오. ' +
+                     '한자, 일본어, 중국어, 베트남어 문자를 한 글자도 쓰지 마십시오.';
 
       var tk = ticker(opt);
       var lastMsg = '';
@@ -683,15 +790,32 @@
             opt.onProgress(30, '입력을 줄여 다시 시도하는 중 (' + (i + 1) + '/' + plan.length + ')');
           }
 
-          var r = await once(clip(prompt, step.size), step.model, step.maxTok);
+          var r = await once(clip(prompt, step.size), step.model, step.maxTok, opt.temp);
 
-          /* 성공 */
           if (r.ok && r.data && r.data.choices && r.data.choices[0]) {
             var ch = r.data.choices[0];
             var txt = (ch.message && ch.message.content) || '';
+
             if (txt.replace(/\s/g, '') !== '') {
+              /* 외국 문자 과다 → 1회 재생성 */
+              if (badRatio(txt) > 0.004) {
+                if (typeof opt.onProgress === 'function') {
+                  opt.onProgress(60, '외국어 문자가 감지되어 다시 작성하는 중');
+                }
+                var r2 = await once(clip(prompt, step.size) + LANG_FIX, step.model, step.maxTok, 0.2);
+                if (r2.ok && r2.data && r2.data.choices && r2.data.choices[0]) {
+                  var m2 = r2.data.choices[0].message;
+                  var t2 = (m2 && m2.content) || '';
+                  if (t2.replace(/\s/g, '') !== '' && badRatio(t2) < badRatio(txt)) {
+                    ch = r2.data.choices[0];
+                    txt = t2;
+                  }
+                }
+              }
+
               if (!r.usedKey) bump();
               if (typeof opt.onProgress === 'function') opt.onProgress(97, '정리하는 중');
+
               return {
                 text: txt.replace(/^\s+|\s+$/g, ''),
                 sources: pickSources(ch.message),
@@ -702,28 +826,15 @@
             continue;
           }
 
-          /* 실패 원인 정리 */
           var em = '';
-          if (r.data && r.data.error) {
-            em = r.data.error.message || r.data.error;
-          }
+          if (r.data && r.data.error) em = r.data.error.message || r.data.error;
           em = String(em || ('HTTP ' + r.status));
           lastMsg = em;
 
-          /* 키 문제는 즉시 중단 */
           if (r.status === 401 || r.status === 403) throw new Error('BAD_KEY');
-
-          /* 크기 문제면 다음 단계로 축소 재시도 */
           if (r.status === 413 || r.status === 400) continue;
-
-          /* 한도 초과 */
-          if (r.status === 429) {
-            throw new Error('요청이 많아 잠시 제한되었습니다. 1~2분 후 다시 시도해 주세요.');
-          }
-
-          /* 그 외 서버 오류도 한 번 더 시도 */
+          if (r.status === 429) throw new Error('요청이 많아 잠시 제한되었습니다. 1~2분 후 다시 시도해 주세요.');
           if (r.status >= 500) continue;
-
           throw new Error(em);
         }
 
@@ -737,6 +848,7 @@
       }
     }
 
+    /* ---------- 마크다운 ---------- */
     function esc(s) {
       return String(s == null ? '' : s)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -776,9 +888,11 @@
       return html || '<p>(내용 없음)</p>';
     }
 
+    /* ---------- 프롬프트 ---------- */
     function base(v) {
       return '## 지원 정보\n' +
         '- 회사/직무 : ' + (v.company || '(미입력)') + '\n\n' +
+        '## 회사 공시자료 (DART 사업보고서 발췌)\n"""\n' + (v.dart || '(미입력)') + '\n"""\n\n' +
         '## 채용공고 원문\n"""\n' + v.jd + '\n"""\n\n' +
         '## 지원자 경력·경험\n"""\n' + v.career + '\n"""\n\n' +
         '## 작성 항목\n' + v.items + '\n';
@@ -787,14 +901,20 @@
     var prompts = {
       strategy: function (v) {
         return base(v) +
-          '\n위 정보를 바탕으로 자기소개서 작성 전략을 세워 주십시오.\n' +
-          '가능하면 해당 회사의 최근 사업·투자·이슈를 웹에서 확인해 반영하고, 확인한 내용은 사실만 적습니다.\n\n' +
+          '\n위 정보를 바탕으로 자기소개서 작성 전략을 세워 주십시오.\n\n' +
+          '[회사 정보 사용 순서]\n' +
+          '1순위 : 위 「회사 공시자료(DART 사업보고서)」 내용\n' +
+          '2순위 : 웹검색 - 금융감독원 전자공시(dart.fss.or.kr) 사업보고서의 사업의 내용,\n' +
+          '        회사 공식 홈페이지, 최근 1년 뉴스, IR 자료\n' +
+          '3순위 : 채용공고에 적힌 사업·조직 설명\n' +
+          '확인되지 않은 내용은 반드시 "확인 필요"로 표기하고 추측하지 마십시오.\n\n' +
           '다음 순서로 작성하십시오.\n' +
-          '1. 회사 분석 — 주요 사업, 최근 1년 이슈 3가지, 이 직무가 회사에서 하는 역할\n' +
-          '2. 공고 키워드 추출 — 필수요건/우대사항에서 핵심 키워드 7개와 각 키워드의 실제 요구 역량\n' +
-          '3. 경력 매칭표 — 키워드별로 지원자의 어떤 경험을 근거로 쓸지, 부족한 부분은 무엇인지\n' +
-          '4. 항목별 전략 — 각 작성 항목마다 (a) 핵심 메시지 1줄 (b) 사용할 경험 (c) 소제목 후보 2개 (d) 반드시 넣을 수치\n' +
-          '5. 주의사항 — 이 지원자가 감점될 위험 요소 3가지와 보완 방법\n';
+          '1. 회사 분석 - 주요 사업과 제품, 매출 구성, 최근 1년 투자·신사업·이슈 3가지,\n' +
+          '   위험요인, 이 직무가 회사에서 하는 역할\n' +
+          '2. 공고 키워드 추출 - 필수요건과 우대사항에서 핵심 키워드 7개와 실제 요구 역량\n' +
+          '3. 경력 매칭표 - 키워드별로 어떤 경험을 근거로 쓸지, 부족한 부분은 무엇인지\n' +
+          '4. 항목별 전략 - 항목마다 핵심 메시지 1줄, 사용할 경험, 소제목 후보 2개, 넣을 수치\n' +
+          '5. 주의사항 - 감점 위험 요소 3가지와 보완 방법\n';
       },
       draft: function (v) {
         return base(v) +
@@ -802,20 +922,21 @@
           '작성 규칙\n' +
           '- 분량 : 항목당 ' + v.len + '자 (±10%)\n' +
           '- 문체 : ' + v.tone + '\n' +
-          '- 각 항목은 "## N. 항목명" 으로 시작하고, 바로 아래 줄에 15자 이내 소제목을 [ ] 안에 넣습니다.\n' +
+          '- 각 항목은 "## N. 항목명" 으로 시작하고, 다음 줄에 15자 이내 소제목을 [ ] 안에 넣습니다.\n' +
           '- 첫 문장은 두괄식(결론·수치·문제정의)으로 시작합니다.\n' +
-          '- 한 문장은 60자 이내로 끊고, STAR(상황-과제-행동-결과) 구조를 지킵니다.\n' +
-          '- 제공된 경력에 없는 사실을 만들지 않습니다. 수치가 없으면 [수치 입력] 으로 표시합니다.\n' +
+          '- 한 문장은 60자 이내, STAR(상황-과제-행동-결과) 구조를 지킵니다.\n' +
+          '- 회사에 관한 서술은 위 공시자료 또는 검색으로 확인된 사실만 사용합니다.\n' +
+          '- 지원자 경력에 없는 사실을 만들지 않습니다. 수치가 없으면 [수치 입력] 으로 표시합니다.\n' +
           '- 공고에 등장한 표현을 항목마다 최소 1회 사용합니다.\n' +
-          '- 문단 끝에는 회사에 기여할 지점을 연결합니다.\n' +
-          '- 각 항목 끝에 "> 보완 필요 : ..." 한 줄로 지원자가 채워야 할 부분을 알려 줍니다.\n' +
+          '- 회사명은 정확히 표기하고 "귀사"라는 단어는 쓰지 않습니다.\n' +
+          '- 각 항목 끝에 "> 보완 필요 : ..." 한 줄을 넣습니다.\n' +
           '- 마지막에 "## 제출 전 확인" 으로 체크포인트 5개를 정리합니다.\n';
       }
     };
 
     window.ResumeAI = {
       getKey: getKey, setKey: setKey, keyInfo: keyInfo, remaining: remaining,
-      call: call, md: md, prompts: prompts
+      call: call, md: md, prompts: prompts, clean: cleanText
     };
   })();
   </script>
@@ -931,7 +1052,7 @@
 
     /* ---------- 3) 입력 자동 저장 / 글자수 ---------- */
     var FORM_LS = 'cbt_resume_form';
-    var FIELDS  = ['company', 'job', 'jd', 'career', 'itemCustom', 'len', 'tone'];
+    var FIELDS  = ['company', 'job', 'jd', 'career', 'dart', 'itemCustom', 'len', 'tone'];
     var saveTimer = null;
 
     function saveForm() {
@@ -963,23 +1084,36 @@
       }
     }
 
-    function setCount(sel, len) {
+    function setCount(sel, len, needMin) {
       var el = $(sel);
       if (!el) return;
       el.textContent = len.toLocaleString() + '자';
-      el.className = 'ai-count' + (len > 0 && len < 30 ? ' warn' : '');
+      el.className = 'ai-count' + (needMin && len > 0 && len < 30 ? ' warn' : '');
     }
     function updateCounts() {
-      setCount('#jdCount', $('#jd') ? $('#jd').value.length : 0);
-      setCount('#careerCount', $('#career') ? $('#career').value.length : 0);
+      setCount('#jdCount', $('#jd') ? $('#jd').value.length : 0, true);
+      setCount('#careerCount', $('#career') ? $('#career').value.length : 0, true);
+      setCount('#dartCount', $('#dart') ? $('#dart').value.length : 0, false);
     }
 
-    ['#jd', '#career', '#company', '#job', '#itemCustom'].forEach(function (sel) {
+    ['#jd', '#career', '#dart', '#company', '#job', '#itemCustom'].forEach(function (sel) {
       on(sel, 'input', function () { updateCounts(); saveLater(); });
     });
     ['#len', '#tone'].forEach(function (sel) { on(sel, 'change', saveLater); });
     document.querySelectorAll('#itemChips input').forEach(function (c) {
       c.addEventListener('change', saveLater);
+    });
+
+    /* DART 검색 버튼 */
+    on('#btnDart', 'click', function () {
+      var name = (($('#company') && $('#company').value) || '').trim();
+      if (!name) {
+        alert('먼저 회사명을 입력해 주세요.');
+        if ($('#company')) $('#company').focus();
+        return;
+      }
+      var url = 'https://dart.fss.or.kr/dsab007/main.do?textCrpNm=' + encodeURIComponent(name);
+      window.open(url, '_blank', 'noopener');
     });
 
     on('#btnFormClear', 'click', function () {
@@ -1010,6 +1144,7 @@
         company: (($('#company') && $('#company').value) || '').trim() + (job ? ' / 직무: ' + job : ''),
         jd: (($('#jd') && $('#jd').value) || '').trim(),
         career: (($('#career') && $('#career').value) || '').trim(),
+        dart: (($('#dart') && $('#dart').value) || '').trim(),
         items: getItems().map(function (s, i) { return (i + 1) + '. ' + s; }).join('\n'),
         len: ($('#len') && $('#len').value) || '700',
         tone: ($('#tone') && $('#tone').value) || '간결한 문어체, ~합니다'
@@ -1029,7 +1164,7 @@
         return false;
       }
       if (!getItems().length) { alert('작성 항목을 1개 이상 선택해 주세요.'); return false; }
-      if (v.jd.length + v.career.length > 20000) {
+      if (v.jd.length + v.career.length + v.dart.length > 20000) {
         alert('입력이 너무 깁니다. 합쳐 20,000자 이내로 줄여 주세요.');
         return false;
       }
@@ -1133,8 +1268,24 @@
           onProgress: function (p, label) { prog.set(p, label); }
         });
 
-        lastText = r.text;
-        $('#aiResultBody').innerHTML = ResumeAI.md(r.text);
+        var cleaned = ResumeAI.clean
+          ? ResumeAI.clean(r.text, v.company)
+          : { text: r.text, removed: 0, banned: [] };
+
+        lastText = cleaned.text;
+
+        var notice = '';
+        if (cleaned.removed > 0) {
+          notice += '🧹 외국 문자 ' + cleaned.removed + '자를 자동 제거했습니다. ';
+        }
+        if (cleaned.banned.length) {
+          notice += '⚠️ 감점 표현 발견 : ' + cleaned.banned.join(', ') + ' → 직접 수정 권장';
+        }
+
+        $('#aiResultBody').innerHTML =
+          (notice ? '<div class="sec-tip" style="margin-bottom:10px;">' + esc(notice) + '</div>' : '') +
+          ResumeAI.md(cleaned.text);
+
         renderSources(r.sources);
         prog.done('완료 ✓' + (r.model ? ' · ' + r.model : ''));
       } catch (e) {
