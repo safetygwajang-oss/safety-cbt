@@ -1,4 +1,4 @@
-# 🏭 포스코퓨처엠 CBT
+# 🏭 골드박스
 
 산업안전기사 필기 기출문제 기반 CBT(Computer-Based Test) 웹앱
 
