@@ -1,7 +1,7 @@
 /* ============================================
    안전과장 CBT - 홈 대시보드
-   main.js (v7)
-   - ★ 커리어 탭(자기소개서·토익스피킹)을 자격증 탭 "윗줄"에 별도 배치
+   main.js (v8)
+   - 커리어 알약 메뉴 제거 (index.html 의 빠른 메뉴 카드로 대체)
    - 자격증별 탭 분류 + 문항수/시험시간 자동 보정
    - 마지막 선택 탭 기억
    ★ index.html 에서 toeic.js / resume-tab.js 태그는 제거하세요
@@ -19,21 +19,10 @@
 
   const codeStore = sessionStorage;   // localStorage 로 바꾸면 계속 기억
   const CODE_KEY = 'dup-access-ok';
-  const TAB_KEY = 'cbt-last-tab';
+  const TAB_KEY  = 'cbt-last-tab';
 
   /* ============================================
-     ★ 윗줄 커리어 메뉴
-     type: 'link'  → 누르면 바로 이동
-           'cards' → 아래에 카드 목록 표시
-     ============================================ */
-    /* ============================================
-     ★ 윗줄 커리어 메뉴
-     type: 'link'  → 누르면 바로 이동
-           'cards' → 아래에 카드 목록 표시
-     ============================================ */
-
-  /* ============================================
-     아랫줄 자격증 탭
+     자격증 탭 목록
      ============================================ */
   const CATEGORIES = [
     { key: 'safety',       label: '🏭 산업안전기사' },
@@ -60,66 +49,27 @@
      추가 스타일 (css 파일 수정 불필요)
      ============================================ */
   function injectStyle() {
-    if (document.getElementById('cbt-career-style')) return;
+    if (document.getElementById('cbt-main-style')) return;
 
     const css = `
-      /* ===== 윗줄 커리어 탭 ===== */
-      .career-bar {
-        display: flex; align-items: center; gap: 8px;
-        flex-wrap: wrap; margin: 26px 0 12px;
-      }
-      .career-bar-label {
-        font-size: .78rem; font-weight: 700; color: #94a3b8;
-        letter-spacing: .04em; margin-right: 2px;
-      }
-      .career-tab {
-        display: inline-flex; align-items: center; gap: 7px;
-        padding: 10px 16px; border-radius: 99px; cursor: pointer;
-        font-family: inherit; font-size: .93rem; font-weight: 700;
-        color: #1d4ed8; background: linear-gradient(135deg,#eff6ff,#f0fdfa);
-        border: 1px solid #dbeafe;
-        transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
-      }
-      .career-tab:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(37,99,235,.18);
-        border-color: #93c5fd;
-      }
-      .career-tab.active {
-        background: linear-gradient(135deg,#2563eb,#0ea5e9);
-        border-color: #2563eb; color: #fff;
-      }
-      .career-tab .cbadge {
-        background: #2563eb; color: #fff;
-        font-size: .64rem; font-weight: 800; letter-spacing: .04em;
-        padding: 2px 7px; border-radius: 99px;
-      }
-      .career-tab.active .cbadge { background: rgba(255,255,255,.28); }
-
-            @media (max-width: 520px) {
-        .career-bar { gap: 6px; margin: 18px 0 10px; }
-        .career-bar-label { width: 100%; margin-bottom: 2px; }
-        .career-tab { flex: 1 1 30%; justify-content: center; padding: 10px 8px; font-size: .82rem; }
-      }
-
-
-      /* ===== 토익 패널 ===== */
+      a.exam-card { text-decoration: none; display: block; color: inherit; }
       .front-intro {
         background: linear-gradient(135deg,#eff6ff,#f0fdfa);
         border: 1px solid #dbeafe; border-radius: 12px;
         padding: 12px 14px; margin-bottom: 14px;
         font-size: .88rem; color: #334155; line-height: 1.6;
       }
-      a.exam-card { text-decoration: none; display: block; color: inherit; }
       .front-tag {
         display: inline-block; background: #2563eb; color: #fff;
         font-size: .68rem; font-weight: 800; letter-spacing: .05em;
         padding: 3px 9px; border-radius: 99px; margin-bottom: 8px;
       }
+      /* 커리어 알약 메뉴 잔재 방지 */
+      .career-bar { display: none !important; }
     `;
 
     const style = document.createElement('style');
-    style.id = 'cbt-career-style';
+    style.id = 'cbt-main-style';
     style.textContent = css;
     document.head.appendChild(style);
   }
@@ -140,7 +90,7 @@
   }
 
   /* ============================================
-     ★ 자격증별 문항수 / 시험시간 보정
+     자격증별 문항수 / 시험시간 보정
      ============================================ */
   function fixMeta(exam) {
     const text = `${exam.id || ''} ${exam.title || ''}`;
@@ -184,18 +134,22 @@
     return codeStore.getItem(CODE_KEY) === '1';
   }
 
-  // ===== 통계 카드 =====
+  /* ============================================
+     통계 카드
+     ============================================ */
   function renderStats() {
     const stats = window.Storage && window.Storage.getStats
       ? window.Storage.getStats()
       : { totalSessions: 0, avgScore: 0, bookmarkCount: 0 };
 
-    if ($('stat-sessions')) $('stat-sessions').textContent = stats.totalSessions;
-    if ($('stat-avg')) $('stat-avg').innerHTML = `${stats.avgScore}<span style="font-size:1rem;">점</span>`;
+    if ($('stat-sessions'))  $('stat-sessions').textContent = stats.totalSessions;
+    if ($('stat-avg'))       $('stat-avg').innerHTML = `${stats.avgScore}<span style="font-size:1rem;">점</span>`;
     if ($('stat-bookmarks')) $('stat-bookmarks').textContent = stats.bookmarkCount;
   }
 
-  // ===== 북마크 모아보기 =====
+  /* ============================================
+     북마크 모아보기
+     ============================================ */
   function renderBookmarks() {
     const list = window.Storage && window.Storage.getBookmarkList
       ? window.Storage.getBookmarkList()
@@ -241,7 +195,9 @@
     }
   }
 
-  // ===== 최근 응시 결과 =====
+  /* ============================================
+     최근 응시 결과
+     ============================================ */
   function renderRecent() {
     const sessions = window.Storage && window.Storage.getAllSessions
       ? window.Storage.getAllSessions()
@@ -305,77 +261,15 @@
 
     const host = tabsEl.parentElement;
 
-    // 기존 패널 / 커리어바 제거 (중복 방지)
+    /* 기존 패널 제거 (중복 방지) */
     host.querySelectorAll('.tab-panel').forEach(p => p.remove());
-    const oldBar = document.getElementById('career-bar');
-    if (oldBar) oldBar.remove();
+
+    /* 이전 버전이 만든 커리어 알약 메뉴 잔재 제거 */
+    document.querySelectorAll('#career-bar, .career-bar').forEach(el => el.remove());
+
     tabsEl.innerHTML = '';
 
     return { tabsEl, host };
-  }
-
-  /* ============================================
-     ★ 커리어 바 (자격증 탭 윗줄)
-     ============================================ */
-  function buildCareerBar(tabsEl, host) {
-    const bar = document.createElement('div');
-    bar.className = 'career-bar';
-    bar.id = 'career-bar';
-    bar.innerHTML = '<span class="career-bar-label"> </span>';
-
-    const panelKeys = [];
-
-    CAREER_TABS.forEach(cfg => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'career-tab';
-      btn.dataset.tab = cfg.key;
-      btn.innerHTML = `${cfg.label}${cfg.badge ? `<span class="cbadge">${escapeHtml(cfg.badge)}</span>` : ''}`;
-
-      if (cfg.type === 'link') {
-        btn.addEventListener('click', () => { window.location.href = cfg.href; });
-        bar.appendChild(btn);
-        return;
-      }
-
-      /* 카드형 : 패널 생성 */
-      btn.addEventListener('click', () => activateTab(cfg.key));
-      bar.appendChild(btn);
-      panelKeys.push(cfg.key);
-
-      const panel = document.createElement('div');
-      panel.className = 'tab-panel';
-      panel.id = `panel-${cfg.key}`;
-      panel.style.display = 'none';
-
-      if (cfg.intro) {
-        const intro = document.createElement('div');
-        intro.className = 'front-intro';
-        intro.innerHTML = cfg.intro;
-        panel.appendChild(intro);
-      }
-
-      const grid = document.createElement('div');
-      grid.className = 'exam-grid';
-      (cfg.cards || []).forEach(c => {
-        const a = document.createElement('a');
-        a.className = 'exam-card';
-        a.href = c.href;
-        a.innerHTML = `
-          <span class="front-tag">${escapeHtml(c.tag)}</span>
-          <h3>${escapeHtml(c.title)}</h3>
-          <div class="exam-subjects">${escapeHtml(c.desc)}</div>
-        `;
-        grid.appendChild(a);
-      });
-      panel.appendChild(grid);
-      host.appendChild(panel);
-    });
-
-    /* 자격증 탭 줄 바로 위에 삽입 */
-    host.insertBefore(bar, tabsEl);
-
-    return panelKeys;
   }
 
   /* ============================================
@@ -398,13 +292,13 @@
       console.log('data/index.json 로드 실패:', e);
     }
 
-    // 응시 기록
+    /* 응시 기록 */
     const sessions = window.Storage && window.Storage.getAllSessions
       ? window.Storage.getAllSessions()
       : {};
     const attempted = new Set(Object.values(sessions).map(s => s.examId));
 
-    // 진행중 기록
+    /* 진행중 기록 */
     const inProgress = new Set();
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -417,12 +311,12 @@
       }
     }
 
-    // 그룹핑
+    /* 그룹핑 */
     const groups = {};
     CATEGORIES.forEach(c => { groups[c.key] = []; });
     exams.forEach(ex => { groups[classify(ex)].push(ex); });
 
-    // 정렬
+    /* 정렬 */
     Object.keys(groups).forEach(key => {
       if (key === 'dup') {
         groups[key].sort((a, b) => String(a.title || a.id).localeCompare(String(b.title || b.id)));
@@ -433,12 +327,9 @@
 
     const { tabsEl, host } = buildShell();
 
-    /* ★ 윗줄 커리어 바 먼저 생성 */
-    const careerPanelKeys = buildCareerBar(tabsEl, host);
-
-    /* 아랫줄 자격증 탭 */
+    /* 자격증 탭 생성 */
     let firstExamKey = null;
-    const panelKeys = careerPanelKeys.slice();
+    const panelKeys = [];
 
     CATEGORIES.forEach(cat => {
       const items = groups[cat.key];
@@ -493,7 +384,7 @@
 
     tabsEl.scrollLeft = 0;
 
-    /* 자격증 탭 클릭 */
+    /* 탭 클릭 */
     tabsEl.querySelectorAll('.main-tab').forEach(btn => {
       btn.addEventListener('click', () => {
         activateTab(btn.dataset.tab);
@@ -507,9 +398,11 @@
     if (isUnlocked()) unlockDup();
   }
 
-  /* 두 줄 모두 반영 */
+  /* ============================================
+     탭 활성화
+     ============================================ */
   function activateTab(key) {
-    document.querySelectorAll('.main-tab, .career-tab').forEach(b => {
+    document.querySelectorAll('.main-tab').forEach(b => {
       b.classList.toggle('active', b.dataset.tab === key);
     });
     document.querySelectorAll('.tab-panel').forEach(p => {
@@ -518,7 +411,9 @@
     try { sessionStorage.setItem(TAB_KEY, key); } catch (e) {}
   }
 
-  /* ===== 카드 그리기 ===== */
+  /* ============================================
+     카드 그리기
+     ============================================ */
   function paint(container, list, attempted, inProgress) {
     container.innerHTML = '';
 
@@ -570,7 +465,9 @@
     });
   }
 
-  /* ===== 입장코드 ===== */
+  /* ============================================
+     입장코드
+     ============================================ */
   function openCodeModal() {
     if (!$('code-modal')) return;
     $('code-error').style.display = 'none';
@@ -614,7 +511,9 @@
     });
   }
 
-  /* ===== 설정 ===== */
+  /* ============================================
+     설정
+     ============================================ */
   function bindEvents() {
     if ($('settings-btn')) {
       $('settings-btn').addEventListener('click', () => $('settings-modal').classList.add('show'));
@@ -648,7 +547,9 @@
     }
   }
 
-  /* ===== 유틸 ===== */
+  /* ============================================
+     유틸
+     ============================================ */
   function escapeHtml(str) {
     if (str == null) return '';
     return String(str)
