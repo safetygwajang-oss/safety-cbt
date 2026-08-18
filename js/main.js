@@ -26,6 +26,11 @@
      type: 'link'  → 누르면 바로 이동
            'cards' → 아래에 카드 목록 표시
      ============================================ */
+    /* ============================================
+     ★ 윗줄 커리어 메뉴
+     type: 'link'  → 누르면 바로 이동
+           'cards' → 아래에 카드 목록 표시
+     ============================================ */
   const CAREER_TABS = [
     {
       key: 'resume',
@@ -47,8 +52,24 @@
         { href: 'study.html?id=toeic-part4', tag: 'PART 4', title: '제공된 정보로 답하기', desc: 'Respond using information · 표 읽기' },
         { href: 'study.html?id=toeic-part5', tag: 'PART 5', title: '의견 제시하기',        desc: 'Express an opinion · 서론-본론-결론' }
       ]
+    },
+    /* ★★★ 여기부터 추가 — 토익스피킹 바로 오른쪽에 배치 ★★★ */
+    {
+      key: 'interview',
+      label: '💼 면접',
+      badge: 'NEW',
+      type: 'cards',
+      intro: '<b>면접 완전정복</b> · 답변 구조(STAR) · 1분 자기소개 · 기업별 예상질문 · 꼬리질문 대응',
+      cards: [
+        { href: 'interview.html?v=guide',   tag: 'GUIDE',   title: '면접 기본기',        desc: '첫인상 · 복장 · 태도 · 1분 자기소개 · STAR 기법' },
+        { href: 'interview.html?v=common',  tag: 'COMMON',  title: '공통 빈출 질문',     desc: '지원동기 · 장단점 · 갈등경험 · 입사 후 포부' },
+        { href: 'interview.html?v=company', tag: 'COMPANY', title: '기업별 예상질문',    desc: '기업 선택 → 인성 · 직무 · 기술 · 압박 질문' },
+        { href: 'interview.html?v=job',     tag: 'JOB',     title: '직무별 기술 질문',   desc: '생산기술 · 품질 · 설비 · 안전환경 · 연구개발' },
+        { href: 'interview.html?v=press',   tag: 'PRESS',   title: '압박·꼬리질문 대응', desc: '모르는 질문 대처법 · 역질문 리스트 · 금지 답변' }
+      ]
     }
   ];
+
 
   /* ============================================
      아랫줄 자격증 탭
