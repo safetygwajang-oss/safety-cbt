@@ -511,10 +511,11 @@
 
   <script src="js/protect.js"></script>
 
-  <script>
+    <script>
   (function(){
     'use strict';
 
+    /* ================= 탭 전환 ================= */
     var VALID = ['guide','common','company','job','press'];
     var tabs  = document.querySelectorAll('#iv-tabs .iv-tab');
     var views = document.querySelectorAll('.iv-view');
@@ -526,27 +527,51 @@
       if(v === 'company') loadCompany();
       try { history.replaceState(null, '', '#' + v); } catch(e){}
     }
-
     tabs.forEach(function(t){
       t.addEventListener('click', function(){
         show(t.dataset.v);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     });
-
     show((location.hash || '').replace('#',''));
 
-    /* ---------- 기업별 예상질문 : JSON 자동 렌더 ---------- */
+
+    /* ================= 기업별 예상질문 ================= */
+    /* 읽어올 데이터 파일 목록 (파일을 추가하면 여기에 한 줄 추가) */
+    var DATA_FILES = [
+      'data/companies-posco.json',
+      'data/companies-sk.json',
+      'data/companies-lg.json',
+      'data/companies-hmg.json',
+      'data/companies-chem.json',
+      'data/companies-etc.json',
+      'data/companies-public.json'
+    ];
+
+    var GROUP_NAME = {
+      'G-POSCO':'포스코그룹', 'G-SK':'SK그룹', 'G-LG':'LG그룹',
+      'G-HMG':'현대차그룹', 'G-CHEM':'화학·소재', 'G-ETC':'기타 대기업·서비스',
+      'G-PUB':'공공기관·공기업'
+    };
+    var TYPE_LABEL = {
+      common:'공통·인성', job:'직무·기술', situation:'상황·압박',
+      english:'영어', pt:'발표과제'
+    };
+    var TIER_LABEL = { T1:'1차 기업군', T2:'2차 기업군', TP:'공공 트랙' };
+
     var bar  = document.getElementById('co-bar');
     var body = document.getElementById('co-body');
-    var loaded = false, LIST = [];
+    var loaded = false;
+    var LIST = [];          // 전체 회사
+    var GROUPS = [];         // 그룹 id 순서
+    var curGroup = '';       // 선택된 그룹
+    var curIdx = 0;          // 선택된 회사 index
 
     function esc(s){
       return String(s == null ? '' : s)
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
-
-    function emptyMsg(html){
+    function msg(html){
       bar.innerHTML = '';
       body.innerHTML = '<div class="empty">' + html + '</div>';
     }
@@ -554,88 +579,130 @@
     function loadCompany(){
       if(loaded) return;
       loaded = true;
-      emptyMsg('데이터를 불러오는 중입니다…');
+      msg('데이터를 불러오는 중입니다…');
 
-      fetch('data/interview.json', { cache: 'no-store' })
-        .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
-        .then(function(j){
-          LIST = (j && j.companies) || [];
-          if(!LIST.length){
-            emptyMsg('아직 등록된 기업 데이터가 없습니다.<br><code>data/interview.json</code> 의 <code>companies</code> 배열에 기업을 추가하면 이 화면에 자동으로 표시됩니다.');
-            return;
-          }
-          renderBar();
-          renderCompany(0);
-        })
-        .catch(function(){
+      /* meta.json 은 있으면 그룹명으로 사용, 없어도 동작 */
+      var metaP = fetch('data/meta.json', {cache:'no-store'})
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .catch(function(){ return null; });
+
+      var filesP = DATA_FILES.map(function(p){
+        return fetch(p, {cache:'no-store'})
+          .then(function(r){ return r.ok ? r.json() : null; })
+          .catch(function(){ return null; });
+      });
+
+      Promise.all([metaP].concat(filesP)).then(function(res){
+        var meta = res[0];
+        if(meta && meta.groups){
+          meta.groups.forEach(function(g){ GROUP_NAME[g.id] = g.name; });
+        }
+        if(meta && meta.tiers){
+          meta.tiers.forEach(function(t){ TIER_LABEL[t.id] = t.name; });
+        }
+        if(meta && meta.qTypes){
+          meta.qTypes.forEach(function(t){ TYPE_LABEL[t.id] = t.name; });
+        }
+
+        var ok = 0;
+        res.slice(1).forEach(function(file){
+          if(!file || !file.companies) return;
+          ok++;
+          file.companies.forEach(function(c){
+            var g = c.group || file.group || 'G-ETC';
+            if(GROUPS.indexOf(g) < 0) GROUPS.push(g);
+            LIST.push({ c:c, g:g });
+          });
+        });
+
+        if(!LIST.length){
           loaded = false;
-          emptyMsg(
-            '데이터를 불러오지 못했습니다.<br>' +
-            '<code>data/interview.json</code> 경로를 확인해 주세요.<br>' +
-            '<span style="font-size:.82rem">※ 파일을 file:// 로 직접 열면 브라우저가 차단합니다. 로컬 서버로 실행하세요.</span>'
-          );
-        });
-    }
+          msg('데이터 파일을 읽지 못했습니다.<br>' +
+              '<code>data/</code> 폴더에 <code>companies-*.json</code> 파일이 있는지 확인해 주세요.<br>' +
+              '<span style="font-size:.82rem">※ 로컬에서 file:// 로 열면 차단됩니다.</span>');
+          return;
+        }
 
-    function renderBar(){
-      bar.innerHTML = LIST.map(function(c, i){
-        return '<button class="co-btn' + (i === 0 ? ' active' : '') + '" data-i="' + i + '">'
-             + esc(c.name || ('기업 ' + (i + 1))) + '</button>';
-      }).join('');
-
-      bar.querySelectorAll('.co-btn').forEach(function(b){
-        b.addEventListener('click', function(){
-          bar.querySelectorAll('.co-btn').forEach(function(x){ x.classList.remove('active'); });
-          b.classList.add('active');
-          renderCompany(Number(b.dataset.i));
-        });
+        curGroup = GROUPS[0];
+        curIdx = LIST.findIndex(function(x){ return x.g === curGroup; });
+        render();
       });
     }
 
-    function qaBlock(q){
-      var h = '<details class="qa"><summary>' + esc(q.q || '') + '</summary><div class="qbody">';
-      if(q.intent) h += '<div class="row"><span class="k intent">의도</span>' + esc(q.intent) + '</div>';
-      if(q.design) h += '<div class="row"><span class="k design">설계</span>' + esc(q.design) + '</div>';
-      if(q.script) h += '<div class="row"><span class="k script">예시</span><span class="quote">' + esc(q.script) + '</span></div>';
-      if(q.minus)  h += '<div class="row"><span class="k minus">감점</span>' + esc(q.minus) + '</div>';
-      h += '</div></details>';
-      return h;
+    function render(){
+      /* --- 상단: 그룹 버튼 + 회사 버튼 --- */
+      var h = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">';
+      GROUPS.forEach(function(g){
+        var n = LIST.filter(function(x){ return x.g === g; }).length;
+        h += '<button class="co-btn' + (g === curGroup ? ' active' : '') + '" data-g="' + g + '">'
+           + esc(GROUP_NAME[g] || g) + ' <span style="opacity:.6">' + n + '</span></button>';
+      });
+      h += '</div><div style="display:flex;gap:6px;flex-wrap:wrap">';
+      LIST.forEach(function(x, i){
+        if(x.g !== curGroup) return;
+        h += '<button class="co-btn' + (i === curIdx ? ' active' : '') + '" data-i="' + i + '">'
+           + esc(x.c.name || '회사') + '</button>';
+      });
+      h += '</div>';
+      bar.innerHTML = h;
+
+      bar.querySelectorAll('[data-g]').forEach(function(b){
+        b.addEventListener('click', function(){
+          curGroup = b.dataset.g;
+          curIdx = LIST.findIndex(function(x){ return x.g === curGroup; });
+          render();
+        });
+      });
+      bar.querySelectorAll('[data-i]').forEach(function(b){
+        b.addEventListener('click', function(){
+          curIdx = Number(b.dataset.i);
+          render();
+        });
+      });
+
+      renderBody();
     }
 
-    function renderCompany(i){
-      var c = LIST[i];
-      if(!c){ body.innerHTML = ''; return; }
-
-      var h = '';
-
-      if(c.tags && c.tags.length){
-        h += '<div style="margin-bottom:10px">'
-           + c.tags.map(function(t){ return '<span class="chip g">' + esc(t) + '</span>'; }).join('')
-           + '</div>';
+    function qaBlock(q){
+      var intent = TYPE_LABEL[q.type] || q.type || '';
+      if(q.tags && q.tags.length){
+        intent += ' · ' + q.tags.map(function(t){ return '#' + t; }).join(' ');
       }
+      var s = '<details class="qa"><summary>' + esc(q.q || '') + '</summary><div class="qbody">';
+      if(intent) s += '<div class="row"><span class="k intent">유형</span>' + esc(intent) + '</div>';
+      if(q.note) s += '<div class="row"><span class="k design">포인트</span>' + esc(q.note) + '</div>';
+      s += '<div class="row"><span class="k script">메모</span><span class="quote">답변 키워드 3개를 정해 적어보세요. (예: 배관분리 / 공단질의 / 10억→3억)</span></div>';
+      s += '</div></details>';
+      return s;
+    }
 
-      if(c.note) h += '<p class="iv-lead">' + esc(c.note) + '</p>';
+    function renderBody(){
+      var x = LIST[curIdx];
+      if(!x){ body.innerHTML = ''; return; }
+      var c = x.c;
 
-      var secs = c.sections || [];
+      var total = 0;
+      (c.interviews || []).forEach(function(s){ total += (s.questions || []).length; });
 
+      var h = '<div style="margin-bottom:10px">';
+      h += '<span class="chip">' + esc(GROUP_NAME[x.g] || x.g) + '</span>';
+      if(c.tier) h += '<span class="chip g">' + esc(TIER_LABEL[c.tier] || c.tier) + '</span>';
+      (c.jobFields || []).forEach(function(f){ h += '<span class="chip g">' + esc(f) + '</span>'; });
+      h += '<span class="chip g">총 ' + total + '문항</span>';
+      h += '</div>';
+
+      var secs = c.interviews || [];
       if(!secs.length){
-        h += '<div class="empty">이 기업의 질문 데이터가 아직 비어 있습니다.<br><code>sections</code> 배열을 채워 주세요.</div>';
+        h += '<div class="empty">등록된 전형 데이터가 없습니다.</div>';
       } else {
         secs.forEach(function(s){
-          h += '<h4>' + esc(s.title || '질문') + '</h4>';
-          var items = s.items || [];
-          if(!items.length){
-            h += '<p style="font-size:.85rem;color:#94a3b8">등록된 질문이 없습니다.</p>';
-          } else {
-            items.forEach(function(q){ h += qaBlock(q); });
-          }
+          h += '<h4>' + esc(s.stage || '전형') + '</h4>';
+          if(s.format) h += '<p class="iv-lead" style="margin-bottom:8px">' + esc(s.format) + '</p>';
+          if(s.scenario) h += '<div class="box info"><span class="bt">📄 제시 상황</span>' + esc(s.scenario) + '</div>';
+          if(s.note) h += '<div class="box warn"><span class="bt">💬 특징</span>' + esc(s.note) + '</div>';
+          (s.questions || []).forEach(function(q){ h += qaBlock(q); });
         });
       }
-
-      if(c.updatedAt){
-        h += '<p style="font-size:.74rem;color:#94a3b8;margin-top:16px">최종 업데이트 · ' + esc(c.updatedAt) + '</p>';
-      }
-
       body.innerHTML = h;
     }
   })();
