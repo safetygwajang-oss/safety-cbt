@@ -46,247 +46,310 @@
 
   <script src="assets/app.js"></script>
 
-  <!-- ▼▼▼ [추가] 답변 자동저장 + JSON 내보내기/불러오기 연동 패치 (원본 로직은 그대로 유지) ▼▼▼ -->
+  <!-- ▼▼▼ [추가] 답변 자동저장 + JSON 내보내기/불러오기 연동 패치 v2 (원본 로직 유지) ▼▼▼ -->
   <script>
   (function () {
     "use strict";
 
-    /* ===== 설정 ===== */
-    var MY_KEY   = "interview-note:answers:v1"; // 이 패치의 저장소
-    var SCHEMA   = "interview-note-answers";    // 내보내기 파일 식별자
-    var VERSION  = 1;
-    var DEBOUNCE = 400;                          // 자동저장 지연(ms)
-    var APPLY_WINDOW = 15000;                    // 늦게 렌더되는 질문에 값 주입 대기(ms)
+    /* ================= 설정 ================= */
+    var MY_KEY = "interview-note:answers:v2";
+    var OLD_KEY = "interview-note:answers:v1";
+    var SCHEMA = "interview-note-answers";
+    var VERSION = 2;
+    var DEBOUNCE = 400;
+    var APPLY_WINDOW = 20000;
 
-    /* ===== 공통 유틸 ===== */
-    function $(sel, root) { return (root || document).querySelector(sel); }
+    /* ================= 유틸 ================= */
+    function $(s, r) { return (r || document).querySelector(s); }
     var toastEl = $("#toast"), toastTimer = null;
-    function toast(msg) {
-      if (!toastEl) { console.log("[note]", msg); return; }
-      toastEl.textContent = msg;
-      toastEl.hidden = false;
+    function toast(m) {
+      if (!toastEl) { console.log("[note]", m); return; }
+      toastEl.textContent = m; toastEl.hidden = false;
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(function () { toastEl.hidden = true; }, 2000);
+      toastTimer = setTimeout(function () { toastEl.hidden = true; }, 2200);
     }
     function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
     function lsSet(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
-
-    /* ===== 1) 답변 textarea 식별 =====
-       data-qid / data-id / data-key / name / id 중 아무거나 있으면 답변칸으로 인식 */
-    function keyOf(ta) {
-      var d = ta.dataset || {};
-      return d.qid || d.qId || d.id || d.key || d.question || ta.name || ta.id || null;
+    function hash(s) {
+      var h = 5381, i;
+      s = String(s);
+      for (i = 0; i < s.length; i++) { h = ((h << 5) + h) + s.charCodeAt(i); h |= 0; }
+      return (h >>> 0).toString(36);
     }
-    function answerAreas() {
-      var out = [], list = document.querySelectorAll("textarea"), i, k;
-      for (i = 0; i < list.length; i++) {
-        k = keyOf(list[i]);
-        if (k) out.push({ el: list[i], key: String(k) });
+    function normText(s) {
+      return String(s == null ? "" : s)
+        .replace(/\s+/g, " ")
+        .replace(/^[\s\-•·]*[0-9]{1,3}[.)\]
+]\s*/, "")
+        .trim();
+    }
+
+    /* ========== 1) 질문 문구 추출 ========== */
+    var Q_SELS = "[data-question],.question,.q,.q-title,.qtext,.q-text,h2,h3,h4,h5,legend,summary,label,strong,b,p";
+    function questionTextFor(ta) {
+      var node = ta, lvl = 0, i, t, dq;
+      while (node && lvl < 7) {
+        node = node.parentElement; lvl++;
+        if (!node) break;
+        if (node.dataset) {
+          dq = node.dataset.question || node.dataset.q || node.dataset.title;
+          if (dq && normText(dq).length > 3) return normText(dq);
+        }
+        var cands = node.querySelectorAll(Q_SELS);
+        for (i = 0; i < cands.length; i++) {
+          if (cands[i].contains(ta)) continue;
+          t = normText(cands[i].textContent);
+          if (t.length >= 6 && t.length <= 400) return t;
+        }
+      }
+      return normText(ta.getAttribute("aria-label") || ta.getAttribute("placeholder") || "");
+    }
+
+    /* ========== 2) 키 결정 (4단 폴백) ========== */
+    function allTextareas() { return Array.prototype.slice.call(document.querySelectorAll("textarea")); }
+    function indexOfTa(ta) { return allTextareas().indexOf(ta); }
+
+    function keyOf(ta) {
+      var d = ta.dataset || {}, k, el, lvl = 0, dd, qt;
+      k = d.qid || d.qId || d.id || d.key || d.question || ta.name || ta.id;
+      if (k) return "k:" + k;
+      el = ta;
+      while (el && lvl < 7) {
+        el = el.parentElement; lvl++;
+        if (!el) break;
+        dd = el.dataset || {};
+        k = dd.qid || dd.qId || dd.id || dd.key;
+        if (k) return "k:" + k;
+        if (el.id) return "k:" + el.id;
+      }
+      qt = questionTextFor(ta);
+      if (qt) return "q:" + hash(qt);
+      return "i:" + indexOfTa(ta);
+    }
+
+    function domItems() {
+      var tas = allTextareas(), out = [], i, v;
+      for (i = 0; i < tas.length; i++) {
+        v = tas[i].value;
+        if (v == null || String(v).trim() === "") continue;
+        out.push({ key: keyOf(tas[i]), q: questionTextFor(tas[i]), a: String(v) });
       }
       return out;
     }
-    function domAnswers() {
-      var m = {}, a = answerAreas(), i;
-      for (i = 0; i < a.length; i++) {
-        var v = a[i].el.value;
-        if (v != null && String(v).trim() !== "") m[a[i].key] = String(v);
-      }
+    function itemsToMap(items) {
+      var m = {}, i;
+      for (i = 0; i < items.length; i++) m[items[i].key] = items[i].a;
       return m;
     }
 
-    /* ===== 2) app.js가 쓰는 저장소 자동 탐지(있다면 미러링) ===== */
-    function looksLikeAnswerStore(obj) {
-      if (!obj || typeof obj !== "object" || Array.isArray(obj)) return false;
-      var ks = Object.keys(obj), i, hit = 0;
-      if (!ks.length || ks.length > 5000) return false;
-      for (i = 0; i < ks.length; i++) {
-        var v = obj[ks[i]];
-        if (typeof v === "string") hit++;
-        else if (v && typeof v === "object" &&
-                (typeof v.answer === "string" || typeof v.text === "string" || typeof v.value === "string")) hit++;
+    /* ========== 3) 임의 JSON에서 답변 뽑기 ========== */
+    var META = /^(schema|version|app|exportedAt|savedAt|count|theme|lang|locale|filter|filters|search|scroll|tab|sort|order|state|ui)$/i;
+    function flatten(data, depth, out) {
+      out = out || {}; depth = depth || 0;
+      if (!data || depth > 4) return out;
+      var i, j, ks, k, v, vv, it;
+      if (Array.isArray(data)) {
+        for (i = 0; i < data.length; i++) {
+          it = data[i];
+          if (!it || typeof it !== "object") continue;
+          k = it.key || it.qid || it.qId || it.id || it.question || it.q;
+          v = it.a || it.answer || it.text || it.value || it.myAnswer;
+          if (k && typeof v === "string" && v.trim()) out[String(k)] = v;
+          else flatten(it, depth + 1, out);
+        }
+        return out;
       }
-      return hit === ks.length;
+      if (typeof data === "object") {
+        ks = Object.keys(data);
+        for (j = 0; j < ks.length; j++) {
+          k = ks[j]; v = data[k];
+          if (META.test(k)) continue;
+          if (typeof v === "string") { if (v.trim() && v.length < 50000) out[k] = v; }
+          else if (v && typeof v === "object") {
+            vv = v.a || v.answer || v.text || v.value || v.myAnswer;
+            if (typeof vv === "string" && vv.trim()) out[k] = vv;
+            else flatten(v, depth + 1, out);
+          }
+        }
+      }
+      return out;
     }
-    function detectStores() {
-      var found = [], i, k, raw, obj;
+
+    /* ========== 4) 저장 / 스냅샷 ========== */
+    function loadMine() {
+      var raw = lsGet(MY_KEY) || lsGet(OLD_KEY);
+      if (!raw) return { map: {}, items: [] };
+      try {
+        var o = JSON.parse(raw);
+        return { map: o.answers || flatten(o), items: o.items || [] };
+      } catch (e) { return { map: {}, items: [] }; }
+    }
+    function saveMine(map, items) {
+      return lsSet(MY_KEY, JSON.stringify({
+        schema: SCHEMA, version: VERSION, savedAt: new Date().toISOString(),
+        count: Object.keys(map).length, answers: map, items: items
+      }));
+    }
+    function snapshotStorage() {
+      var snap = {}, i, k, raw;
       try {
         for (i = 0; i < localStorage.length; i++) {
           k = localStorage.key(i);
-          if (!k || k === MY_KEY) continue;
-          if (!/answer|note|interview|질문|답변/i.test(k)) continue;
-          raw = lsGet(k);
-          if (!raw || raw.charAt(0) !== "{") continue;
-          try { obj = JSON.parse(raw); } catch (e) { continue; }
-          if (looksLikeAnswerStore(obj)) found.push({ key: k, sample: obj });
-          else if (obj && looksLikeAnswerStore(obj.answers)) found.push({ key: k, sample: obj.answers, wrap: "answers" });
+          if (!k) continue;
+          raw = localStorage.getItem(k);
+          if (raw == null || raw.length > 800000) continue;
+          if (k === MY_KEY || k === OLD_KEY || /answer|note|interview|qa|memo|draft|질문|답변/i.test(k)) { snap[k] = raw; continue; }
+          if (raw.charAt(0) === "{" || raw.charAt(0) === "[") {
+            try { if (Object.keys(flatten(JSON.parse(raw))).length) snap[k] = raw; } catch (e) {}
+          }
         }
       } catch (e) {}
-      return found;
+      return snap;
     }
 
-    /* ===== 3) 저장 ===== */
-    function loadMine() {
-      try {
-        var o = JSON.parse(lsGet(MY_KEY) || "{}");
-        return (o && o.answers) ? o.answers : (looksLikeAnswerStore(o) ? o : {});
-      } catch (e) { return {}; }
-    }
-    function saveMine(map) {
-      return lsSet(MY_KEY, JSON.stringify({
-        schema: SCHEMA, version: VERSION, savedAt: new Date().toISOString(), answers: map
-      }));
-    }
-    function mirrorToStores(map) {
-      var stores = detectStores(), i, s, cur, ks, j, key;
-      for (i = 0; i < stores.length; i++) {
-        s = stores[i];
-        try {
-          cur = JSON.parse(lsGet(s.key) || "{}");
-          var target = s.wrap ? (cur.answers || (cur.answers = {})) : cur;
-          ks = Object.keys(map);
-          for (j = 0; j < ks.length; j++) {
-            key = ks[j];
-            var old = target[key];
-            if (old && typeof old === "object") {
-              if (typeof old.answer === "string") old.answer = map[key];
-              else if (typeof old.text === "string") old.text = map[key];
-              else old.value = map[key];
-            } else {
-              target[key] = map[key];
-            }
-          }
-          lsSet(s.key, JSON.stringify(cur));
-        } catch (e) {}
+    /* 현재 상태 = DOM + 내 저장소 + 다른 저장소 */
+    function collect() {
+      var items = domItems(), map = itemsToMap(items);
+      var mine = loadMine(), ks, i;
+      ks = Object.keys(mine.map);
+      for (i = 0; i < ks.length; i++) if (map[ks[i]] == null) map[ks[i]] = mine.map[ks[i]];
+      for (i = 0; i < mine.items.length; i++) {
+        var it = mine.items[i];
+        if (!it || !it.key) continue;
+        var dup = false, j;
+        for (j = 0; j < items.length; j++) if (items[j].key === it.key) { dup = true; break; }
+        if (!dup) items.push({ key: it.key, q: it.q || "", a: map[it.key] || it.a || "" });
       }
-    }
-    function mergedAnswers() {
-      var base = loadMine(), dom = domAnswers(), ks = Object.keys(dom), i;
-      for (i = 0; i < ks.length; i++) base[ks[i]] = dom[ks[i]];
-      var stores = detectStores(), s, j, sk, v;
-      for (i = 0; i < stores.length; i++) {
-        s = stores[i]; sk = Object.keys(s.sample);
-        for (j = 0; j < sk.length; j++) {
-          if (base[sk[j]] != null && String(base[sk[j]]).trim() !== "") continue;
-          v = s.sample[sk[j]];
-          v = (typeof v === "string") ? v : (v && (v.answer || v.text || v.value)) || "";
-          if (String(v).trim() !== "") base[sk[j]] = String(v);
-        }
+      var snap = snapshotStorage(), sk = Object.keys(snap), extra;
+      for (i = 0; i < sk.length; i++) {
+        if (sk[i] === MY_KEY || sk[i] === OLD_KEY) continue;
+        try { extra = flatten(JSON.parse(snap[sk[i]])); } catch (e) { continue; }
+        var ek = Object.keys(extra), n;
+        for (n = 0; n < ek.length; n++) if (map[ek[n]] == null) map[ek[n]] = extra[ek[n]];
       }
-      return base;
+      return { map: map, items: items, storage: snap };
     }
 
     var saveTimer = null;
-    function scheduleSave() {
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(function () { flushSave(true); }, DEBOUNCE);
+    function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(function () { flush(true); }, DEBOUNCE); }
+    function flush(showToast) {
+      var c = collect(), ok = saveMine(c.map, c.items);
+      if (showToast) toast(ok ? "저장됨 (" + Object.keys(c.map).length + "문항)" : "⚠ 저장 실패");
     }
-    function flushSave(showToast) {
-      var map = mergedAnswers();
-      var ok = saveMine(map);
-      mirrorToStores(domAnswers());
-      if (showToast) toast(ok ? "저장됨 (" + Object.keys(map).length + "문항)" : "⚠ 저장 실패(브라우저 저장공간 확인)");
-    }
-
     document.addEventListener("input", function (e) {
-      if (e.target && e.target.tagName === "TEXTAREA" && keyOf(e.target)) scheduleSave();
+      if (e.target && e.target.tagName === "TEXTAREA") scheduleSave();
     }, false);
-    window.addEventListener("beforeunload", function () { flushSave(false); });
+    window.addEventListener("beforeunload", function () { flush(false); });
 
-    /* ===== 4) 화면에 값 주입 (비동기 렌더 대응) ===== */
-    var pending = null, pendingOnlyEmpty = true, pendingUntil = 0, observer = null;
-
+    /* ========== 5) 화면 주입 (비동기 렌더 대응) ========== */
+    var pending = null, onlyEmpty = true, until = 0, obs = null;
     function setValue(ta, text) {
-      if (ta.value === text) return;
+      if (ta.value === text) return false;
       ta.value = text;
       ta.dispatchEvent(new Event("input", { bubbles: true }));
       ta.dispatchEvent(new Event("change", { bubbles: true }));
+      return true;
+    }
+    function lookup(ta) {
+      if (!pending) return null;
+      var k = keyOf(ta), qt = questionTextFor(ta), h = qt ? hash(qt) : "", v;
+      v = pending.byKey[k]; if (v != null) return v;
+      if (h) { v = pending.byKey["q:" + h]; if (v != null) return v; }
+      if (h) { v = pending.byQ[h]; if (v != null) return v; }
+      if (qt) { v = pending.byText[normText(qt)]; if (v != null) return v; }
+      v = pending.byKey["i:" + indexOfTa(ta)];
+      return v == null ? null : v;
     }
     function applyPending() {
       if (!pending) return 0;
-      var a = answerAreas(), i, n = 0;
-      for (i = 0; i < a.length; i++) {
-        var v = pending[a[i].key];
+      var tas = allTextareas(), i, v, n = 0;
+      for (i = 0; i < tas.length; i++) {
+        v = lookup(tas[i]);
         if (v == null) continue;
-        if (pendingOnlyEmpty && String(a[i].el.value || "").trim() !== "") continue;
-        setValue(a[i].el, String(v)); n++;
+        if (onlyEmpty && String(tas[i].value || "").trim() !== "") continue;
+        if (setValue(tas[i], String(v))) n++;
       }
       return n;
     }
-    function startApply(map, onlyEmpty) {
-      pending = map; pendingOnlyEmpty = !!onlyEmpty;
-      pendingUntil = Date.now() + APPLY_WINDOW;
+    function startApply(bundle, oe) {
+      pending = bundle; onlyEmpty = !!oe; until = Date.now() + APPLY_WINDOW;
       var n = applyPending();
-      if (!observer) {
-        observer = new MutationObserver(function () {
-          if (Date.now() > pendingUntil) { observer.disconnect(); observer = null; pending = null; return; }
+      if (!obs) {
+        obs = new MutationObserver(function () {
+          if (Date.now() > until) { obs.disconnect(); obs = null; pending = null; return; }
           applyPending();
         });
-        observer.observe(document.body, { childList: true, subtree: true });
+        obs.observe(document.body, { childList: true, subtree: true });
       }
       return n;
     }
+    function bundleOf(map, items) {
+      var b = { byKey: map || {}, byQ: {}, byText: {} }, i, it;
+      items = items || [];
+      for (i = 0; i < items.length; i++) {
+        it = items[i];
+        if (!it || !it.a || String(it.a).trim() === "") continue;
+        if (it.q) { b.byQ[hash(normText(it.q))] = it.a; b.byText[normText(it.q)] = it.a; }
+      }
+      return b;
+    }
 
-    /* 새로고침 복원: 이미 값이 있는 칸은 건드리지 않음 */
     function restore() {
       var mine = loadMine();
-      if (Object.keys(mine).length) startApply(mine, true);
+      if (Object.keys(mine.map).length || mine.items.length) startApply(bundleOf(mine.map, mine.items), true);
     }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", restore);
-    } else { restore(); }
 
-    /* ===== 5) 내보내기 ===== */
+    /* ========== 6) 내보내기 ========== */
     function stamp() {
       var d = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; };
-      return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) +
-             "_" + p(d.getHours()) + p(d.getMinutes());
+      return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes());
     }
-    function doExport() {
-      flushSave(false);
-      var answers = mergedAnswers();
-      var payload = {
-        schema: SCHEMA,
-        version: VERSION,
-        app: "면접 예상질문 노트",
-        exportedAt: new Date().toISOString(),
-        count: Object.keys(answers).length,
-        answers: answers
-      };
-      var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement("a");
-      a.href = url;
-      a.download = "면접답변_" + stamp() + ".json";
+    function download(obj, name) {
+      var blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json;charset=utf-8" });
+      var url = URL.createObjectURL(blob), a = document.createElement("a");
+      a.href = url; a.download = name;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-      toast("내보내기 완료 · " + payload.count + "문항");
+    }
+    function doExport() {
+      flush(false);
+      var c = collect(), n = Object.keys(c.map).length;
+      if (n === 0) {
+        var tas = allTextareas().length;
+        if (!confirm("수집된 답변이 0건입니다.\n(화면 textarea " + tas + "개 / 저장소 후보 " +
+          Object.keys(c.storage).length + "개)\n\n답변을 입력한 상태인지 확인하세요.\n그래도 파일을 만들까요?")) return;
+      }
+      download({
+        schema: SCHEMA, version: VERSION, app: "면접 예상질문 노트",
+        exportedAt: new Date().toISOString(), count: n,
+        answers: c.map, items: c.items, storage: c.storage
+      }, "면접답변_" + stamp() + ".json");
+      toast("내보내기 완료 · " + n + "문항");
     }
 
-    /* ===== 6) 불러오기 (구버전 포맷 5종 호환) ===== */
-    function normalize(data) {
-      var map = {}, i, it, k;
-      function put(key, val) {
-        if (key == null) return;
-        if (val && typeof val === "object") val = val.answer || val.text || val.value || "";
-        if (val == null) return;
-        val = String(val);
-        if (val.trim() === "") return;
-        map[String(key)] = val;
-      }
-      if (Array.isArray(data)) {                                   // [{qid, answer}, ...]
-        for (i = 0; i < data.length; i++) {
-          it = data[i] || {};
-          put(it.qid || it.id || it.key || it.question || it.q, it.answer || it.text || it.value || it.a);
+    /* ========== 7) 불러오기 ========== */
+    function parseIncoming(data) {
+      var map = {}, items = [], i, it, ks, k;
+      if (data && Array.isArray(data.items)) {
+        for (i = 0; i < data.items.length; i++) {
+          it = data.items[i] || {};
+          var a = it.a || it.answer || it.text || it.value;
+          if (a == null || String(a).trim() === "") continue;
+          k = it.key || it.qid || it.id || (it.q ? "q:" + hash(normText(it.q)) : null);
+          items.push({ key: k, q: it.q || it.question || "", a: String(a) });
+          if (k) map[k] = String(a);
         }
-        return map;
       }
-      if (data && typeof data === "object") {
-        var src = data.answers || data.data || data.notes || data.items || data;
-        if (Array.isArray(src)) return normalize(src);
-        var ks = Object.keys(src);
-        for (i = 0; i < ks.length; i++) { k = ks[i]; put(k, src[k]); }
-      }
-      return map;
+      var flat = flatten(data && (data.answers || data.data || data.notes) ? (data.answers || data.data || data.notes) : data);
+      ks = Object.keys(flat);
+      for (i = 0; i < ks.length; i++) if (map[ks[i]] == null) map[ks[i]] = flat[ks[i]];
+      return { map: map, items: items };
+    }
+
+    function restoreRawStorage(storage) {
+      var ks = Object.keys(storage || {}), i, n = 0;
+      for (i = 0; i < ks.length; i++) if (lsSet(ks[i], storage[ks[i]])) n++;
+      return n;
     }
 
     function doImport(file) {
@@ -295,36 +358,58 @@
       fr.onload = function () {
         var data;
         try { data = JSON.parse(String(fr.result)); }
-        catch (e) { toast("⚠ JSON 형식이 아닙니다"); return; }
+        catch (e) { alert("JSON 형식이 아닙니다.\n" + e.message); return; }
 
-        var incoming = normalize(data), n = Object.keys(incoming).length;
-        if (!n) { toast("⚠ 불러올 답변이 없습니다(파일 구조 확인)"); return; }
+        var inc = parseIncoming(data), n = Object.keys(inc.map).length;
+        var hasStorage = data && data.storage && Object.keys(data.storage).length > 0;
 
-        var overwrite = confirm(
-          "불러올 답변 " + n + "문항.\n\n[확인] 기존 답변에 덮어쓰기\n[취소] 병합(비어 있는 칸만 채우기)"
-        );
+        if (n === 0 && hasStorage) {
+          if (confirm("문항 단위 답변은 없지만 저장소 백업이 있습니다.\n원본 저장소를 복원하고 새로고침할까요?")) {
+            restoreRawStorage(data.storage);
+            location.reload(); return;
+          }
+        }
+        if (n === 0) {
+          alert("불러올 답변이 없습니다.\n\n[파일 진단]\n최상위 키: " +
+            Object.keys(data || {}).slice(0, 12).join(", ") +
+            "\ncount 값: " + (data && data.count) +
+            "\n\n※ count가 0이면 내보내기 시점에 답변이 수집되지 않은 파일입니다. 답변 입력 후 다시 내보내세요.");
+          return;
+        }
 
-        var current = mergedAnswers(), ks = Object.keys(incoming), i, k;
+        var overwrite = confirm("불러올 답변 " + n + "문항.\n\n[확인] 덮어쓰기\n[취소] 병합(빈 칸만 채우기)");
+
+        var cur = collect(), ks = Object.keys(inc.map), i, k;
         for (i = 0; i < ks.length; i++) {
           k = ks[i];
-          if (!overwrite && current[k] != null && String(current[k]).trim() !== "") continue;
-          current[k] = incoming[k];
+          if (!overwrite && cur.map[k] != null && String(cur.map[k]).trim() !== "") continue;
+          cur.map[k] = inc.map[k];
         }
-        saveMine(current);
-        mirrorToStores(current);
+        var mergedItems = cur.items.concat(inc.items);
+        saveMine(cur.map, mergedItems);
+        if (hasStorage && overwrite) restoreRawStorage(data.storage);
 
-        var applied = startApply(current, !overwrite);
-        toast("불러오기 완료 · " + n + "문항 (화면 반영 " + applied + "개)");
-
-        if (applied === 0) {
-          if (confirm("저장은 완료되었으나 화면 반영이 확인되지 않았습니다.\n새로고침해서 반영할까요?")) location.reload();
-        }
+        var applied = startApply(bundleOf(cur.map, mergedItems), !overwrite);
+        toast("불러오기 완료 · " + n + "문항 (반영 " + applied + "개)");
+        if (applied === 0 && confirm("저장은 됐지만 화면 반영이 확인되지 않았습니다.\n새로고침할까요?")) location.reload();
       };
-      fr.onerror = function () { toast("⚠ 파일을 읽을 수 없습니다"); };
+      fr.onerror = function () { alert("파일을 읽을 수 없습니다."); };
       fr.readAsText(file, "utf-8");
     }
 
-    /* ===== 7) 원본 버튼에 연결 (캡처 단계에서 선점 → 이중 실행 방지) ===== */
+    /* ========== 8) 진단 명령 ========== */
+    window.__noteDiag = function () {
+      var tas = allTextareas(), rows = tas.slice(0, 20).map(function (t) {
+        return { key: keyOf(t), q: questionTextFor(t).slice(0, 40), len: (t.value || "").length };
+      });
+      var c = collect();
+      console.log("textarea 수:", tas.length, "| 수집 답변:", Object.keys(c.map).length,
+                  "| 저장소 후보:", Object.keys(c.storage));
+      console.table(rows);
+      return { textareas: tas.length, collected: Object.keys(c.map).length, storageKeys: Object.keys(c.storage) };
+    };
+
+    /* ========== 9) 버튼 연결 (캡처 단계 선점) ========== */
     function bind() {
       var btn = $("#btn-export"), fi = $("#file-import");
       if (btn && !btn.dataset.patched) {
@@ -341,20 +426,18 @@
           if (e.stopImmediatePropagation) e.stopImmediatePropagation();
           var f = fi.files && fi.files[0];
           doImport(f);
-          fi.value = ""; // 같은 파일 재선택 가능
+          fi.value = "";
         }, true);
       }
-      // Ctrl/Cmd + S = 즉시 저장
       document.addEventListener("keydown", function (e) {
-        if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
-          e.preventDefault(); flushSave(true);
-        }
+        if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) { e.preventDefault(); flush(true); }
       });
+      restore();
     }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
     else bind();
   })();
   </script>
-  <!-- ▲▲▲ [추가] 패치 끝 ▲▲▲ -->
+  <!-- ▲▲▲ [추가] 패치 v2 끝 ▲▲▲ -->
 </body>
 </html>
