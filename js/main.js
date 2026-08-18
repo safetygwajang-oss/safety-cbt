@@ -135,11 +135,12 @@
       }
       .career-tab.active .cbadge { background: rgba(255,255,255,.28); }
 
-      @media (max-width: 520px) {
+            @media (max-width: 520px) {
         .career-bar { gap: 6px; margin: 18px 0 10px; }
         .career-bar-label { width: 100%; margin-bottom: 2px; }
-        .career-tab { flex: 1 1 46%; justify-content: center; padding: 10px 10px; font-size: .87rem; }
+        .career-tab { flex: 1 1 30%; justify-content: center; padding: 10px 8px; font-size: .82rem; }
       }
+
 
       /* ===== 토익 패널 ===== */
       .front-intro {
