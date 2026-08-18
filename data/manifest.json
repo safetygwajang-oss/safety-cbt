@@ -1,0 +1,6 @@
+{
+  "coreStories": "data/core-stories.json",
+  "files": [
+    "data/companies-posco.json"
+  ]
+}
