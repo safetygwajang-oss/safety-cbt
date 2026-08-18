@@ -229,33 +229,28 @@
   <script src="js/storage.js"></script>
   <script src="js/main.js"></script>
 
-  <!-- ===== 랜덤 기출문제 카드를 중복기출 탭 맨 앞으로 고정 ===== -->
+    <!-- ===== 랜덤 카드 고정 + 기타 탭 숨김 ===== -->
   <script>
   (function () {
     'use strict';
 
-    /* 랜덤 시험 카드를 찾습니다. */
+    /* ===== 랜덤 시험 카드 찾기 ===== */
     function findRandomCard() {
-      var link = document.querySelector(
-        '#dup-list a[href*="exam=random"], ' +
-        '#dup-list [data-exam-id="random"], ' +
-        '#dup-list [data-id="random"]'
-      );
+      var selector =
+        'a[href*="exam=random"], ' +
+        '[data-exam-id="random"], ' +
+        '[data-id="random"]';
 
-      if (!link) {
-        link = document.querySelector(
-          'a[href*="exam=random"], ' +
-          '[data-exam-id="random"], ' +
-          '[data-id="random"]'
-        );
-      }
+      var link =
+        document.querySelector('#dup-list ' + selector) ||
+        document.querySelector(selector);
 
       if (!link) return null;
 
       return link.closest('.exam-card, .card, li') || link;
     }
 
-    /* 카드를 소속 그리드의 첫 번째 위치로 이동시킵니다. */
+    /* ===== 랜덤 카드를 그리드 맨 앞으로 이동 ===== */
     function pinRandomCard() {
       var card = findRandomCard();
 
@@ -265,36 +260,91 @@
 
       var container = card.parentElement;
 
-      if (!container) return true;
-
-      if (container.firstElementChild !== card) {
+      if (container && container.firstElementChild !== card) {
         container.insertBefore(card, container.firstElementChild);
       }
 
       return true;
     }
 
-    /*
-     * main.js가 카드 목록을 비동기로 생성하므로
-     * 렌더링이 끝날 때까지 반복 확인합니다.
-     */
+    /* ===== '기타' 탭과 해당 패널 숨김 ===== */
+    function hideEtcTab() {
+      var tabs = document.querySelectorAll(
+        '#main-tabs .main-tab, #main-tabs button, #main-tabs a'
+      );
+
+      var hidden = false;
+
+      tabs.forEach(function (tab) {
+        var text = (tab.textContent || '').trim();
+
+        if (text.indexOf('기타') === -1) return;
+
+        // 이미 숨겨져 있으면 통과
+        if (tab.dataset.etcHidden === '1') {
+          hidden = true;
+          return;
+        }
+
+        // 활성 탭이 '기타'였다면 첫 번째 탭으로 전환
+        var isActive =
+          tab.classList.contains('active') ||
+          tab.getAttribute('aria-selected') === 'true';
+
+        tab.style.display = 'none';
+        tab.dataset.etcHidden = '1';
+
+        // 연결된 패널도 숨김
+        var target =
+          tab.dataset.target ||
+          tab.dataset.panel ||
+          tab.getAttribute('data-tab');
+
+        if (target) {
+          var panel = document.getElementById(target) ||
+            document.querySelector(target);
+
+          if (panel) panel.style.display = 'none';
+        }
+
+        if (isActive) {
+          var first = document.querySelector(
+            '#main-tabs .main-tab:not([data-etc-hidden]), ' +
+            '#main-tabs button:not([data-etc-hidden])'
+          );
+
+          if (first) first.click();
+        }
+
+        hidden = true;
+      });
+
+      return hidden;
+    }
+
+    /* ===== main.js 렌더링 완료까지 반복 확인 ===== */
     var tries = 0;
 
     var timer = setInterval(function () {
       tries++;
 
-      if (pinRandomCard() || tries > 60) {
-        clearInterval(timer);
-      }
+      pinRandomCard();
+      hideEtcTab();
+
+      if (tries > 60) clearInterval(timer);
     }, 100);
 
-    /*
-     * 탭 전환이나 입장코드 입력 후 목록이 다시 그려질 수 있으므로
-     * 클릭이 발생할 때마다 재정렬합니다.
-     */
+    /* ===== 탭 전환·코드 입력 후 재적용 ===== */
     document.addEventListener('click', function () {
-      setTimeout(pinRandomCard, 80);
-      setTimeout(pinRandomCard, 400);
+      setTimeout(function () {
+        pinRandomCard();
+        hideEtcTab();
+      }, 80);
+
+      setTimeout(function () {
+        pinRandomCard();
+        hideEtcTab();
+      }, 400);
     });
   })();
   </script>
