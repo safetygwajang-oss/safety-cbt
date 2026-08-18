@@ -293,5 +293,75 @@
     });
   })();
   </script>
+    <!-- ===== 중복 탭 숨기기 (빠른 메뉴와 겹치는 항목) ===== -->
+  <script>
+  (function () {
+    'use strict';
+
+    /* 숨길 탭 이름 — 여기만 수정하면 됩니다 */
+    var HIDE = ['자기소개서', '토익스피킹', '면접', '기타'];
+
+    function hideDupTabs() {
+      var box = document.getElementById('main-tabs');
+      if (!box) return;
+
+      var tabs = box.querySelectorAll('.main-tab, button, a');
+      if (!tabs.length) return;
+
+      var visible = 0;
+
+      tabs.forEach(function (tab) {
+        var text = (tab.textContent || '').trim();
+        var hit = HIDE.some(function (w) { return text.indexOf(w) !== -1; });
+
+        if (!hit) { 
+          if (tab.style.display !== 'none') visible++;
+          return; 
+        }
+
+        var wasActive =
+          tab.classList.contains('active') ||
+          tab.getAttribute('aria-selected') === 'true';
+
+        tab.style.display = 'none';
+        tab.dataset.dupHidden = '1';
+
+        /* 연결된 패널도 함께 숨김 */
+        var target = tab.dataset.target || tab.dataset.panel || tab.getAttribute('data-tab');
+        if (target) {
+          var panel = document.getElementById(target) ||
+                      (target.charAt(0) === '#' ? document.querySelector(target) : null);
+          if (panel) panel.style.display = 'none';
+        }
+
+        /* 숨긴 탭이 활성 상태였다면 첫 번째 보이는 탭으로 전환 */
+        if (wasActive) {
+          var first = null;
+          box.querySelectorAll('.main-tab, button, a').forEach(function (t) {
+            if (!first && t.style.display !== 'none') first = t;
+          });
+          if (first) first.click();
+        }
+      });
+
+      /* 남은 탭이 없으면 탭바 자체를 숨김 */
+      box.style.display = (visible === 0) ? 'none' : '';
+    }
+
+    /* main.js 렌더링 완료까지 반복 확인 */
+    var n = 0;
+    var timer = setInterval(function () {
+      n++;
+      hideDupTabs();
+      if (n > 60) clearInterval(timer);
+    }, 100);
+
+    /* 탭 전환·코드 입력 후 재적용 */
+    document.addEventListener('click', function () {
+      setTimeout(hideDupTabs, 100);
+      setTimeout(hideDupTabs, 500);
+    });
+  })();
+  </script>
 </body>
 </html>
