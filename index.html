@@ -293,75 +293,80 @@
     });
   })();
   </script>
-    <!-- ===== 중복 탭 숨기기 (빠른 메뉴와 겹치는 항목) ===== -->
+  <!-- ===== 중복 메뉴 알약 숨기기 (범용) ===== -->
   <script>
   (function () {
     'use strict';
 
-    /* 숨길 탭 이름 — 여기만 수정하면 됩니다 */
-    var HIDE = ['자기소개서', '토익스피킹', '면접', '기타'];
+    /* 숨길 문구 (공백 무시, 앞부분 일치) */
+    var WORDS = ['자기소개서', '토익스피킹', '면접', '기타'];
 
-    function hideDupTabs() {
-      var box = document.getElementById('main-tabs');
-      if (!box) return;
+    /* 이 안에 있는 요소는 절대 숨기지 않음 (보호 구역) */
+    var SAFE = ['.quick-menu', '.topbar', '.site-footer', '#nav', '.exam-grid', '.bookmark-list'];
 
-      var tabs = box.querySelectorAll('.main-tab, button, a');
-      if (!tabs.length) return;
+    function norm(s) { return (s || '').replace(/\s+/g, ''); }
 
-      var visible = 0;
-
-      tabs.forEach(function (tab) {
-        var text = (tab.textContent || '').trim();
-        var hit = HIDE.some(function (w) { return text.indexOf(w) !== -1; });
-
-        if (!hit) { 
-          if (tab.style.display !== 'none') visible++;
-          return; 
-        }
-
-        var wasActive =
-          tab.classList.contains('active') ||
-          tab.getAttribute('aria-selected') === 'true';
-
-        tab.style.display = 'none';
-        tab.dataset.dupHidden = '1';
-
-        /* 연결된 패널도 함께 숨김 */
-        var target = tab.dataset.target || tab.dataset.panel || tab.getAttribute('data-tab');
-        if (target) {
-          var panel = document.getElementById(target) ||
-                      (target.charAt(0) === '#' ? document.querySelector(target) : null);
-          if (panel) panel.style.display = 'none';
-        }
-
-        /* 숨긴 탭이 활성 상태였다면 첫 번째 보이는 탭으로 전환 */
-        if (wasActive) {
-          var first = null;
-          box.querySelectorAll('.main-tab, button, a').forEach(function (t) {
-            if (!first && t.style.display !== 'none') first = t;
-          });
-          if (first) first.click();
-        }
-      });
-
-      /* 남은 탭이 없으면 탭바 자체를 숨김 */
-      box.style.display = (visible === 0) ? 'none' : '';
+    function isSafe(el) {
+      for (var i = 0; i < SAFE.length; i++) {
+        if (el.closest(SAFE[i])) return true;
+      }
+      return false;
     }
 
-    /* main.js 렌더링 완료까지 반복 확인 */
+    function hidePills() {
+      var cands = document.querySelectorAll('a, button, [role="tab"], .main-tab, li, div, span');
+
+      cands.forEach(function (el) {
+        if (el.dataset.pillHidden === '1') return;
+        if (isSafe(el)) return;
+
+        /* 알약 버튼 특성: 텍스트가 짧고, 자식 요소가 적음 */
+        var t = norm(el.textContent);
+        if (!t || t.length > 24) return;
+        if (el.children.length > 3) return;
+
+        var hit = WORDS.some(function (w) { return t.indexOf(norm(w)) === 0; });
+        if (!hit) return;
+
+        /* 자식도 조건에 맞으면 부모만 숨겨 중복 처리 방지 */
+        el.style.setProperty('display', 'none', 'important');
+        el.dataset.pillHidden = '1';
+
+        /* 부모 컨테이너가 완전히 비면 함께 숨김 */
+        var p = el.parentElement;
+        for (var d = 0; d < 2 && p; d++) {
+          if (isSafe(p)) break;
+          var vis = 0;
+          Array.prototype.forEach.call(p.children, function (ch) {
+            if (getComputedStyle(ch).display !== 'none') vis++;
+          });
+          if (vis === 0 && norm(p.textContent).length < 40) {
+            p.style.setProperty('display', 'none', 'important');
+          }
+          p = p.parentElement;
+        }
+      });
+    }
+
     var n = 0;
     var timer = setInterval(function () {
       n++;
-      hideDupTabs();
-      if (n > 60) clearInterval(timer);
+      hidePills();
+      if (n > 80) clearInterval(timer);
     }, 100);
 
-    /* 탭 전환·코드 입력 후 재적용 */
     document.addEventListener('click', function () {
-      setTimeout(hideDupTabs, 100);
-      setTimeout(hideDupTabs, 500);
+      setTimeout(hidePills, 120);
+      setTimeout(hidePills, 600);
     });
+
+    /* 동적 추가 감지 */
+    if (window.MutationObserver) {
+      new MutationObserver(function () { hidePills(); })
+        .observe(document.body, { childList: true, subtree: true });
+    }
   })();
   </script>
 </body>
 </html>
+
