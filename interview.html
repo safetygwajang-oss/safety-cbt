@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>면접 완전정복 · 안전과장 골드박스</title>
+  <meta name="description" content="면접 기본기부터 공통 빈출 질문, 직무별 기술 질문, 압박·꼬리질문 대응까지 취업 면접 실전 가이드">
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9283463208175336" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/custom.css">
+
+  <style>
+    html, body { min-height: 100%; }
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+    body > main { flex: 1 0 auto; }
+
+    .topbar .container { display: flex; align-items: center; gap: 14px; }
+    .topbar .logo { flex: 0 0 auto; white-space: nowrap; }
+    .topbar .topbar-actions { flex: 0 0 auto; margin-left: auto; }
+
+    .site-footer {
+      flex-shrink: 0; margin-top: auto; padding: 18px 12px 22px; text-align: center;
+      font-size: .72rem; line-height: 1.6; color: #9aa1ab;
+      border-top: 1px solid var(--gray-200, #e5e7eb); background: #fff; word-break: keep-all;
+    }
+    .ad-zone { display:block; margin:26px auto 10px; max-width:100%; overflow:hidden; text-align:center; }
+    .ad-zone .adsbygoogle { display:block; width:100%; }
+    .ad-label { display:block; font-size:.62rem; color:#c2c8ce; letter-spacing:.06em; margin-bottom:4px; }
+
+    /* ===== 히어로 ===== */
+    .iv-hero {
+      background: linear-gradient(135deg,#1e3a8a,#0ea5e9);
+      color:#fff; border-radius:16px; padding:26px 24px; margin:22px 0 18px;
+    }
+    .iv-hero h2 { margin:0 0 8px; font-size:1.5rem; letter-spacing:-.02em; }
+    .iv-hero p { margin:0; font-size:.9rem; opacity:.92; line-height:1.6; }
+    .iv-back { display:inline-block; margin-top:14px; font-size:.8rem; color:#fff;
+      background:rgba(255,255,255,.18); padding:6px 13px; border-radius:99px; text-decoration:none; }
+
+    /* ===== 서브탭 ===== */
+    .iv-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+    .iv-tab {
+      display:inline-flex; align-items:center; gap:6px; padding:10px 15px; border-radius:99px;
+      border:1px solid #dbeafe; background:linear-gradient(135deg,#eff6ff,#f0fdfa);
+      color:#1d4ed8; font-family:inherit; font-size:.9rem; font-weight:700; cursor:pointer;
+      transition:transform .15s ease, box-shadow .15s ease;
+    }
+    .iv-tab:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(37,99,235,.16); }
+    .iv-tab.active { background:linear-gradient(135deg,#2563eb,#0ea5e9); border-color:#2563eb; color:#fff; }
+
+    /* ===== 공통 블록 ===== */
+    .iv-view { display:none; }
+    .iv-view.on { display:block; animation:ivFade .25s ease; }
+    @keyframes ivFade { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+
+    .iv-sec { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:20px 22px; margin-bottom:16px; }
+    .iv-sec > h3 {
+      margin:0 0 14px; font-size:1.12rem; color:#0f172a; letter-spacing:-.01em;
+      padding-bottom:10px; border-bottom:2px solid #eff6ff; display:flex; align-items:center; gap:8px;
+    }
+    .iv-sec h4 { margin:18px 0 8px; font-size:.97rem; color:#1d4ed8; }
+    .iv-sec p, .iv-sec li { font-size:.9rem; line-height:1.75; color:#334155; }
+    .iv-sec ul, .iv-sec ol { padding-left:20px; margin:8px 0; }
+    .iv-sec li { margin-bottom:5px; }
+    .iv-sec b { color:#0f172a; }
+
+    .iv-lead { font-size:.9rem; color:#475569; line-height:1.75; background:#f8fafc;
+      border-left:3px solid #94a3b8; padding:10px 14px; border-radius:0 8px 8px 0; margin:0 0 14px; }
+
+    /* 박스 */
+    .box { border-radius:10px; padding:13px 16px; margin:12px 0; font-size:.88rem; line-height:1.7; }
+    .box.tip  { background:#f0fdf4; border-left:4px solid #22c55e; color:#14532d; }
+    .box.warn { background:#fffbeb; border-left:4px solid #f59e0b; color:#78350f; }
+    .box.bad  { background:#fef2f2; border-left:4px solid #ef4444; color:#7f1d1d; }
+    .box.info { background:#eff6ff; border-left:4px solid #3b82f6; color:#1e3a8a; }
+    .box .bt { display:block; font-weight:800; margin-bottom:5px; }
+
+    /* 비교 카드 */
+    .vs { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0; }
+    .vs > div { border-radius:10px; padding:13px 15px; font-size:.86rem; line-height:1.7; }
+    .vs .no { background:#fef2f2; border:1px solid #fecaca; color:#7f1d1d; }
+    .vs .ok { background:#f0fdf4; border:1px solid #bbf7d0; color:#14532d; }
+    .vs .lb { display:block; font-weight:800; font-size:.78rem; letter-spacing:.04em; margin-bottom:6px; }
+
+    /* 표 */
+    .iv-table { width:100%; border-collapse:collapse; margin:12px 0; font-size:.86rem; }
+    .iv-table th, .iv-table td { border:1px solid #e5e7eb; padding:9px 11px; text-align:left; vertical-align:top; line-height:1.6; }
+    .iv-table th { background:#f1f5f9; color:#0f172a; font-weight:700; white-space:nowrap; }
+    .iv-table tbody tr:nth-child(even) { background:#fafbfc; }
+
+    /* 스텝 */
+    .steps { counter-reset:st; margin:12px 0; }
+    .step { position:relative; padding:0 0 14px 40px; border-left:2px dashed #cbd5e1; margin-left:12px; }
+    .step:last-child { border-left-color:transparent; padding-bottom:0; }
+    .step::before {
+      counter-increment:st; content:counter(st);
+      position:absolute; left:-14px; top:0; width:26px; height:26px; border-radius:50%;
+      background:#2563eb; color:#fff; font-size:.78rem; font-weight:800;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .step .st-t { font-weight:800; color:#0f172a; font-size:.92rem; margin-bottom:3px; }
+    .step .st-d { font-size:.86rem; color:#475569; line-height:1.7; }
+
+    /* 질문 아코디언 */
+    .qa { border:1px solid #e5e7eb; border-radius:11px; margin-bottom:9px; overflow:hidden; background:#fff; }
+    .qa summary {
+      cursor:pointer; padding:14px 16px; font-size:.93rem; font-weight:700; color:#0f172a;
+      display:flex; align-items:flex-start; gap:9px; list-style:none; line-height:1.55;
+    }
+    .qa summary::-webkit-details-marker { display:none; }
+    .qa summary::after { content:"▾"; margin-left:auto; color:#94a3b8; font-size:.8rem; flex:0 0 auto; }
+    .qa[open] summary { background:#eff6ff; color:#1d4ed8; }
+    .qa[open] summary::after { content:"▴"; }
+    .qa .qbody { padding:4px 16px 16px; border-top:1px solid #f1f5f9; }
+    .qa .row { margin-top:11px; font-size:.87rem; line-height:1.72; color:#334155; }
+    .qa .row .k {
+      display:inline-block; font-size:.7rem; font-weight:800; letter-spacing:.04em;
+      padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align:1px;
+    }
+    .k.intent { background:#e0e7ff; color:#3730a3; }
+    .k.design { background:#dbeafe; color:#1e40af; }
+    .k.script { background:#dcfce7; color:#166534; }
+    .k.minus  { background:#fee2e2; color:#991b1b; }
+    .qa .quote { display:block; margin-top:6px; padding:11px 13px; background:#f8fafc;
+      border-left:3px solid #22c55e; border-radius:0 8px 8px 0; color:#0f172a; font-size:.86rem; line-height:1.75; }
+
+    .chip { display:inline-block; font-size:.7rem; font-weight:800; padding:3px 9px;
+      border-radius:99px; background:#2563eb; color:#fff; margin:0 5px 5px 0; letter-spacing:.03em; }
+    .chip.g { background:#e2e8f0; color:#334155; }
+
+    .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; margin:12px 0; }
+    .mini { border:1px solid #e5e7eb; border-radius:11px; padding:14px 16px; background:#fff; }
+    .mini h5 { margin:0 0 8px; font-size:.92rem; color:#1d4ed8; }
+    .mini ul { margin:0; padding-left:18px; }
+    .mini li { font-size:.85rem; line-height:1.7; color:#334155; }
+
+    /* 기업별 */
+    .co-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+    .co-btn { padding:8px 14px; border-radius:99px; border:1px solid #e2e8f0; background:#fff;
+      font-family:inherit; font-size:.86rem; font-weight:700; color:#475569; cursor:pointer; }
+    .co-btn.active { background:#0f172a; border-color:#0f172a; color:#fff; }
+    .empty { text-align:center; padding:46px 20px; color:#94a3b8; font-size:.9rem; line-height:1.8;
+      border:2px dashed #e2e8f0; border-radius:14px; background:#fafbfc; }
+
+    @media (max-width: 640px) {
+      .iv-hero { padding:20px 18px; }
+      .iv-hero h2 { font-size:1.25rem; }
+      .iv-sec { padding:16px 15px; }
+      .vs { grid-template-columns:1fr; }
+      .iv-tab { flex:1 1 44%; justify-content:center; font-size:.84rem; padding:9px 8px; }
+      .iv-table { font-size:.8rem; }
+      .iv-table th, .iv-table td { padding:7px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container">
+      <a href="index.html" class="logo" style="text-decoration:none;">⛑️ 안전과장 · 골드박스</a>
+      <div class="topbar-actions">
+        <a href="index.html" class="btn-sm" style="text-decoration:none;">🏠 홈</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="iv-hero">
+      <h2>💼 면접 완전정복</h2>
+      <p>면접은 <b>재능</b>이 아니라 <b>준비량</b>입니다. 아래 순서대로 따라가면 누구나 “말이 되는 답변”을 만들 수 있습니다.</p>
+      <a href="index.html" class="iv-back">← 메인으로</a>
+    </section>
+
+    <div class="iv-tabs" id="iv-tabs">
+      <button class="iv-tab" data-v="guide">📋 면접 기본기</button>
+      <button class="iv-tab" data-v="common">💬 공통 빈출 질문</button>
+      <button class="iv-tab" data-v="company">🏢 기업별 예상질문</button>
+      <button class="iv-tab" data-v="job">🎯 직무별 기술 질문</button>
+      <button class="iv-tab" data-v="press">🔥 압박·꼬리질문</button>
+    </div>
+
+    <!-- ==================== ① 면접 기본기 ==================== -->
+    <section class="iv-view" id="view-guide">
+
+      <div class="iv-sec">
+        <h3>🧠 면접관은 결국 이 3가지만 본다</h3>
+        <p class="iv-lead">면접 질문은 수백 개지만, 면접관 머릿속 판단 기준은 딱 3개입니다. 모든 답변은 이 셋 중 하나를 증명하는 데 써야 합니다.</p>
+        <table class="iv-table">
+          <thead><tr><th>판단 기준</th><th>면접관의 속마음</th><th>증명 방법</th></tr></thead>
+          <tbody>
+            <tr><td><b>① 할 수 있나</b><br>(직무 역량)</td><td>“시켜놓으면 결과를 낼까?”</td><td>전공·프로젝트·자격증·인턴에서 <b>직접 한 일 + 숫자 결과</b></td></tr>
+            <tr><td><b>② 같이 일할 수 있나</b><br>(인성·소통)</td><td>“팀에 갈등 만들지 않을까?”</td><td>갈등을 <b>내가 먼저 조율한</b> 경험, 표정·말투·경청 태도</td></tr>
+            <tr><td><b>③ 오래 다닐까</b><br>(지원 진정성)</td><td>“1년 안에 나가면 내가 욕먹는다”</td><td>회사·직무를 <b>구체적으로 조사한 근거</b>, 일관된 커리어 방향</td></tr>
+          </tbody>
+        </table>
+        <div class="box tip"><span class="bt">💡 실전 팁</span>
+          답변이 막힐 때는 “이 답이 셋 중 무엇을 증명하는가?”만 떠올리세요. 아무것도 증명하지 못하는 문장은 <b>빼는 게 이득</b>입니다.
+        </div>
+      </div>
+
+      <div class="iv-sec">
+        <h3>⏱ 합격을 결정하는 첫 30초</h3>
+        <p class="iv-lead">면접관 다수는 입장 후 30초~1분 안에 1차 인상을 확정하고, 이후 질문으로 그 인상을 확인하려 합니다. 즉 <b>도입부가 가장 값싸고 효과 큰 투자</b>입니다.</p>
+        <div class="steps">
+          <div class="step"><div class="st-t">노크 2~3회 → “들어오세요” 후 입장</div><div class="st-d">문은 소리 나지 않게 닫고, 돌아서서 면접관과 눈을 맞춥니다.</div></div>
+          <div class="step"><div class="st-t">의자 옆에 서서 인사</div><div class="st-d">“안녕하십니까, ○○ 직무에 지원한 <b>홍길동</b>입니다.” 상체 30도, 1.5초 정지 후 올라옵니다.</div></div>
+          <div class="step"><div class="st-t">“앉으세요” 들은 뒤 착석</div><div class="st-d">등받이에 기대지 말고 엉덩이를 깊게, 허리는 세우고 손은 무릎 또는 책상 위에 가볍게.</div></div>
+          <div class="step"><div class="st-t">시선 배분</div><div class="st-d">질문한 사람 <b>70%</b>, 나머지 면접관 <b>30%</b>. 천장·바닥·허공을 보면 “자신 없음”으로 읽힙니다.</div></div>
+          <div class="step"><div class="st-t">첫 목소리를 평소보다 15% 크게</div><div class="st-d">첫 문장 볼륨이 그 면접 전체의 인상을 결정합니다. 목소리 작은 사람은 무조건 감점입니다.</div></div>
+        </div>
+        <div class="box warn"><span class="bt">⚠️ 대기실도 면접장입니다</span>
+          휴대폰 게임, 다리 떨기, 옆 지원자와 잡담, 안내 직원에게 무례한 태도 — 인사팀에 전달되는 경우가 실제로 있습니다.
+        </div>
+      </div>
+
+      <div class="iv-sec">
+        <h3>👔 복장·용모 체크리스트</h3>
+        <p class="iv-lead">복장으로 가점을 받기는 어렵지만, <b>감점은 매우 쉽게</b> 받습니다. 목표는 “깔끔해서 아무 말도 안 나오는 상태”입니다.</p>
+        <table class="iv-table">
+          <thead><tr><th>항목</th><th>기준</th><th>흔한 실수</th></tr></thead>
+          <tbody>
+            <tr><td>정장</td><td>네이비·차콜그레이 / 몸에 맞는 사이즈</td><td>어깨 뜸, 소매·바지 길이 과다</td></tr>
+            <tr><td>셔츠·블라우스</td><td>흰색 또는 연한 하늘색, 다림질 필수</td><td>목깃 구김, 겨드랑이 땀자국</td></tr>
+            <tr><td>구두·양말</td><td>검정/갈색 정장화, 광 닦기 / 어두운 색 양말</td><td>흰 양말, 발목 노출, 먼지투성이 구두</td></tr>
+            <tr><td>헤어</td><td>눈썹·귀 보이게, 긴 머리는 단정히 묶기</td><td>앞머리로 눈 가림, 정리 안 된 뒷머리</td></tr>
+            <tr><td>손·향</td><td>손톱 짧게, 향수는 사용 안 하는 편이 안전</td><td>진한 향수, 담배 냄새</td></tr>
+            <tr><td>소지품</td><td>서류 클리어파일, 손수건, 여분 스타킹/넥타이</td><td>비닐봉지, 커피 들고 입장</td></tr>
+          </tbody>
+        </table>
+        <div class="box info"><span class="bt">ℹ️ 비즈니스 캐주얼 안내를 받았다면</span>
+          면바지(치노)+셔츠+니트 조합이 안전합니다. 청바지·반바지·슬리퍼·후드티·로고 큰 티셔츠는 피하세요.
+        </div>
+      </div>
+
+      <div class="iv-sec">
+        <h3>🎙 1분 자기소개 설계 공식</h3>
+        <p class="iv-lead">자기소개는 “나를 소개하는 시간”이 아니라 <b>면접관이 나에게 물어볼 질문을 내가 심는 시간</b>입니다. 자랑하고 싶은 경험을 일부러 한 줄만 흘려 꼬리질문을 유도하세요.</p>
+        <table class="iv-table">
+          <thead><tr><th>구성</th><th>분량</th><th>내용</th></tr></thead>
+          <tbody>
+            <tr><td><b>① 헤드라인</b></td><td>10초</td><td>나를 한 문장으로 정의 (직무 키워드 포함)</td></tr>
+            <tr><td><b>② 근거 1</b></td><td>20초</td><td>직무 역량 경험 + <b>숫자</b> 결과</td></tr>
+            <tr><td><b>③ 근거 2</b></td><td>15초</td><td>인성·협업 또는 차별점 (자격증·현장경험)</td></tr>
+            <tr><td><b>④ 입사 후 포부</b></td><td>15초</td><td>지원 직무에서 무엇을 하고 싶은지 구체적으로</td></tr>
+          </tbody>
+        </table>
+        <h4>✍️ 빈칸 템플릿</h4>
+        <div class="box tip">
+          “저는 <b>[직무 키워드]</b>를 <b>[본인의 강점 한 단어]</b>로 해결해 온 지원자 <b>[이름]</b>입니다.<br>
+          첫째, <b>[경험]</b>에서 <b>[내가 한 행동]</b>을 통해 <b>[숫자 결과]</b>를 만들었습니다.<br>
+          둘째, <b>[자격증/협업 경험]</b>을 통해 <b>[검증된 태도]</b>를 갖췄습니다.<br>
+          입사 후에는 <b>[구체적 업무]</b>부터 빠르게 익혀 <b>[3년 뒤 목표]</b>가 되겠습니다.”
+        </div>
+        <div class="box warn"><span class="bt">⚠️ 30초 / 1분 / 2분 3종 세트로 준비</span>
+          “간단히 소개해 주세요”(30초), “자기소개 해주세요”(1분), “편하게 이야기해 보세요”(2분) — 요구 시간이 다릅니다. 1분 버전만 외우면 무조건 어색해집니다.
+        </div>
+        <div class="vs">
+          <div class="no"><span class="lb">❌ 흔한 실패</span>“1남 1녀 중 장남으로 태어나 성실하신 부모님 밑에서…” → 가족사·성장배경은 <b>정보 가치 0</b>. 30초를 버립니다.</div>
+          <div class="ok"><span class="lb">⭕ 좋은 예</span>“불량률을 데이터로 잡아온 지원자 홍길동입니다. 졸업작품에서 공정 변수를 로그로 분석해 불량 12%→4%로 줄였습니다.”</div>
+        </div>
+      </div>
+
+      <div class="iv-sec">
+        <h3>⭐ STAR 기법 — 경험 질문의 표준 답안</h3>
+        <p class="iv-lead">“~한 경험을 말해보세요” 류의 질문은 전부 STAR로 답합니다. 핵심은 <b>A(행동)를 가장 길게</b> 말하는 것입니다. 대부분의 지원자는 상황 설명만 30초 하다 시간을 다 씁니다.</p>
+        <table class="iv-table">
+          <thead><tr><th>단계</th><th>비중</th><th>말할 내용</th></tr></thead>
+          <tbody>
+            <tr><td><b>S</b>ituation (상황)</td><td>10%</td><td>언제, 어디서, 어떤 배경 — <b>두 문장 이내</b></td></tr>
+            <tr><td><b>T</b>ask (과제)</td><td>10%</td><td>내가 맡은 역할과 목표, 문제의 핵심</td></tr>
+            <tr><td><b>A</b>ction (행동)</td><td><b>60%</b></td><td>“내가” 한 구체적 행동 3단계 (분석 → 실행 → 설득/협업)</td></tr>
+            <tr><td><b>R</b>esult (결과)</td><td>20%</td><td><b>숫자</b> 결과 + 배운 점 + 그것이 이 직무와 연결되는 지점</td></tr>
+          </tbody>
+        </table>
+        <div class="vs">
+          <div class="no"><span class="lb">❌ 주어가 “우리”</span>“팀원들과 열심히 준비해서 좋은 결과가 나왔고 협업의 중요성을 배웠습니다.” → 무엇을 했는지 알 수 없음.</div>
+          <div class="ok"><span class="lb">⭕ 주어가 “저”</span>“저는 회의록 담당을 자원해 매일 결정사항을 공유했고, 중복 작업 2건을 사전에 발견해 일정을 3일 단축했습니다.”</div>
+        </div>
+        <div class="box info"><span class="bt">ℹ️ 경험 3개면 모든 질문을 막습니다</span>
+          <b>①성과 경험 ②실패·갈등 경험 ③협업·리더십 경험</b> 3개를 STAR로 완성해 두면, 질문이 어떻게 바뀌어도 각도만 틀어 재사용할 수 있습니다.
+        </div>
+      </div>
+
+      <div class="iv-sec">
+        <h3>🗣 말하기 기술 — 두괄식·길이·속도</h3>
+        <div class="grid2">
+          <div class="mini">
+            <h5>PREP 두괄식 구조</h5>
+            <ul>
+              <li><b>P</b>oint: 결론 먼저 (“예, 가능합니다”)</li>
+              <li><b>R</b>eason: 이유 1~2개</li>
+              <li><b>E</b>xample: 근거 경험</li>
+              <li><b>P</b>oint: 한 줄 정리</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>답변 길이·속도 기준</h5>
+            <ul>
+              <li>일반 질문 <b>30~60초</b> (200~350자)</li>
+              <li>경험 질문 <b>60~90초</b></li>
+              <li>속도 <b>분당 300~350자</b></li>
+              <li>90초 넘으면 면접관 집중력 이탈</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>즉시 고쳐야 할 말버릇</h5>
+            <ul>
+              <li>“어… 그… 음…” 채움말</li>
+              <li>“~인 것 같습니다” (확신 없음)</li>
+              <li>“솔직히 말씀드리면” (앞말은 거짓?)</li>
+              <li>어미 흐리기, 문장 끝 올려 말하기</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>모르면 이렇게</h5>
+            <ul>
+              <li>3초 침묵은 <b>정상</b> — 급하게 말 시작 금지</li>
+              <li>“잠시 생각해도 될까요?” 허용됨</li>
+              <li>질문 못 들었으면 반드시 재확인</li>
+              <li>“모르겠습니다” 후 <b>배우겠다는 방법</b>까지</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="iv-sec">
+        <h3>🎭 면접 유형별 공략</h3>
+        <table class="iv-table">
+          <thead><tr><th>유형</th><th>보는 것</th><th>공략 포인트</th></tr></thead>
+          <tbody>
+            <tr><td><b>실무진 면접</b></td><td>직무 지식·즉시 투입 가능성</td><td>전공 용어를 정확히. 모르면 인정하고 학습 계획 제시</td></tr>
+            <tr><td><b>임원 면접</b></td><td>인성·조직 적합성·장기 근속</td><td>디테일보다 <b>태도와 일관성</b>. 산업 전체 관점으로 답변</td></tr>
+            <tr><td><b>PT 면접</b></td><td>논리 구조·전달력</td><td>결론 → 근거 3 → 리스크·대안 순. 시간 초과는 큰 감점</td></tr>
+            <tr><td><b>토론 면접</b></td><td>경청·조율 능력</td><td>이기려 들지 말 것. 남의 의견 요약 후 보완하는 사람이 1등</td></tr>
+            <tr><td><b>AI 역량검사</b></td><td>일관성·표정·발화</td><td>카메라 정면, 밝은 표정 유지. 앞뒤 답변이 모순되면 감점</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="iv-sec">
+        <h3>📅 면접 D-7 준비 로드맵</h3>
+        <div class="steps">
+          <div class="step"><div class="st-t">D-7 · 자소서 역추적</div><div class="st-d">내 자소서에서 나올 질문 20개를 직접 뽑습니다. 실제 질문의 절반 이상이 여기서 나옵니다.</div></div>
+          <div class="step"><div class="st-t">D-6 · 기업 조사</div><div class="st-d">사업 부문, 주요 제품, 최근 1년 뉴스 3건, 인재상, 채용공고 문구를 정리합니다.</div></div>
+          <div class="step"><div class="st-t">D-5 · 직무 조사</div><div class="st-d">공고의 “주요 업무” 문장별로 내 경험을 1:1 매칭시킵니다. 매칭 안 되는 항목은 학습 계획으로 대체.</div></div>
+          <div class="step"><div class="st-t">D-4~3 · 답변 스크립트</div><div class="step-d st-d">공통 질문 15개 + 직무 질문 10개를 <b>키워드 3개</b> 형태로 메모합니다(문장 통암기 금지).</div></div>
+          <div class="step"><div class="st-t">D-2 · 소리 내어 녹음</div><div class="st-d">휴대폰으로 녹음해 다시 들으세요. 말버릇·속도·어미 문제가 즉시 보입니다. 최소 3회 반복.</div></div>
+          <div class="step"><div class="st-t">D-1 · 모의면접 & 준비물</div><div class="st-d">가족·친구 앞에서 실전처럼 1회. 복장 점검, 교통편·소요시간 확인, 서류 인쇄.</div></div>
+          <div class="step"><div class="st-t">D-DAY · 30분 전 도착</div><div class="st-d">근처 카페에서 헤드라인 문장과 경험 3개만 훑습니다. 새 내용 암기는 오히려 방해.</div></div>
+        </div>
+        <div class="box bad"><span class="bt">🚫 즉시 감점되는 습관</span>
+          지각 / 무표정·목소리 작음 / 회사명·직무명 잘못 말하기 / 자소서와 다른 내용 / 이전 회사·학교 비난 / 연봉·복지만 질문 / “아무 일이나 다 하겠습니다” / 다리 떨기·팔짱 / 면접관 말 끊기 / 준비 안 된 역질문(“없습니다”)
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ② 공통 빈출 질문 ==================== -->
+    <section class="iv-view" id="view-common">
+      <div class="iv-sec">
+        <h3>💬 공통 빈출 질문 15 — 의도 · 설계 · 예시</h3>
+        <p class="iv-lead">아래 15개는 업종·직무와 무관하게 반복되는 질문입니다. <b>질문을 클릭</b>하면 면접관의 의도, 답변 설계, 바로 쓸 수 있는 예시 문장, 감점 포인트가 나옵니다.</p>
+
+        <details class="qa"><summary>1. 자기소개를 해주세요.</summary><div class="qbody">
+          <div class="row"><span class="k intent">의도</span>준비도와 전달력 확인. 그리고 <b>다음 질문거리 찾기</b>.</div>
+          <div class="row"><span class="k design">설계</span>헤드라인 → 직무 역량 근거(숫자) → 인성/차별점 → 입사 후 포부. 60초 이내.</div>
+          <div class="row"><span class="k script">예시</span><span class="quote">“데이터로 문제 원인을 찾아내는 지원자 ○○○입니다. 졸업작품에서 설비 로그 3개월치를 분석해 반복 정지 원인을 특정하고 가동률을 8% 높였습니다. 또한 관련 자격증 취득 과정에서 현장 기준을 익혔습니다. 입사 후에는 공정 데이터 관리부터 익혀 3년 내 개선 과제를 주도하는 담당자가 되겠습니다.”</span></div>
+          <div class="row"><span class="k minus">감점</span>성장배경·가족 이야기, 자소서 낭독, 형용사만 나열(성실·열정·책임감).</div>
+        </div></details>
+
+        <details class="qa"><summary>2. 우리 회사에 지원한 이유는 무엇입니까?</summary><div class="qbody">
+          <div class="row"><span class="k intent">의도</span>“아무 데나 넣은 것 아닌지” 확인. 근속 가능성 판단.</div>
+          <div class="row"><span class="k design">회사를 고른 이유(산업·제품·사업방향) → 내 방향과 겹치는 지점 → 그래서 이 회사여야 하는 이유. <b>다른 회사엔 못 쓰는 문장</b>이 반드시 1개 이상 들어가야 합니다.</div>
+          <div class="row"><span class="k script">예시</span><span class="quote">“○○ 분야로 사업을 확장하는 흐름을 보고, 제가 준비한 △△ 역량을 가장 오래 쓸 수 있는 곳이라 판단했습니다. 최근 □□ 투자 발표를 보며 앞으로 필요한 인력이 어떤 일을 하게 될지 구체적으로 상상할 수 있었습니다.”</span></div>
+          <div class="row"><span class="k minus">감점</span>“업계 1위라서”, “복지가 좋아서”, “집이 가까워서”, 홈페이지 인재상 그대로 읽기.</div>
+        </div></details>
+
+        <details class="qa"><summary>3. 왜 이 직무를 선택했습니까?</summary><div class="qbody">
+          <div class="row"><span class="k intent">의도</span>직무 이해도 + 오래 버틸 사람인지. 직무 미스매치는 조기 퇴사 1위 원인입니다.</div>
+          <div class="row"><span class="k design">계기(경험) → 준비 과정(전공·자격·프로젝트) → 이 직무의 <b>힘든 점까지 알고 있음</b>을 언급하면 신뢰도가 급상승합니다.</div>
+          <div class="row"><span class="k script">예시</span><span class="quote">“현장 실습에서 문제를 데이터로 좁혀가는 과정이 가장 재미있었습니다. 이후 관련 과목과 자격증으로 준비했고, 이 직무가 반복 점검과 야간 대응이 많다는 점도 알고 있습니다. 그럼에도 결과가 눈에 보이는 일이라 계속하고 싶
