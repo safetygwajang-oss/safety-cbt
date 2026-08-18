@@ -49,10 +49,33 @@
     .site-footer .footer-links a { color: #9aa1ab; text-decoration: none; margin: 0 6px; }
     .site-footer .footer-links a:hover { text-decoration: underline; }
 
+    /* ===== 랜덤 기출문제 카드 강조 ===== */
+    .random-exam-card {
+      border: 2px solid #2563eb !important;
+      background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%) !important;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.18) !important;
+      position: relative;
+    }
+    .random-exam-card::before {
+      content: "🎲 RANDOM";
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: #2563eb;
+      color: #fff;
+      font-size: 0.66rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.02em;
+      z-index: 2;
+    }
+
     @media (max-width: 900px) { .topbar-ad { display: none; } }
     @media (max-width: 768px) {
       .ad-zone { margin: 18px auto 6px; }
       .site-footer { font-size: 0.68rem; padding: 16px 14px 20px; }
+      .random-exam-card::before { font-size: 0.6rem; padding: 2px 6px; }
     }
   </style>
 </head>
@@ -197,7 +220,7 @@
   <!-- 하단 출처 표기 -->
   <footer class="site-footer">
     <div class="footer-links">
-      오류, 에러 등 문의는 받지 않음. 문제시 삭제</a>
+      오류, 에러 등 문의는 받지 않음. 문제시 삭제
     </div>
     출처 : 시계토끼 제니쌤, 제이크 토익스피킹, 한국산업인력공단, 각종 CBT 사이트(최강 자격증 기출문제 전자문제집 CBT, CBT 문제은행, 모두CBT 등)
   </footer>
@@ -205,5 +228,75 @@
   <script src="js/protect.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/main.js"></script>
+
+  <!-- ===== 랜덤 기출문제 카드를 중복기출 탭 맨 앞으로 고정 ===== -->
+  <script>
+  (function () {
+    'use strict';
+
+    /* 랜덤 시험 카드를 찾습니다. */
+    function findRandomCard() {
+      var link = document.querySelector(
+        '#dup-list a[href*="exam=random"], ' +
+        '#dup-list [data-exam-id="random"], ' +
+        '#dup-list [data-id="random"]'
+      );
+
+      if (!link) {
+        link = document.querySelector(
+          'a[href*="exam=random"], ' +
+          '[data-exam-id="random"], ' +
+          '[data-id="random"]'
+        );
+      }
+
+      if (!link) return null;
+
+      return link.closest('.exam-card, .card, li') || link;
+    }
+
+    /* 카드를 소속 그리드의 첫 번째 위치로 이동시킵니다. */
+    function pinRandomCard() {
+      var card = findRandomCard();
+
+      if (!card) return false;
+
+      card.classList.add('random-exam-card');
+
+      var container = card.parentElement;
+
+      if (!container) return true;
+
+      if (container.firstElementChild !== card) {
+        container.insertBefore(card, container.firstElementChild);
+      }
+
+      return true;
+    }
+
+    /*
+     * main.js가 카드 목록을 비동기로 생성하므로
+     * 렌더링이 끝날 때까지 반복 확인합니다.
+     */
+    var tries = 0;
+
+    var timer = setInterval(function () {
+      tries++;
+
+      if (pinRandomCard() || tries > 60) {
+        clearInterval(timer);
+      }
+    }, 100);
+
+    /*
+     * 탭 전환이나 입장코드 입력 후 목록이 다시 그려질 수 있으므로
+     * 클릭이 발생할 때마다 재정렬합니다.
+     */
+    document.addEventListener('click', function () {
+      setTimeout(pinRandomCard, 80);
+      setTimeout(pinRandomCard, 400);
+    });
+  })();
+  </script>
 </body>
 </html>
