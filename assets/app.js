@@ -114,7 +114,7 @@
     const main = $('#main');
 
     /* 1) meta */
-    state.meta = (await tryJSON('data/meta.json')) || FALLBACK_META;
+    state.meta = (await tryJSON('data/meta.json', true)) || FALLBACK_META;
     if (!state.meta.groups)   state.meta.groups   = FALLBACK_META.groups;
     if (!state.meta.tiers)    state.meta.tiers    = FALLBACK_META.tiers;
     if (!state.meta.qTypes)   state.meta.qTypes   = FALLBACK_META.qTypes;
@@ -123,7 +123,7 @@
     loadAnswers();
 
     /* 2) 파일 목록 (manifest 우선, 없으면 기본값) */
-    const manifest = await tryJSON('data/manifest.json');
+    const manifest = await tryJSON('data/manifest.json', true);
     const files = (manifest?.files?.length) ? manifest.files : FALLBACK_FILES;
     const corePath = manifest?.coreStories || 'data/core-stories.json';
 
@@ -140,7 +140,7 @@
     });
 
     /* 4) 공통 경험 뱅크 (없어도 무관) */
-    state.coreStories = await tryJSON(corePath);
+    state.coreStories = await tryJSON(corePath, true);
 
     if (!state.companies.length && !state.coreStories) {
       main.innerHTML =
@@ -209,11 +209,7 @@
       html += `</div>`;
     });
 
-    if (state.warnings.length) {
-      html += `<div class="nav-group"><div class="nav-group-title">⚠️ 로딩 경고</div>
-        <div style="font-size:11px;color:#b4232a;line-height:1.6;padding:0 8px">
-          ${state.warnings.map(w => esc(w)).join('<br>')}</div></div>`;
-    }
+   
     nav.innerHTML = html;
   }
 
