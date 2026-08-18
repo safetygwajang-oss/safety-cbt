@@ -11,151 +11,9 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/custom.css">
 
-  <style>
-    html, body { min-height: 100%; }
-    body { display: flex; flex-direction: column; min-height: 100vh; }
-    body > main { flex: 1 0 auto; }
-
-    .topbar .container { display: flex; align-items: center; gap: 14px; }
-    .topbar .logo { flex: 0 0 auto; white-space: nowrap; }
-    .topbar .topbar-actions { flex: 0 0 auto; margin-left: auto; }
-
-    .site-footer {
-      flex-shrink: 0; margin-top: auto; padding: 18px 12px 22px; text-align: center;
-      font-size: .72rem; line-height: 1.6; color: #9aa1ab;
-      border-top: 1px solid var(--gray-200, #e5e7eb); background: #fff; word-break: keep-all;
-    }
-    .ad-zone { display:block; margin:26px auto 10px; max-width:100%; overflow:hidden; text-align:center; }
-    .ad-zone .adsbygoogle { display:block; width:100%; }
-    .ad-label { display:block; font-size:.62rem; color:#c2c8ce; letter-spacing:.06em; margin-bottom:4px; }
-
-    /* ===== 히어로 ===== */
-    .iv-hero {
-      background: linear-gradient(135deg,#1e3a8a,#0ea5e9);
-      color:#fff; border-radius:16px; padding:26px 24px; margin:22px 0 18px;
-    }
-    .iv-hero h2 { margin:0 0 8px; font-size:1.5rem; letter-spacing:-.02em; }
-    .iv-hero p { margin:0; font-size:.9rem; opacity:.92; line-height:1.6; }
-    .iv-back { display:inline-block; margin-top:14px; font-size:.8rem; color:#fff;
-      background:rgba(255,255,255,.18); padding:6px 13px; border-radius:99px; text-decoration:none; }
-
-    /* ===== 서브탭 ===== */
-    .iv-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
-    .iv-tab {
-      display:inline-flex; align-items:center; gap:6px; padding:10px 15px; border-radius:99px;
-      border:1px solid #dbeafe; background:linear-gradient(135deg,#eff6ff,#f0fdfa);
-      color:#1d4ed8; font-family:inherit; font-size:.9rem; font-weight:700; cursor:pointer;
-      transition:transform .15s ease, box-shadow .15s ease;
-    }
-    .iv-tab:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(37,99,235,.16); }
-    .iv-tab.active { background:linear-gradient(135deg,#2563eb,#0ea5e9); border-color:#2563eb; color:#fff; }
-
-    /* ===== 공통 블록 ===== */
-    .iv-view { display:none; }
-    .iv-view.on { display:block; animation:ivFade .25s ease; }
-    @keyframes ivFade { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
-
-    .iv-sec { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:20px 22px; margin-bottom:16px; }
-    .iv-sec > h3 {
-      margin:0 0 14px; font-size:1.12rem; color:#0f172a; letter-spacing:-.01em;
-      padding-bottom:10px; border-bottom:2px solid #eff6ff; display:flex; align-items:center; gap:8px;
-    }
-    .iv-sec h4 { margin:18px 0 8px; font-size:.97rem; color:#1d4ed8; }
-    .iv-sec p, .iv-sec li { font-size:.9rem; line-height:1.75; color:#334155; }
-    .iv-sec ul, .iv-sec ol { padding-left:20px; margin:8px 0; }
-    .iv-sec li { margin-bottom:5px; }
-    .iv-sec b { color:#0f172a; }
-
-    .iv-lead { font-size:.9rem; color:#475569; line-height:1.75; background:#f8fafc;
-      border-left:3px solid #94a3b8; padding:10px 14px; border-radius:0 8px 8px 0; margin:0 0 14px; }
-
-    /* 박스 */
-    .box { border-radius:10px; padding:13px 16px; margin:12px 0; font-size:.88rem; line-height:1.7; }
-    .box.tip  { background:#f0fdf4; border-left:4px solid #22c55e; color:#14532d; }
-    .box.warn { background:#fffbeb; border-left:4px solid #f59e0b; color:#78350f; }
-    .box.bad  { background:#fef2f2; border-left:4px solid #ef4444; color:#7f1d1d; }
-    .box.info { background:#eff6ff; border-left:4px solid #3b82f6; color:#1e3a8a; }
-    .box .bt { display:block; font-weight:800; margin-bottom:5px; }
-
-    /* 비교 카드 */
-    .vs { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0; }
-    .vs > div { border-radius:10px; padding:13px 15px; font-size:.86rem; line-height:1.7; }
-    .vs .no { background:#fef2f2; border:1px solid #fecaca; color:#7f1d1d; }
-    .vs .ok { background:#f0fdf4; border:1px solid #bbf7d0; color:#14532d; }
-    .vs .lb { display:block; font-weight:800; font-size:.78rem; letter-spacing:.04em; margin-bottom:6px; }
-
-    /* 표 */
-    .iv-table { width:100%; border-collapse:collapse; margin:12px 0; font-size:.86rem; }
-    .iv-table th, .iv-table td { border:1px solid #e5e7eb; padding:9px 11px; text-align:left; vertical-align:top; line-height:1.6; }
-    .iv-table th { background:#f1f5f9; color:#0f172a; font-weight:700; white-space:nowrap; }
-    .iv-table tbody tr:nth-child(even) { background:#fafbfc; }
-
-    /* 스텝 */
-    .steps { counter-reset:st; margin:12px 0; }
-    .step { position:relative; padding:0 0 14px 40px; border-left:2px dashed #cbd5e1; margin-left:12px; }
-    .step:last-child { border-left-color:transparent; padding-bottom:0; }
-    .step::before {
-      counter-increment:st; content:counter(st);
-      position:absolute; left:-14px; top:0; width:26px; height:26px; border-radius:50%;
-      background:#2563eb; color:#fff; font-size:.78rem; font-weight:800;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .step .st-t { font-weight:800; color:#0f172a; font-size:.92rem; margin-bottom:3px; }
-    .step .st-d { font-size:.86rem; color:#475569; line-height:1.7; }
-
-    /* 질문 아코디언 */
-    .qa { border:1px solid #e5e7eb; border-radius:11px; margin-bottom:9px; overflow:hidden; background:#fff; }
-    .qa summary {
-      cursor:pointer; padding:14px 16px; font-size:.93rem; font-weight:700; color:#0f172a;
-      display:flex; align-items:flex-start; gap:9px; list-style:none; line-height:1.55;
-    }
-    .qa summary::-webkit-details-marker { display:none; }
-    .qa summary::after { content:"▾"; margin-left:auto; color:#94a3b8; font-size:.8rem; flex:0 0 auto; }
-    .qa[open] summary { background:#eff6ff; color:#1d4ed8; }
-    .qa[open] summary::after { content:"▴"; }
-    .qa .qbody { padding:4px 16px 16px; border-top:1px solid #f1f5f9; }
-    .qa .row { margin-top:11px; font-size:.87rem; line-height:1.72; color:#334155; }
-    .qa .row .k {
-      display:inline-block; font-size:.7rem; font-weight:800; letter-spacing:.04em;
-      padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align:1px;
-    }
-    .k.intent { background:#e0e7ff; color:#3730a3; }
-    .k.design { background:#dbeafe; color:#1e40af; }
-    .k.script { background:#dcfce7; color:#166534; }
-    .k.minus  { background:#fee2e2; color:#991b1b; }
-    .qa .quote { display:block; margin-top:6px; padding:11px 13px; background:#f8fafc;
-      border-left:3px solid #22c55e; border-radius:0 8px 8px 0; color:#0f172a; font-size:.86rem; line-height:1.75; }
-
-    .chip { display:inline-block; font-size:.7rem; font-weight:800; padding:3px 9px;
-      border-radius:99px; background:#2563eb; color:#fff; margin:0 5px 5px 0; letter-spacing:.03em; }
-    .chip.g { background:#e2e8f0; color:#334155; }
-
-    .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; margin:12px 0; }
-    .mini { border:1px solid #e5e7eb; border-radius:11px; padding:14px 16px; background:#fff; }
-    .mini h5 { margin:0 0 8px; font-size:.92rem; color:#1d4ed8; }
-    .mini ul { margin:0; padding-left:18px; }
-    .mini li { font-size:.85rem; line-height:1.7; color:#334155; }
-
-    /* 기업별 */
-    .co-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
-    .co-btn { padding:8px 14px; border-radius:99px; border:1px solid #e2e8f0; background:#fff;
-      font-family:inherit; font-size:.86rem; font-weight:700; color:#475569; cursor:pointer; }
-    .co-btn.active { background:#0f172a; border-color:#0f172a; color:#fff; }
-    .empty { text-align:center; padding:46px 20px; color:#94a3b8; font-size:.9rem; line-height:1.8;
-      border:2px dashed #e2e8f0; border-radius:14px; background:#fafbfc; }
-
-    @media (max-width: 640px) {
-      .iv-hero { padding:20px 18px; }
-      .iv-hero h2 { font-size:1.25rem; }
-      .iv-sec { padding:16px 15px; }
-      .vs { grid-template-columns:1fr; }
-      .iv-tab { flex:1 1 44%; justify-content:center; font-size:.84rem; padding:9px 8px; }
-      .iv-table { font-size:.8rem; }
-      .iv-table th, .iv-table td { padding:7px 8px; }
-    }
-  </style>
+  <!-- 면접 페이지 스타일 → css/custom.css (섹션 6·9)로 이관 -->
 </head>
-<body>
+<body class="page-interview">
   <header class="topbar">
     <div class="container">
       <a href="index.html" class="logo" style="text-decoration:none;">⛑️ 안전과장 · 골드박스</a>
@@ -344,9 +202,9 @@
           <div class="step"><div class="st-t">D-7 · 자소서 역추적</div><div class="st-d">내 자소서에서 나올 질문 20개를 직접 뽑습니다. 실제 질문의 절반 이상이 여기서 나옵니다.</div></div>
           <div class="step"><div class="st-t">D-6 · 기업 조사</div><div class="st-d">사업 부문, 주요 제품, 최근 1년 뉴스 3건, 인재상, 채용공고 문구를 정리합니다.</div></div>
           <div class="step"><div class="st-t">D-5 · 직무 조사</div><div class="st-d">공고의 “주요 업무” 문장별로 내 경험을 1:1 매칭시킵니다. 매칭 안 되는 항목은 학습 계획으로 대체.</div></div>
-          <div class="step"><div class="st-t">D-4~3 · 답변 스크립트</div><div class="step-d st-d">공통 질문 15개 + 직무 질문 10개를 <b>키워드 3개</b> 형태로 메모합니다(문장 통암기 금지).</div></div>
+          <div class="step"><div class="st-t">D-4~3 · 답변 스크립트</div><div class="st-d">공통 질문 15개 + 직무 질문 10개를 <b>키워드 3개</b> 형태로 메모합니다(문장 통암기 금지).</div></div>
           <div class="step"><div class="st-t">D-2 · 소리 내어 녹음</div><div class="st-d">휴대폰으로 녹음해 다시 들으세요. 말버릇·속도·어미 문제가 즉시 보입니다. 최소 3회 반복.</div></div>
-          <div class="step"><div class="st-t">D-1 · 모의면접 & 준비물</div><div class="st-d">가족·친구 앞에서 실전처럼 1회. 복장 점검, 교통편·소요시간 확인, 서류 인쇄.</div></div>
+          <div class="step"><div class="st-t">D-1 · 모의면접 &amp; 준비물</div><div class="st-d">가족·친구 앞에서 실전처럼 1회. 복장 점검, 교통편·소요시간 확인, 서류 인쇄.</div></div>
           <div class="step"><div class="st-t">D-DAY · 30분 전 도착</div><div class="st-d">근처 카페에서 헤드라인 문장과 경험 3개만 훑습니다. 새 내용 암기는 오히려 방해.</div></div>
         </div>
         <div class="box bad"><span class="bt">🚫 즉시 감점되는 습관</span>
@@ -370,14 +228,14 @@
 
         <details class="qa"><summary>2. 우리 회사에 지원한 이유는 무엇입니까?</summary><div class="qbody">
           <div class="row"><span class="k intent">의도</span>“아무 데나 넣은 것 아닌지” 확인. 근속 가능성 판단.</div>
-          <div class="row"><span class="k design">회사를 고른 이유(산업·제품·사업방향) → 내 방향과 겹치는 지점 → 그래서 이 회사여야 하는 이유. <b>다른 회사엔 못 쓰는 문장</b>이 반드시 1개 이상 들어가야 합니다.</div>
+          <div class="row"><span class="k design">설계</span>회사를 고른 이유(산업·제품·사업방향) → 내 방향과 겹치는 지점 → 그래서 이 회사여야 하는 이유. <b>다른 회사엔 못 쓰는 문장</b>이 반드시 1개 이상 들어가야 합니다.</div>
           <div class="row"><span class="k script">예시</span><span class="quote">“○○ 분야로 사업을 확장하는 흐름을 보고, 제가 준비한 △△ 역량을 가장 오래 쓸 수 있는 곳이라 판단했습니다. 최근 □□ 투자 발표를 보며 앞으로 필요한 인력이 어떤 일을 하게 될지 구체적으로 상상할 수 있었습니다.”</span></div>
           <div class="row"><span class="k minus">감점</span>“업계 1위라서”, “복지가 좋아서”, “집이 가까워서”, 홈페이지 인재상 그대로 읽기.</div>
         </div></details>
 
         <details class="qa"><summary>3. 왜 이 직무를 선택했습니까?</summary><div class="qbody">
           <div class="row"><span class="k intent">의도</span>직무 이해도 + 오래 버틸 사람인지. 직무 미스매치는 조기 퇴사 1위 원인입니다.</div>
-          <div class="row"><span class="k design">계기(경험) → 준비 과정(전공·자격·프로젝트) → 이 직무의 <b>힘든 점까지 알고 있음</b>을 언급하면 신뢰도가 급상승합니다.</div>
+          <div class="row"><span class="k design">설계</span>계기(경험) → 준비 과정(전공·자격·프로젝트) → 이 직무의 <b>힘든 점까지 알고 있음</b>을 언급하면 신뢰도가 급상승합니다.</div>
           <div class="row"><span class="k script">예시</span><span class="quote">“현장 실습에서 문제를 데이터로 좁혀가는 과정이 가장 재미있었습니다. 이후 관련 과목과 자격증으로 준비했고, 이 직무가 반복 점검과 야간 대응이 많다는 점도 알고 있습니다. 그럼에도 결과가 눈에 보이는 일이라 계속하고 싶었습니다.”</span></div>
           <div class="row"><span class="k minus">감점</span>“전공이라서”, “적성에 맞을 것 같아서” 등 추상형 / 직무 내용을 잘못 이해한 답변(예: 품질 직무에 “설비 설계를 하고 싶습니다”).</div>
         </div></details>
@@ -455,7 +313,7 @@
         <details class="qa"><summary>14. 마지막으로 하고 싶은 말이 있습니까?</summary><div class="qbody">
           <div class="row"><span class="k intent">의도</span>마지막 인상 + 아쉬운 답변을 스스로 보완할 기회 제공.</div>
           <div class="row"><span class="k design">설계</span>보완 1문장(면접 중 부족했던 답에 숫자·근거 추가) → 핵심 강점 재확인 → 짧은 각오. 30초.</div>
-          <div class="row"><span class="k script">예시</span><span class="quote">“앞서 말씀드린 개선 사례에 수치를 덧붙이면, 점검 시간이 40분에서 25분으로 줄었습니다. 기록하고 기준을 만드는 일을 꾸준히 해왔습니다. 현장에서 가장 빨리 쓸모 있어지는 신입이 되겠습니다.”</span></div>
+          <div class="row"><span class="k script">예시</span><span class="quote">“앞서 말씀드린 개선 사례에 수치를 덧붙이면, 점검 시간이 40분에서 25분으로 줄었습니다. 기록하고 기준을 만드는 일을 꾸준히 해왔습니다. 현장에서 가장 빨리 쓸 만한 사람이 되는 신입이 되겠습니다.”</span></div>
           <div class="row"><span class="k minus">감점</span>“없습니다” / 이미 한 말 반복 / 감정 호소(“꼭 뽑아주십시오”)만 남기는 것.</div>
         </div></details>
 
@@ -641,7 +499,7 @@
 
     <div class="ad-zone">
       <span class="ad-label">ADVERTISEMENT</span>
-      <ins class="adsbygoogle" data-ad-client="ca-pub-9283463208175336" data-ad-slot="0000000000" data-ad-format="auto" data-full-width-responsive="true"></ins>
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9283463208175336" data-ad-slot="1373941745" data-ad-format="auto" data-full-width-responsive="true"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
   </main>
@@ -651,8 +509,12 @@
     © 안전과장 · 골드박스
   </footer>
 
+  <script src="js/protect.js"></script>
+
   <script>
   (function(){
+    'use strict';
+
     var VALID = ['guide','common','company','job','press'];
     var tabs  = document.querySelectorAll('#iv-tabs .iv-tab');
     var views = document.querySelectorAll('.iv-view');
@@ -664,16 +526,18 @@
       if(v === 'company') loadCompany();
       try { history.replaceState(null, '', '#' + v); } catch(e){}
     }
+
     tabs.forEach(function(t){
       t.addEventListener('click', function(){
         show(t.dataset.v);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     });
+
     show((location.hash || '').replace('#',''));
 
-    /* ---------- 기업별 예상질문: JSON 자동 렌더 ---------- */
-    var bar = document.getElementById('co-bar');
+    /* ---------- 기업별 예상질문 : JSON 자동 렌더 ---------- */
+    var bar  = document.getElementById('co-bar');
     var body = document.getElementById('co-body');
     var loaded = false, LIST = [];
 
@@ -681,6 +545,7 @@
       return String(s == null ? '' : s)
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
+
     function emptyMsg(html){
       bar.innerHTML = '';
       body.innerHTML = '<div class="empty">' + html + '</div>';
@@ -690,6 +555,7 @@
       if(loaded) return;
       loaded = true;
       emptyMsg('데이터를 불러오는 중입니다…');
+
       fetch('data/interview.json', { cache: 'no-store' })
         .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
         .then(function(j){
@@ -706,17 +572,17 @@
           emptyMsg(
             '데이터를 불러오지 못했습니다.<br>' +
             '<code>data/interview.json</code> 경로를 확인해 주세요.<br>' +
-            '<span style="font-size:.82rem">※ 파일을 file:// 로 직접 열면 브라우저가 차단합니다. 로컬 서버(예: <code>python -m http.server</code>)로 실행하세요.</span>'
+            '<span style="font-size:.82rem">※ 파일을 file:// 로 직접 열면 브라우저가 차단합니다. 로컬 서버로 실행하세요.</span>'
           );
         });
     }
 
-    /* 기업 선택 버튼 */
     function renderBar(){
       bar.innerHTML = LIST.map(function(c, i){
         return '<button class="co-btn' + (i === 0 ? ' active' : '') + '" data-i="' + i + '">'
              + esc(c.name || ('기업 ' + (i + 1))) + '</button>';
       }).join('');
+
       bar.querySelectorAll('.co-btn').forEach(function(b){
         b.addEventListener('click', function(){
           bar.querySelectorAll('.co-btn').forEach(function(x){ x.classList.remove('active'); });
@@ -726,7 +592,6 @@
       });
     }
 
-    /* 질문 1건 → 아코디언 HTML */
     function qaBlock(q){
       var h = '<details class="qa"><summary>' + esc(q.q || '') + '</summary><div class="qbody">';
       if(q.intent) h += '<div class="row"><span class="k intent">의도</span>' + esc(q.intent) + '</div>';
@@ -737,23 +602,24 @@
       return h;
     }
 
-    /* 기업 상세 렌더 */
     function renderCompany(i){
       var c = LIST[i];
       if(!c){ body.innerHTML = ''; return; }
 
       var h = '';
+
       if(c.tags && c.tags.length){
         h += '<div style="margin-bottom:10px">'
            + c.tags.map(function(t){ return '<span class="chip g">' + esc(t) + '</span>'; }).join('')
            + '</div>';
       }
+
       if(c.note) h += '<p class="iv-lead">' + esc(c.note) + '</p>';
 
       var secs = c.sections || [];
+
       if(!secs.length){
-        h += '<div class="empty">이 기업의 질문 데이터가 아직 비어 있습니다.<br>'
-           + '<code>sections</code> 배열을 채워 주세요.</div>';
+        h += '<div class="empty">이 기업의 질문 데이터가 아직 비어 있습니다.<br><code>sections</code> 배열을 채워 주세요.</div>';
       } else {
         secs.forEach(function(s){
           h += '<h4>' + esc(s.title || '질문') + '</h4>';
@@ -769,10 +635,10 @@
       if(c.updatedAt){
         h += '<p style="font-size:.74rem;color:#94a3b8;margin-top:16px">최종 업데이트 · ' + esc(c.updatedAt) + '</p>';
       }
+
       body.innerHTML = h;
     }
   })();
   </script>
 </body>
 </html>
-
