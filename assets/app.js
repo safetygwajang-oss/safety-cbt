@@ -97,10 +97,17 @@
     if (!r.ok) throw new Error(`${path} → HTTP ${r.status}`);
     return r.json();
   }
-  async function tryJSON(path) {
-    try { return await getJSON(path); }
-    catch (e) { state.warnings.push(e.message || String(e)); return null; }
+    /* silent = true : 없어도 되는 파일 → 경고 표시 안 함 */
+  async function tryJSON(path, silent) {
+    try {
+      return await getJSON(path);
+    } catch (e) {
+      console.warn('[note] 로드 건너뜀:', path, e.message || e);
+      if (!silent) state.warnings.push(e.message || String(e));
+      return null;
+    }
   }
+
 
   /* ---------------- 초기화 ---------------- */
   async function init() {
