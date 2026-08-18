@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>면접 예상질문 & 나의 답변 노트</title>
+  <meta name="description" content="기업별 면접 예상질문에 나의 답변을 작성하고 저장·내보내기 하는 개인 학습 노트" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1><a href="index.html">📖 면접 예상질문 노트</a></h1>
+
+    <div class="topbar-actions">
+      <input id="search" type="search" placeholder="질문·태그 검색 (예: PSM, 이직사유)" />
+      <button id="btn-export" class="btn" type="button">내 답변 내보내기(JSON)</button>
+      <label class="btn ghost">
+        불러오기<input id="file-import" type="file" accept="application/json" hidden />
+      </label>
+      <button id="btn-print" class="btn ghost" type="button">인쇄/PDF</button>
+      <a href="interview.html" class="btn ghost">면접 가이드</a>
+      <a href="index.html" class="btn ghost">🏠 홈</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="filters">
+        <select id="filter-tier">
+          <option value="">전체 기업군</option>
+        </select>
+        <select id="filter-type">
+          <option value="">전체 질문유형</option>
+        </select>
+        <label class="chk"><input type="checkbox" id="only-unanswered" /> 미작성만 보기</label>
+      </div>
+      <nav id="nav" class="nav"></nav>
+    </aside>
+
+    <main id="main" class="main">
+      <p class="loading">데이터를 불러오는 중…</p>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" hidden>저장됨</div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
