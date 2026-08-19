@@ -15,8 +15,30 @@
 
   <style>
     /*
+     * [보안] 입력창(input, textarea)을 제외한 전체 영역 드래그/선택 금지
+     */
+    body {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    /*
+     * 핵심 키워드, 답변 입력란 등 사용자가 직접 입력하는 요소만 복사/드래그 허용
+     */
+    input,
+    textarea,
+    [contenteditable="true"],
+    .allow-copy {
+      -webkit-user-select: text !important;
+      -moz-user-select: text !important;
+      -ms-user-select: text !important;
+      user-select: text !important;
+    }
+
+    /*
      * 우측 상단 저장 안내 문구
-     * 배경색이나 음영 없이 글자만 표시합니다.
      */
     .save-notice {
       display: inline-flex;
@@ -43,8 +65,7 @@
     }
 
     /*
-     * app.js가 참조하는 요소를 화면에서만 숨깁니다.
-     * 요소 자체는 존재하므로 초기화 오류가 발생하지 않습니다.
+     * app.js 호환용 숨김 슬롯
      */
     .legacy-hidden-slot {
       position: absolute !important;
@@ -96,7 +117,6 @@
 
   <!--
     app.js 호환용 숨김 슬롯
-    화면에는 보이지 않으며 초기화 오류 방지 목적으로만 존재합니다.
   -->
   <div class="legacy-hidden-slot" aria-hidden="true">
     <button id="btn-export" type="button" tabindex="-1">
@@ -148,19 +168,71 @@
     저장됨
   </div>
 
+  <!-- ▼▼▼ [추가] 콘텐츠 보호 스크립트 (입력창 외 우클릭/복사 차단) ▼▼▼ -->
+  <script>
+  (function () {
+    "use strict";
+
+    /* 입력 요소인지 판단하는 함수 (키워드/답변 작성란 허용) */
+    function isEditableElement(el) {
+      if (!el) return false;
+      var tagName = el.tagName ? el.tagName.toUpperCase() : "";
+      if (tagName === "TEXTAREA" || tagName === "INPUT") return true;
+      if (el.isContentEditable) return true;
+      if (el.closest && el.closest(".allow-copy")) return true;
+      return false;
+    }
+
+    /* 1. 마우스 우클릭 제한 (입력란 내부만 허용) */
+    document.addEventListener("contextmenu", function (e) {
+      if (!isEditableElement(e.target)) {
+        e.preventDefault();
+        return false;
+      }
+    }, true);
+
+    /* 2. 복사(Copy) / 잘라내기(Cut) 제한 */
+    document.addEventListener("copy", function (e) {
+      if (!isEditableElement(e.target)) {
+        e.preventDefault();
+        return false;
+      }
+    }, true);
+
+    document.addEventListener("cut", function (e) {
+      if (!isEditableElement(e.target)) {
+        e.preventDefault();
+        return false;
+      }
+    }, true);
+
+    /* 3. 드래그 시작 제한 */
+    document.addEventListener("dragstart", function (e) {
+      if (!isEditableElement(e.target)) {
+        e.preventDefault();
+        return false;
+      }
+    }, true);
+
+    /* 4. 선택(selection) 영역 시작 제한 */
+    document.addEventListener("selectstart", function (e) {
+      if (!isEditableElement(e.target)) {
+        e.preventDefault();
+        return false;
+      }
+    }, true);
+  })();
+  </script>
+  <!-- ▲▲▲ 콘텐츠 보호 스크립트 끝 ▲▲▲ -->
+
   <!--
     안전장치
-    app.js가 위 목록 외의 다른 ID를 참조해 초기화 오류가 날 경우를 대비합니다.
-    존재하지 않는 요소를 요청하면 숨김 슬롯에 임시 요소를 만들어 반환합니다.
+    app.js가 참조하는 요소 미존재 시 임시 요소 생성
   -->
   <script>
   (function () {
     "use strict";
 
-    /*
-     * app.js에서 사용할 가능성이 있는 컨트롤 ID 목록입니다.
-     * 필요에 따라 자유롭게 추가할 수 있습니다.
-     */
     var SAFE_IDS = [
       "btn-export",
       "btn-import",
@@ -174,76 +246,51 @@
     ];
 
     function slot() {
-      var container = document.querySelector(
-        ".legacy-hidden-slot"
-      );
-
+      var container = document.querySelector(".legacy-hidden-slot");
       if (!container) {
         container = document.createElement("div");
         container.className = "legacy-hidden-slot";
         container.setAttribute("aria-hidden", "true");
         document.body.appendChild(container);
       }
-
       return container;
     }
 
     function createStub(id) {
       var element;
-
-      if (
-        id.indexOf("file") !== -1
-      ) {
+      if (id.indexOf("file") !== -1) {
         element = document.createElement("input");
         element.type = "file";
       } else {
         element = document.createElement("button");
         element.type = "button";
       }
-
       element.id = id;
       element.tabIndex = -1;
-
       slot().appendChild(element);
-
       return element;
     }
 
-    var originalGetElementById =
-      document.getElementById.bind(document);
+    var originalGetElementById = document.getElementById.bind(document);
 
     document.getElementById = function (id) {
       var found = originalGetElementById(id);
-
-      if (
-        found ||
-        SAFE_IDS.indexOf(id) === -1
-      ) {
+      if (found || SAFE_IDS.indexOf(id) === -1) {
         return found;
       }
-
       return createStub(id);
     };
 
-    var originalQuerySelector =
-      document.querySelector.bind(document);
+    var originalQuerySelector = document.querySelector.bind(document);
 
     document.querySelector = function (selector) {
       var found = originalQuerySelector(selector);
-
       if (found) {
         return found;
       }
 
-      /*
-       * "#id" 형태의 단순 선택자만 보완합니다.
-       */
-      if (
-        typeof selector === "string" &&
-        /^#[A-Za-z][\w-]*$/.test(selector)
-      ) {
+      if (typeof selector === "string" && /^#[A-Za-z][\w-]*$/.test(selector)) {
         var id = selector.slice(1);
-
         if (SAFE_IDS.indexOf(id) !== -1) {
           return createStub(id);
         }
