@@ -28,9 +28,6 @@
       white-space: nowrap;
     }
 
-    /*
-     * 화면이 좁아질 경우 문구가 잘리지 않도록 줄바꿈을 허용합니다.
-     */
     @media (max-width: 1100px) {
       .save-notice {
         width: 100%;
@@ -39,13 +36,29 @@
       }
     }
 
-    /*
-     * 인쇄할 때는 화면용 안내 문구를 표시하지 않습니다.
-     */
     @media print {
       .save-notice {
         display: none;
       }
+    }
+
+    /*
+     * app.js가 참조하는 요소를 화면에서만 숨깁니다.
+     * 요소 자체는 존재하므로 초기화 오류가 발생하지 않습니다.
+     */
+    .legacy-hidden-slot {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      margin: -1px !important;
+      padding: 0 !important;
+      border: 0 !important;
+      overflow: hidden !important;
+      clip: rect(0 0 0 0) !important;
+      clip-path: inset(50%) !important;
+      white-space: nowrap !important;
+      pointer-events: none !important;
+      opacity: 0 !important;
     }
   </style>
 </head>
@@ -81,6 +94,31 @@
     </div>
   </header>
 
+  <!--
+    app.js 호환용 숨김 슬롯
+    화면에는 보이지 않으며 초기화 오류 방지 목적으로만 존재합니다.
+  -->
+  <div class="legacy-hidden-slot" aria-hidden="true">
+    <button id="btn-export" type="button" tabindex="-1">
+      내보내기
+    </button>
+
+    <button id="btn-import" type="button" tabindex="-1">
+      불러오기
+    </button>
+
+    <button id="btn-export-word" type="button" tabindex="-1">
+      Word
+    </button>
+
+    <input
+      id="file-import"
+      type="file"
+      accept="application/json,.json"
+      tabindex="-1"
+    />
+  </div>
+
   <div class="layout">
     <aside class="sidebar">
       <div class="filters">
@@ -109,6 +147,112 @@
   <div id="toast" class="toast" hidden>
     저장됨
   </div>
+
+  <!--
+    안전장치
+    app.js가 위 목록 외의 다른 ID를 참조해 초기화 오류가 날 경우를 대비합니다.
+    존재하지 않는 요소를 요청하면 숨김 슬롯에 임시 요소를 만들어 반환합니다.
+  -->
+  <script>
+  (function () {
+    "use strict";
+
+    /*
+     * app.js에서 사용할 가능성이 있는 컨트롤 ID 목록입니다.
+     * 필요에 따라 자유롭게 추가할 수 있습니다.
+     */
+    var SAFE_IDS = [
+      "btn-export",
+      "btn-import",
+      "btn-export-word",
+      "btn-export-json",
+      "btn-save",
+      "btn-reset",
+      "btn-clear",
+      "file-import",
+      "file-input"
+    ];
+
+    function slot() {
+      var container = document.querySelector(
+        ".legacy-hidden-slot"
+      );
+
+      if (!container) {
+        container = document.createElement("div");
+        container.className = "legacy-hidden-slot";
+        container.setAttribute("aria-hidden", "true");
+        document.body.appendChild(container);
+      }
+
+      return container;
+    }
+
+    function createStub(id) {
+      var element;
+
+      if (
+        id.indexOf("file") !== -1
+      ) {
+        element = document.createElement("input");
+        element.type = "file";
+      } else {
+        element = document.createElement("button");
+        element.type = "button";
+      }
+
+      element.id = id;
+      element.tabIndex = -1;
+
+      slot().appendChild(element);
+
+      return element;
+    }
+
+    var originalGetElementById =
+      document.getElementById.bind(document);
+
+    document.getElementById = function (id) {
+      var found = originalGetElementById(id);
+
+      if (
+        found ||
+        SAFE_IDS.indexOf(id) === -1
+      ) {
+        return found;
+      }
+
+      return createStub(id);
+    };
+
+    var originalQuerySelector =
+      document.querySelector.bind(document);
+
+    document.querySelector = function (selector) {
+      var found = originalQuerySelector(selector);
+
+      if (found) {
+        return found;
+      }
+
+      /*
+       * "#id" 형태의 단순 선택자만 보완합니다.
+       */
+      if (
+        typeof selector === "string" &&
+        /^#[A-Za-z][\w-]*$/.test(selector)
+      ) {
+        var id = selector.slice(1);
+
+        if (SAFE_IDS.indexOf(id) !== -1) {
+          return createStub(id);
+        }
+      }
+
+      return found;
+    };
+  })();
+  </script>
 
   <script src="assets/app.js"></script>
 </body>
